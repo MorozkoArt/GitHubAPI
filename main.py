@@ -11,8 +11,10 @@ def take_data (user, var_aut):
         user_data.append(user.owned_private_repos)
     user_data.append(user.followers)
     user_data.append(user.hireable)
+
     for i in range(0, len(user_data), +1):
         print(user_data[i])
+    print(user.location)
 
     my_repos = user.get_repos()
 
@@ -23,7 +25,9 @@ def take_data (user, var_aut):
         language = repository.language
         comit = repository.forks
         rrr = repository.stargazers_count
-        print(name, private, public, created_date, language, comit, rrr)
+        owner = repository.get_contributors()
+
+        print(name, private, public, created_date, language, comit, rrr, *owner)
 
 print("Каким способом вы желаете авторизоваться? \n" 
       " 1 - Авторизация через логин \n"
