@@ -1,20 +1,46 @@
 import requests
+import base64
+import os
 from github import Github
 from pprint import pprint
 from github import Auth
 
-def take_data (user, var_aut):
-    user_data = []
-    user_data.append(user.login)
-    user_data.append(user.public_repos)
-    if var_aut != 1:
-        user_data.append(user.owned_private_repos)
-    user_data.append(user.followers)
-    user_data.append(user.hireable)
+class User_GitHub:
+    languages = []
 
-    for i in range(0, len(user_data), +1):
-        print(user_data[i])
-    print(user.location)
+    def __init__(self, name, followers, following, hireable, private_repos, public_repos, last_modified, created_at, plan, blog, repos ):
+        self.name = name
+        self.followers = followers
+        self.following = following
+        self.hireable = hireable
+        self.private_repos = private_repos
+        self.public_repos = public_repos
+        self.last_modified = last_modified
+        self.created_at = created_at
+        self.plan = plan
+        self.blog = blog
+        self.repos = repos
+        for repo in self.repos:
+            for content in repo.get_contents(""):
+                if content.path.endswith(".py"):
+                    # save the file
+                    filename = os.path.join("python-files", f"{repo.full_name.replace('/', '-')}-{content.path}")
+                    with open(filename, "wb") as f:
+                        f.write(content.decoded_content)
+            if self.languages.count(repo.language) == 0:
+                self.languages.append(repo.language)
+
+
+
+
+
+
+
+
+def take_data (user, var_aut):
+
+    user_git = User_GitHub(user.login, user.followers, user.following, user.hireable, user.owned_private_repos, user.public_repos,
+                           user.last_modified_datetime, user.created_at, user.plan, user.blog, user.get_repos())
 
     my_repos = user.get_repos()
 
@@ -28,6 +54,9 @@ def take_data (user, var_aut):
         owner = repository.get_contributors()
 
         print(name, private, public, created_date, language, comit, rrr, *owner)
+
+if not os.path.exists("python-files"):
+    os.mkdir("python-files")
 
 print("Каким способом вы желаете авторизоваться? \n" 
       " 1 - Авторизация через логин \n"
