@@ -1,16 +1,21 @@
+from datetime import datetime
+
 import requests
 import base64
 import os
+import tqdm
 from github import Github
 from pprint import pprint
 from github import Auth
+from tqdm import tqdm_pandas
 
+# Класс, который хранит основые поля пользователя
 class User_GitHub:
     languages = []
     repos_user = []
-
-
     def __init__(self, name, followers, following, hireable, private_repos, public_repos, last_modified, created_at, plan, blog, repos ):
+        total = repos.totalCount
+        prbar = ProgressBar(total)
         self.name = name
         self.followers = followers
         self.following = following
@@ -23,19 +28,43 @@ class User_GitHub:
         self.blog = blog
         self.repos = repos
         for repo in self.repos:
-            #for content in repo.get_contents(""):
-              #  if content.path.endswith(".py"):
-                    # save the file
-                 #   filename = os.path.join("python-files", f"{repo.full_name.replace('/', '-')}-{content.path}")
-                 #   with open(filename, "wb") as f:
-                 #       f.write(content.decoded_content)
-            repo_user = User_repo(repo.name, repo.forks, repo.stargazers_count, repo.get_contributors().totalCount, repo.created_at,
+            repo_user = User_repo(repo.name, repo.forks, repo.stargazers_count, repo.get_contributors().totalCount,
+                                  repo.created_at,
                                   repo.last_modified_datetime, repo.get_commits().totalCount)
+
             self.repos_user.append(repo_user)
+            prbar.updatePd()
+
             if self.languages.count(repo.language) == 0:
                 self.languages.append(repo.language)
+        prbar.closePd()
+    def Print_user_information(self):
+        print("########################################################################################")
+        print(f"Имя пользователя: {self.name} \n"
+              f"Колличество подписчиков: {self.followers} \n"
+              f"Колличество подписок: {self.following} \n"
+              f"Хз: {self.hireable} \n"
+              f"Колличество приватных репозиториев: {self.private_repos} \n"
+              f"Колличество публичных репозиториев: {self.public_repos} \n"
+              f"Дата создание аккаунта: {self.created_at}\n"
+              f"Дата последнего изменения: {self.last_modified} \n"
+              f"Подписка: {self.plan} \n"
+              f"Ссылка на блог: {self.blog} \n"
+              f"Языки программирования: " + ' '.join(map(str, self.languages)))
+        print("########################################################################################")
+        for i in range (len(self.repos_user)):
+            print(f"Название репозитория {self.repos_user[i].name} \n"
+                  f"Количество веток: {self.repos_user[i].forks} \n"
+                  f"Колличество звезд: {self.repos_user[i].stargazers_count} \n"
+                  f"Колличество контрибьютеров: {self.repos_user[i].contributors_count} \n"
+                  f"Дата создания репозитория: {self.repos_user[i].created_at} \n"
+                  f"Дата последнего изменения репозитория: {self.repos_user[i].last_date} \n"
+                  f"Колличество коммитов внутри репозитория: {self.repos_user[i].commits}")
+            print("/////////////////////////////////////////////////////////////////////////////////////////")
 
 
+
+# Класс который хранит основные поля репозитория
 class User_repo:
     def __init__(self, name, forks, stargazers_count, contributors_count, created_at, last_date, commits):
         self.name = name
@@ -47,16 +76,37 @@ class User_repo:
         self.commits = commits
         #self.content = content
 
+# Класс, который выводит progressbar в консоль
+class ProgressBar:
+    tqdm_params = {}
+    pd = 0
+    def __init__(self, total):
+        self.total = total
+        self.tqdm_params = {
+            'desc': "Загрузка данных о пользователе: ",
+            'total': self.total,
+            'miniters': 1,
+            'ncols': 100,
+            'unit': 'it',
+            'unit_scale': True,
+            'unit_divisor': 1024,
+        }
+        self.pd = tqdm.tqdm(**self.tqdm_params)
+    def updatePd(self):
+        self.pd.update(1)
+    def closePd(self):
+        self.pd.close()
 
 
 def take_data (user):
-
     user_git = User_GitHub(user.login, user.followers, user.following, user.hireable, user.owned_private_repos, user.public_repos,
                            user.last_modified_datetime, user.created_at, user.plan, user.blog, user.get_repos())
-    print(user_git.Get_Name())
+    user_git.Print_user_information()
 
 if not os.path.exists("python-files"):
     os.mkdir("python-files")
+
+#######################  Main
 
 print("Каким способом вы желаете авторизоваться? \n" 
       " 1 - Авторизация через логин \n"
@@ -66,11 +116,11 @@ var_aut  = input(" Введите номер варианта авторизац
 
 #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
 
-
 if var_aut == "1":
     login = input(" Введите логин пользователя: ")
     g = Github()
     user = g.get_user(login)
+
     take_data(user)
 
 elif var_aut == "2":
@@ -79,16 +129,13 @@ elif var_aut == "2":
     auth = Auth.Login(login, password)
     g = Github(auth = auth)
     user = g.get_user()
-
     take_data(user)
 
 elif var_aut == "3":
     access_token = input(" Введите токен доступа пользователя: ")
     auth = Auth.Token(access_token)
-
     login = Github(auth = auth)
     user = login.get_user()
-
     take_data(user)
 
 
