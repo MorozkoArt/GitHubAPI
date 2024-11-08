@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import requests
 import base64
 import os
@@ -7,14 +5,16 @@ import tqdm
 from github import Github
 from pprint import pprint
 from github import Auth
-from tqdm import tqdm_pandas
+from g4f.client import Client
+
+
 
 # Класс, который хранит основые поля пользователя
 class User_GitHub:
     languages = []
     repos_user = []
     def __init__(self, name, followers, following, hireable, private_repos, public_repos, last_modified, created_at, plan, blog, repos ):
-        total = repos.totalCount
+        total = (repos.totalCount+1)
         prbar = ProgressBar(total)
         self.name = name
         self.followers = followers
@@ -27,15 +27,14 @@ class User_GitHub:
         self.plan = plan
         self.blog = blog
         self.repos = repos
+        prbar.updatePd()
         for repo in self.repos:
             repo_user = User_repo(repo.name, repo.forks, repo.stargazers_count, repo.get_contributors().totalCount,
                                   repo.created_at,
                                   repo.last_modified_datetime, repo.get_commits().totalCount)
-
             self.repos_user.append(repo_user)
             prbar.updatePd()
-
-            if self.languages.count(repo.language) == 0:
+            if repo.language not in self.languages:
                 self.languages.append(repo.language)
         prbar.closePd()
     def Print_user_information(self):
@@ -43,7 +42,7 @@ class User_GitHub:
         print(f"Имя пользователя: {self.name} \n"
               f"Колличество подписчиков: {self.followers} \n"
               f"Колличество подписок: {self.following} \n"
-              f"Хз: {self.hireable} \n"
+              f"Доступность для найма: {self.hireable} \n"
               f"Колличество приватных репозиториев: {self.private_repos} \n"
               f"Колличество публичных репозиториев: {self.public_repos} \n"
               f"Дата создание аккаунта: {self.created_at}\n"
@@ -78,20 +77,17 @@ class User_repo:
 
 # Класс, который выводит progressbar в консоль
 class ProgressBar:
-    tqdm_params = {}
-    pd = 0
     def __init__(self, total):
         self.total = total
-        self.tqdm_params = {
-            'desc': "Загрузка данных о пользователе: ",
-            'total': self.total,
-            'miniters': 1,
-            'ncols': 100,
-            'unit': 'it',
-            'unit_scale': True,
-            'unit_divisor': 1024,
-        }
-        self.pd = tqdm.tqdm(**self.tqdm_params)
+        self.pd = tqdm.tqdm(
+            desc="Загрузка данных о пользователе: ",
+            total=self.total,
+            miniters=1,
+            ncols=100,
+            unit='итерация',
+            unit_scale=True,
+            unit_divisor=1024,
+        )
     def updatePd(self):
         self.pd.update(1)
     def closePd(self):
@@ -103,10 +99,23 @@ def take_data (user):
                            user.last_modified_datetime, user.created_at, user.plan, user.blog, user.get_repos())
     user_git.Print_user_information()
 
-if not os.path.exists("python-files"):
-    os.mkdir("python-files")
+def evaluate_code(file_path):
+    with open(file_path, 'r') as file:
+        code = file.read()
+
+    client = Client()
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": f"what is the future of the British monarchy"}],
+        # Add any other necessary parameters
+    )
+    file.close()
+    print(response.choices[0].message.content)
+
 
 #######################  Main
+file_path = r"C:\Users\Артём Морозов\source\repos\ClimbingTheHill\ClimbingTheHill\Program.cs"
+evaluate_code(file_path)
 
 print("Каким способом вы желаете авторизоваться? \n" 
       " 1 - Авторизация через логин \n"
@@ -116,27 +125,36 @@ var_aut  = input(" Введите номер варианта авторизац
 
 #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
 
+MyToken = "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"
 if var_aut == "1":
     login = input(" Введите логин пользователя: ")
-    g = Github()
-    user = g.get_user(login)
-
-    take_data(user)
+    try:
+        g = Github(MyToken)
+        user = g.get_user(login)
+        take_data(user)
+    except Exception as e:
+        print(f"Произошла ошибка: {e}")
 
 elif var_aut == "2":
     login= input(" Введите логин пользователя: ")
     password = input(" Введите пароль: " )
-    auth = Auth.Login(login, password)
-    g = Github(auth = auth)
-    user = g.get_user()
-    take_data(user)
+    try:
+        auth = Auth.Login(login, password)
+        g = Github(auth=auth)
+        user = g.get_user()
+        take_data(user)
+    except Exception as e:
+        print(f"Произошла ошибка: {e}")
 
 elif var_aut == "3":
     access_token = input(" Введите токен доступа пользователя: ")
-    auth = Auth.Token(access_token)
-    login = Github(auth = auth)
-    user = login.get_user()
-    take_data(user)
+    try:
+        auth = Auth.Token(access_token)
+        login = Github(auth=auth)
+        user = login.get_user()
+        take_data(user)
+    except Exception as e:
+        print(f"Произошла ошибка: {e}")
 
 
 
