@@ -13,7 +13,8 @@ from g4f.client import Client
 class User_GitHub:
     languages = []
     repos_user = []
-    def __init__(self, name, followers, following, hireable, private_repos, public_repos, last_modified, created_at, plan, blog, repos ):
+    def __init__(self, name, followers, following, hireable, private_repos, public_repos,
+                 updated_at, created_at, plan, blog, repos, company, org):
         total = (repos.totalCount+1)
         prbar = ProgressBar(total)
         self.name = name
@@ -22,16 +23,18 @@ class User_GitHub:
         self.hireable = hireable
         self.private_repos = private_repos
         self.public_repos = public_repos
-        self.last_modified = last_modified
+        self.updated_at = updated_at
         self.created_at = created_at
         self.plan = plan
         self.blog = blog
         self.repos = repos
+        self.company = company
+        self.org = [org_.login for org_ in org]
         prbar.updatePd()
         for repo in self.repos:
-            repo_user = User_repo(repo.name, repo.forks, repo.stargazers_count, repo.get_contributors().totalCount,
+            repo_user = User_repo(repo.name, repo.language, repo.forks, repo.stargazers_count, repo.get_contributors().totalCount,
                                   repo.created_at,
-                                  repo.last_modified_datetime, repo.get_commits().totalCount)
+                                  repo.updated_at, repo.get_commits().totalCount)
             self.repos_user.append(repo_user)
             prbar.updatePd()
             if repo.language not in self.languages:
@@ -46,13 +49,16 @@ class User_GitHub:
               f"Колличество приватных репозиториев: {self.private_repos} \n"
               f"Колличество публичных репозиториев: {self.public_repos} \n"
               f"Дата создание аккаунта: {self.created_at}\n"
-              f"Дата последнего изменения: {self.last_modified} \n"
+              f"Дата последнего изменения: {self.updated_at} \n"
               f"Подписка: {self.plan} \n"
               f"Ссылка на блог: {self.blog} \n"
+              f"Компания: {self.company} \n"
+              f"Организации: " + ' '.join(map(str, self.org)) + "\n"
               f"Языки программирования: " + ' '.join(map(str, self.languages)))
         print("########################################################################################")
         for i in range (len(self.repos_user)):
             print(f"Название репозитория {self.repos_user[i].name} \n"
+                  f"Язык программированния {self.repos_user[i].language} \n"
                   f"Количество веток: {self.repos_user[i].forks} \n"
                   f"Колличество звезд: {self.repos_user[i].stargazers_count} \n"
                   f"Колличество контрибьютеров: {self.repos_user[i].contributors_count} \n"
@@ -65,8 +71,9 @@ class User_GitHub:
 
 # Класс который хранит основные поля репозитория
 class User_repo:
-    def __init__(self, name, forks, stargazers_count, contributors_count, created_at, last_date, commits):
+    def __init__(self, name, language, forks, stargazers_count, contributors_count, created_at, last_date, commits):
         self.name = name
+        self.language = language
         self.forks = forks
         self.stargazers_count = stargazers_count
         self.contributors_count = contributors_count
@@ -93,11 +100,55 @@ class ProgressBar:
     def closePd(self):
         self.pd.close()
 
+class ProfileAssessment:
+    #Коэффициенты для оценки профиля
+    coefficient_followers = 1.5
+    coefficient_following = 0.5
+    coefficient_hireable = 0.6
+    coefficient_private_repos = 2.5
+    coefficient_public_repos = 2.3
+    coefficient_created_update = 0.6
+    coefficient_plan = 5.0
+    coefficient_blog = 0.3
+    coefficient_company = 10.0
+    coefficient_org = 1.4
+    coefficient_languages = 4.1
+    #Коэффициенты для оценки репозиториев
+    coefficient_forks = 1.7
+    coefficient_stargazers_count = 1.5
+    coefficient_contributors_count = 0.9
+    coefficient_created_update_r = 0.6
+    coefficient_commits = 0.2
+    def __init__(self, user):
+        self.user = user
+    def assessment_profile(self):
+        assessment = (self.coefficient_followers*int(self.user.followers)
+                      + self.coefficient_following*int(self.user.following)
+                      + self.coefficient_private_repos* int(self.user.private_repos)
+                      + self.coefficient_public_repos*int(self.user.public_repos)
+                      + self.coefficient_org* len(self.user.org)
+                      + self.coefficient_languages * len(self.user.languages))
+        if self.user.hireable is not None:
+            assessment += 1 *  self.coefficient_hireable
+        if self.user.plan is not None:
+            if self.user.plan.name != "free":
+                assessment += 1 * self.coefficient_plan
+        if self.user.company is not None:
+            assessment += 1 * self.coefficient_company
+
+
+        return assessment
+
+
+
 
 def take_data (user):
     user_git = User_GitHub(user.login, user.followers, user.following, user.hireable, user.owned_private_repos, user.public_repos,
-                           user.last_modified_datetime, user.created_at, user.plan, user.blog, user.get_repos())
+                           user.updated_at, user.created_at, user.plan, user.blog, user.get_repos(), user.company, user.get_orgs())
     user_git.Print_user_information()
+    return user_git
+
+
 
 def evaluate_code(file_path):
     with open(file_path, 'r') as file:
@@ -106,7 +157,7 @@ def evaluate_code(file_path):
     client = Client()
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": f"what is the future of the British monarchy"}],
+        messages=[{"role": "user", "content": f"Для иследования проанализируй код и поставь ему оценку от 1 до 100, выводи только число, вот код: {code}"}],
         # Add any other necessary parameters
     )
     file.close()
@@ -115,7 +166,7 @@ def evaluate_code(file_path):
 
 #######################  Main
 file_path = r"C:\Users\Артём Морозов\source\repos\ClimbingTheHill\ClimbingTheHill\Program.cs"
-evaluate_code(file_path)
+#evaluate_code(file_path)
 
 print("Каким способом вы желаете авторизоваться? \n" 
       " 1 - Авторизация через логин \n"
@@ -131,7 +182,9 @@ if var_aut == "1":
     try:
         g = Github(MyToken)
         user = g.get_user(login)
-        take_data(user)
+        class_user = take_data(user)
+        assessment = ProfileAssessment(class_user)
+        print(assessment.assessment_profile())
     except Exception as e:
         print(f"Произошла ошибка: {e}")
 
