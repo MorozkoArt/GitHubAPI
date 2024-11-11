@@ -2,11 +2,14 @@ import requests
 import base64
 import os
 import tqdm
+import tkinter as tk
+from prettytable import PrettyTable, HRuleStyle
 from github import Github
 from pprint import pprint
 from github import Auth
 from g4f.client import Client
 from copy import deepcopy
+from tkinter import filedialog
 
 
 
@@ -41,33 +44,48 @@ class User_GitHub:
             if repo.language not in self.languages and repo.language is not None:
                 self.languages.append(repo.language)
         prbar.closePd()
-    def Print_user_information(self):
-        print("########################################################################################")
-        print(f"Имя пользователя: {self.name} \n"
-              f"Колличество подписчиков: {self.followers} \n"
-              f"Колличество подписок: {self.following} \n"
-              f"Доступность для найма: {self.hireable} \n"
-              f"Колличество приватных репозиториев: {self.private_repos} \n"
-              f"Колличество публичных репозиториев: {self.public_repos} \n"
-              f"Дата создание аккаунта: {self.created_at}\n"
-              f"Дата последнего изменения: {self.updated_at} \n"
-              f"Подписка: {self.plan} \n"
-              f"Ссылка на блог: {self.blog} \n"
-              f"Компания: {self.company} \n"
-              f"Организации: " + ' '.join(map(str, self.org)) + "\n"
-              f"Языки программирования: " + ' '.join(map(str, self.languages)))
-        print("########################################################################################")
-        for i in range (len(self.repos_user)):
-            print(f"Название репозитория {self.repos_user[i].name} \n"
-                  f"Язык программированния {self.repos_user[i].language} \n"
-                  f"Количество веток: {self.repos_user[i].forks} \n"
-                  f"Колличество звезд: {self.repos_user[i].stargazers_count} \n"
-                  f"Колличество контрибьютеров: {self.repos_user[i].contributors_count} \n"
-                  f"Дата создания репозитория: {self.repos_user[i].created_at} \n"
-                  f"Дата последнего изменения репозитория: {self.repos_user[i].last_date} \n"
-                  f"Колличество коммитов внутри репозитория: {self.repos_user[i].commits}")
-            print("/////////////////////////////////////////////////////////////////////////////////////////")
 
+    def Print_user_information(self):
+        tables = []
+        x = PrettyTable(hrules=HRuleStyle.ALL)
+        x.field_names = ["Field name", "Significance"]
+        x.add_row(["Имя пользователя",self.name ])
+        x.add_row(["Количество подписчиков", self.followers])
+        x.add_row(["Количество подписок", self.following])
+        x.add_row(["Доступность для найма", self.hireable])
+        x.add_row(["Количество приватных репозиториев", self.private_repos])
+        x.add_row(["Количество публичных репозиториев", self.public_repos])
+        x.add_row(["Дата создания аккаунта", self.created_at])
+        x.add_row(["Дата последнего изменения", self.updated_at])
+        x.add_row(["Подписка", self.plan])
+        x.add_row(["Ссылка на блог", self.blog])
+        x.add_row(["Компания", self.company])
+        x.add_row(["Организации", ' '.join(map(str, self.org))])
+        x.add_row(["Языки программирования", ' '.join(map(str, self.languages))])
+        x.align["Field name"] = "l"  # Выравнивание текста в столбце
+        x.align["Significance"] = "r"  # Выравнивание текста в столбце
+        x.border = True  # Отображать границы таблицы
+        x.header = True  # Отображать заголовок таблицы
+        x.padding_width = 1  # Отступ между ячейками
+        tables.append(x)
+        for i in range (len(self.repos_user)):
+            x_r = PrettyTable(hrules=HRuleStyle.ALL)
+            x_r.field_names = ["Field name", "Significance"]
+            x_r.add_row(["Название репозитория", self.repos_user[i].name])
+            x_r.add_row(["Язык программирования", self.repos_user[i].language])
+            x_r.add_row(["Количество веток", self.repos_user[i].forks])
+            x_r.add_row(["Количество звезд", self.repos_user[i].stargazers_count])
+            x_r.add_row(["Количество контрибьютеров", self.repos_user[i].contributors_count])
+            x_r.add_row(["Дата создания репозитория", self.repos_user[i].created_at])
+            x_r.add_row(["Дата последнего изменения репозитория", self.repos_user[i].last_date])
+            x_r.add_row(["Количество коммитов внутри репозитория", self.repos_user[i].commits])
+            x_r.align["Field name"] = "l"  # Выравнивание текста в столбце
+            x_r.align["Significance"] = "r"  # Выравнивание текста в столбце
+            x_r.border = True  # Отображать границы таблицы
+            x_r.header = True  # Отображать заголовок таблицы
+            x_r.padding_width = 1  # Отступ между ячейками
+            tables.append(x_r)
+        return tables
 
 
 # Класс который хранит основные поля репозитория
@@ -101,6 +119,7 @@ class ProgressBar:
     def closePd(self):
         self.pd.close()
 
+#Класс для оценки профиля и его репозиториев
 class ProfileAssessment:
     #Коэффициенты для оценки профиля
     coefficient_followers = 1.5
@@ -170,16 +189,62 @@ class ProfileAssessment:
         average_score = overall_assessment / len(self.user.repos_user)
         return average_score
 
-
-
+#Основной метод вызозова
 def take_data (user):
     user_git = User_GitHub(user.login, user.followers, user.following, user.hireable, user.owned_private_repos, user.public_repos,
                            user.updated_at, user.created_at, user.plan, user.blog, user.get_repos(), user.company, user.get_orgs())
-    user_git.Print_user_information()
-    return user_git
+    assessment = ProfileAssessment(user_git)
+    assessment_profile = assessment.assessment_profile()
+    assessment_repos = assessment.assessment_repos()
+    assessmet = assessment_profile + assessment_repos
+    print(f"Оценка профиля: {assessment_profile}, Оценка репозиториев: {assessment_repos}, Общая оценка: {assessmet}")
+    print("Желаете ли вы получить подробную информацию об оценке?\n"
+          " 1 - если желаете загрузить файл с информациеей\n"
+          " 2 - если выгрузить всю подробную информацию в консоль\n"
+          " 3 - если вам не нужна подробная информация")
+    var = int(input("Введите число от 1-го до 3-ех: "))
+    if var == 1:
+        save_user_information(user_git)
+    elif var == 2:
+        tables = user_git.Print_user_information()
+        for i in range(len(tables)):
+            print(str(tables[i]))
+            if i == 0:
+                print('\n Репозитории: \n')
+            else:
+                print('\n\n')
+    else:
+        exit()
 
 
+#Сохранение файла на компьютере
+def save_user_information(user):
+    # Создание диалогового окна для выбора места сохранения файла
+    root = tk.Tk()
+    root.withdraw() # Скрыть главное окно
+    root.attributes('-topmost', True)
+    root.geometry("400x300+400+100")
+    default_filename = f"GitHub_{user.name}.txt"
 
+    # Открытие диалога для выбора пути и имени файла
+    file_path = filedialog.asksaveasfilename(defaultextension = ".txt",
+                                             initialfile=default_filename,
+                                             filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
+    if file_path:
+        with open(file_path, 'w', encoding='utf-8') as f:
+            tables = user.Print_user_information()
+            for i in range(len(tables)):
+                f.write(str(tables[i]))
+                if i == 0:
+                    f.write('\n Репозитории: \n')
+                else:
+                    f.write('\n\n')
+        print("Информация пользователя сохранена в файл:", file_path)
+    else:
+        print("Сохранение файла отменено.")
+    root.destroy()
+
+# Чат GPT
 def evaluate_code(file_path):
     with open(file_path, 'r') as file:
         code = file.read()
@@ -212,12 +277,7 @@ if var_aut == "1":
     try:
         g = Github(MyToken)
         user = g.get_user(login)
-        class_user = take_data(user)
-        assessment = ProfileAssessment(class_user)
-        assessment_profile = assessment.assessment_profile()
-        assessment_repos = assessment.assessment_repos()
-        assessmet = assessment_profile + assessment_repos
-        print(f"Оценка профиля: {assessment_profile}, Оценка репозиториев: {assessment_repos}, Общая оценка: {assessmet}")
+        take_data(user)
     except Exception as e:
         print(f"Произошла ошибка: {e}")
 
@@ -228,12 +288,7 @@ elif var_aut == "2":
         auth = Auth.Login(login, password)
         g = Github(auth=auth)
         user = g.get_user()
-        class_user = take_data(user)
-        assessment = ProfileAssessment(class_user)
-        assessment_profile = assessment.assessment_profile()
-        assessment_repos = assessment.assessment_repos()
-        assessmet = assessment_profile + assessment_repos
-        print(f"Оценка профиля: {assessment_profile}, Оценка репозиториев: {assessment_repos}, Общая оценка: {assessmet}")
+        take_data(user)
     except Exception as e:
         print(f"Произошла ошибка: {e}")
 
@@ -243,12 +298,7 @@ elif var_aut == "3":
         auth = Auth.Token(access_token)
         login = Github(auth=auth)
         user = login.get_user()
-        class_user = take_data(user)
-        assessment = ProfileAssessment(class_user)
-        assessment_profile = assessment.assessment_profile()
-        assessment_repos = assessment.assessment_repos()
-        assessmet = assessment_profile + assessment_repos
-        print(f"Оценка профиля: {assessment_profile}, Оценка репозиториев: {assessment_repos}, Общая оценка: {assessmet}")
+        take_data(user)
     except Exception as e:
         print(f"Произошла ошибка: {e}")
 
