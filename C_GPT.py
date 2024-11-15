@@ -2,16 +2,13 @@ from g4f.client import Client
 import re
 
 class GPT:
-
     def __init__(self, listOfPaths):
         self.listOfPaths = listOfPaths
-
     def evaluate_codeS(self):
         list_evaluate_codeS = []
         for i in range (len(self.listOfPaths)):
             list_evaluate_codeS.append(self.evaluate_code(self.listOfPaths[i]))
         return list_evaluate_codeS
-
     # Чат GPT
     def evaluate_code(self, file_path):
         while True:
@@ -31,7 +28,6 @@ class GPT:
                     break  # Выход из цикла при успешном выполнении
             except Exception as e:
                 print(f"Произошла ошибка: {e}. Попробуйте снова.")
-
     def is_request_ended_with_status_code(self, s):
         # Определяем регулярное выражение для поиска соответствия
         pattern = r'^Request ended with status code \d+$'
