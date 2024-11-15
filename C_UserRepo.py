@@ -1,4 +1,5 @@
 import os
+import shutil
 class User_repo:
 
     def __init__(self, name, language, forks, stargazers_count, contributors_count, created_at, last_date, commits, count_views):
@@ -30,9 +31,15 @@ class User_repo:
     def dounloud_mainRepo(repo):
         print(repo.name)
         code_extensions = ('.py', '.java', '.js', '.cpp', '.c', '.rb', '.go', '.php',
-                           '.html', '.css', '.swift', '.ts', '.json', '.sh', '.pl', '.r')
+                           '.html', '.css', '.swift', '.ts', '.json', '.sh', '.pl', '.r', '.cs')
         if not os.path.exists("storage"):
             os.makedirs("storage")
+        else:
+            # Проверка, пуста ли директория
+            if os.listdir("storage"):  # Если директория не пуста
+                # Удаление всего содержимого директории
+                shutil.rmtree("storage")  # Удаляем директорию и всё её содержимое
+                os.makedirs("storage")  # Создаём директорию заново
 
         contents = repo.get_contents("")
         while contents:

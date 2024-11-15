@@ -46,8 +46,8 @@ class User_GitHub:
             prbar.updatePd()
             if repo.language not in self.languages and repo.language is not None:
                 self.languages.append(repo.language)
-        User_repo.dounloud_mainRepo(User_repo.serch_repo(self.repos, judgement_rName))
         prbar.closePd()
+        User_repo.dounloud_mainRepo(User_repo.serch_repo(self.repos, judgement_rName))
 
 
     def Print_user_information(self):

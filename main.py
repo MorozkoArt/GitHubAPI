@@ -42,7 +42,7 @@ file_path = r"C:\Users\Артём Морозов\source\repos\ALG 1.2(2)\ALG 1.2
 test_list = []
 test_list.append(file_path)
 test_GPT = GPT(test_list)
-#test_list2 = test_GPT.evaluate_codeS()
+test_list2 = test_GPT.evaluate_codeS()
 
 print("Каким способом вы желаете авторизоваться? \n" 
       " 1 - Авторизация через логин \n"
