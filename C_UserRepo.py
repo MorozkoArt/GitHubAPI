@@ -29,6 +29,7 @@ class User_repo:
 
     # Проход по файлам в репозитории
     def dounloud_mainRepo(repo):
+        list_of_paths = []
         print(repo.name)
         code_extensions = ('.py', '.java', '.js', '.cpp', '.c', '.rb', '.go', '.php',
                            '.html', '.css', '.swift', '.ts', '.json', '.sh', '.pl', '.r', '.cs')
@@ -55,6 +56,8 @@ class User_repo:
                     with open(path, 'wb') as f:
                         f.write(file_content.decoded_content)
                     print(f"{path} загружен.")
+                    list_of_paths.append(path)
+        return list_of_paths
 
     def serch_repo(repos, name):
         for repo in repos:
