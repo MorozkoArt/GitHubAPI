@@ -6,7 +6,7 @@ from github import Auth
 from C_User import User_GitHub
 from C_ProfileAssessment import ProfileAssessment
 from M_SaveInformation import save_user_information
-from C_GPT import GPT
+
 
 
 #Основной метод вызозова
@@ -17,7 +17,17 @@ def take_data (user, publicOrPrivate):
     assessment_profile = assessment.assessment_profile()
     assessment_repos = assessment.assessment_repos()
     assessmet = assessment_profile + assessment_repos
-    print(f"Оценка профиля: {assessment_profile}, Оценка репозиториев: {assessment_repos}, Общая оценка: {assessmet}")
+    test = 0 #Оценка кода
+    print("Желаете ли вы оценить код внутри одного репозитория? (репозиторий выбирался по количеству комитов, звезд, ветвей и простмотров)")
+    print("Оценка кода займет достаточно много времени (от 1 минуты до 15)")
+    var_kod = int(input("Введите 1, если - оценить, введите 2 - оценка не нужна: "))
+    if var_kod == 1:
+        print("Если репозиторий содержит много файлов с кодом, оценивать все или первые три?")
+        var_kod_2 = int(input("Введите 1, если - оценить все, введите 2 - оценить первые три: "))
+        test = assessment.assessment_kod(var_kod_2)
+    print(f"Оценка профиля: {assessment_profile}, Оценка репозиториев: {assessment_repos}, Общая оценка: {assessmet}",)
+    if var_kod == 1:
+        print(f"Оценка кода:{test}")
     print("Желаете ли вы получить подробную информацию об оценке?\n"
           " 1 - если желаете загрузить файл с информациеей\n"
           " 2 - если выгрузить всю подробную информацию в консоль\n"
@@ -38,12 +48,6 @@ def take_data (user, publicOrPrivate):
 
 
 #######################  Main
-file_path = r"C:\Users\Артём Морозов\source\repos\ALG 1.2(2)\ALG 1.2(2)\Main.cpp"
-test_list = []
-test_list.append(file_path)
-test_GPT = GPT(test_list)
-test_list2 = test_GPT.evaluate_codeS()
-
 print("Каким способом вы желаете авторизоваться? \n" 
       " 1 - Авторизация через логин \n"
       " 2 - Авторизация через логин и пароль \n"

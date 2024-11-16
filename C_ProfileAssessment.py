@@ -1,4 +1,6 @@
 from copy import deepcopy
+from C_UserRepo import User_repo
+from C_GPT import GPT
 
 class ProfileAssessment:
     #Коэффициенты для оценки профиля
@@ -73,3 +75,13 @@ class ProfileAssessment:
             assessment_repo.clear()
         average_score = overall_assessment / len(self.user.repos_user)
         return average_score
+    def assessment_kod(self, full_or_three):
+        list_of_path = User_repo.dounloud_mainRepo(self.user.main_repo)
+        chat_gpt = GPT(list_of_path)
+        list_test = chat_gpt.evaluate_codeS(full_or_three)
+        kod_mark = 0
+        for i in range (len(list_test)):
+            text, marks = list_test[i]
+            kod_mark+=marks
+        kod_mark = (kod_mark/len(list_test))*5
+        return kod_mark

@@ -6,6 +6,9 @@ from C_UserRepo import User_repo
 class User_GitHub:
     languages = []
     repos_user = []
+    max_judgement = 0
+    judgement_rName = ""
+    main_repo = None
     def __init__(self, name, followers, following, hireable, private_repos, public_repos,
                  updated_at, created_at, plan, blog, repos, company, org, publicOrPrivate):
         total = (repos.totalCount+1)
@@ -24,8 +27,6 @@ class User_GitHub:
         self.company = company
         self.publicOrPrivate = publicOrPrivate
         self.org = [org_.login for org_ in org]
-        max_judgement = 0
-        judgement_rName = ""
         prbar.updatePd()
         for repo in self.repos:
             if self.publicOrPrivate == "public":
@@ -40,14 +41,14 @@ class User_GitHub:
                                       repo.updated_at, repo.get_commits().totalCount, repo.get_views_traffic()['count'])
             self.repos_user.append(repo_user)
             judgement = repo_user.tournament(repo_user)
-            if judgement > max_judgement:
-                max_judgement = judgement
-                judgement_rName = repo_user.name
+            if judgement > self.max_judgement:
+                self.max_judgement = judgement
+                self.judgement_rName = repo_user.name
             prbar.updatePd()
             if repo.language not in self.languages and repo.language is not None:
                 self.languages.append(repo.language)
         prbar.closePd()
-        User_repo.dounloud_mainRepo(User_repo.serch_repo(self.repos, judgement_rName))
+        self.main_repo = User_repo.serch_repo(self.repos, self.judgement_rName)
 
 
     def Print_user_information(self):
