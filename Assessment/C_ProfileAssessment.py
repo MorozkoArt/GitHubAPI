@@ -1,6 +1,6 @@
 from copy import deepcopy
-from C_UserRepo import User_repo
-from C_GPT import GPT
+from User_and_Repo.C_UserRepo import User_repo
+from Assessment.C_GPT import GPT
 
 class ProfileAssessment:
     #Коэффициенты для оценки профиля
