@@ -1,7 +1,7 @@
 
 from prettytable import PrettyTable, HRuleStyle
-from C_ProgressBar import ProgressBar
-from C_UserRepo import User_repo
+from Interface.C_ProgressBar import ProgressBar
+from User_and_Repo.C_UserRepo import User_repo
 
 class User_GitHub:
     languages = []
