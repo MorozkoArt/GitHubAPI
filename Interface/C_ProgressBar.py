@@ -9,7 +9,7 @@ class ProgressBar:
             total=self.total,
             miniters=1,
             ncols=100,
-            unit='итерация',
+            unit='it',
             unit_scale=True,
             unit_divisor=1024,
         )

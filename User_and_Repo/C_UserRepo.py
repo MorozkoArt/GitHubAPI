@@ -37,7 +37,7 @@ class User_repo:
             os.makedirs("storage")
         else:
             # Проверка, пуста ли директория
-            if os.listdir("storage"):  # Если директория не пуста
+            if os.listdir("storage"):
                 # Удаление всего содержимого директории
                 shutil.rmtree("storage")  # Удаляем директорию и всё её содержимое
                 os.makedirs("storage")  # Создаём директорию заново
