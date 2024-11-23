@@ -1,4 +1,5 @@
 from g4f.client import Client
+import os
 import re
 
 class GPT:
@@ -18,6 +19,7 @@ class GPT:
     def evaluate_code(self, file_path):
         while True:
             try:
+                file_name = os.path.basename(file_path)
                 with open(file_path, 'rb') as file:
                     code = file.read()
                 text = (f"{code}: оцени этот код от 1 до 10-ти, и выведи ответ в следующем формате: "
@@ -30,8 +32,8 @@ class GPT:
                 if self.is_request_ended_with_status_code(response.choices[0].message.content) == False:
                     marks = self.check_grade_format(response.choices[0].message.content)
                     if marks >=0:
-                        print(response.choices[0].message.content)
-                        return response.choices[0].message.content, marks
+                        print(f"Оценка файла {file_name}: {marks}")
+                        return response.choices[0].message.content, marks, file_name
                         break  # Выход из цикла при успешном выполнении
             except Exception as e:
                 print(f"Произошла ошибка: {e}. Попробуйте снова.")
