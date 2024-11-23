@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog
 
-def save_user_information(user):
+def save_user_information(user, assessment):
     # Создание диалогового окна для выбора места сохранения файла
     root = tk.Tk()
     root.withdraw() # Скрыть главное окно
@@ -15,8 +15,15 @@ def save_user_information(user):
     if file_path:
         with open(file_path, 'w', encoding='utf-8') as f:
             tables = user.Print_user_information()
+            tables_assesment = assessment.print_assessment()
             for i in range(len(tables)):
                 f.write(str(tables[i]))
+                if i == 0:
+                    f.write('\n Репозитории: \n')
+                else:
+                    f.write('\n\n')
+            for i in range(len(tables_assesment)):
+                f.write(str(tables_assesment[i]))
                 if i == 0:
                     f.write('\n Репозитории: \n')
                 else:

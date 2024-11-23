@@ -1,4 +1,3 @@
-
 from prettytable import PrettyTable, HRuleStyle
 from Interface.C_ProgressBar import ProgressBar
 from User_and_Repo.C_UserRepo import User_repo
@@ -40,13 +39,14 @@ class User_GitHub:
                                       repo.created_at,
                                       repo.updated_at, repo.get_commits().totalCount, repo.get_views_traffic()['count'])
             self.repos_user.append(repo_user)
-            judgement = repo_user.tournament(repo_user)
-            if judgement > self.max_judgement:
-                self.max_judgement = judgement
-                self.judgement_rName = repo_user.name
+            if repo_user.language is not None:
+                judgement = repo_user.tournament(repo_user)
+                if judgement > self.max_judgement:
+                    self.max_judgement = judgement
+                    self.judgement_rName = repo_user.name
             prbar.updatePd()
-            if repo.language not in self.languages and repo.language is not None:
-                self.languages.append(repo.language)
+            if repo_user.language not in self.languages and repo_user.language is not None:
+                self.languages.append(repo_user.language)
         prbar.closePd()
         self.main_repo = User_repo.serch_repo(self.repos, self.judgement_rName)
 
