@@ -32,17 +32,26 @@ def print_assessment(user, assessment, var_kod):
     x.header = True  # Отображать заголовок таблицы
     x.padding_width = 1  # Отступ между ячейками
 
+    str1 = f"Результат оценки профиля пользователя - {user.name} \n\n"
+    str2 = f"Данные о профиле пользователя и их оценка:\n"
+    tables.append(str1)
+    tables.append(str2)
     tables.append(x)
+    tables.append("\n\n")
+    if assessment.average_score_repos != 0:
+        str4 = f"Данные о репозиториях и их оценка: \n\n"
+        tables.append(str4)
 
     # Данные об оценке репозиториев
     for i in range(len(assessmen_repos_list)):
+        str_repo1 = f"Репозиторий №-{i+1}: {user.repos_user[i].name}\n"
         x_r = PrettyTable(hrules=HRuleStyle.ALL)
         x_r.field_names = ["Field name", "Significance", "Assessment"]
         x_r.add_row(["Название репозитория", user.repos_user[i].name, " "])
         x_r.add_row(["Язык программирования", user.repos_user[i].language, " "])
         x_r.add_row(["Количество веток", user.repos_user[i].forks, assessmen_repos_list[i][0]])
         x_r.add_row(["Количество звезд", user.repos_user[i].stargazers_count, assessmen_repos_list[i][1]])
-        x_r.add_row(["Количество контрибьютеров", user.repos_user[i].contributors_count, assessmen_repos_list[i][2]])
+        x_r.add_row(["Количество контрибьюторов", user.repos_user[i].contributors_count, assessmen_repos_list[i][2]])
         x_r.add_row(["Дата создания репозитория", user.repos_user[i].created_at, " "])
         x_r.add_row(["Дата последнего изменения репозитория", user.repos_user[i].last_date, " "])
         total_days = (int((user.repos_user[i].last_date - user.repos_user[i].created_at).days))
@@ -55,9 +64,15 @@ def print_assessment(user, assessment, var_kod):
         x_r.border = True  # Отображать границы таблицы
         x_r.header = True  # Отображать заголовок таблицы
         x_r.padding_width = 1  # Отступ между ячейками
+        str_repo2 = f"\nОбщая оценка репозитория {sum(assessmen_repos_list[i])}"
+        tables.append(str_repo1)
         tables.append(x_r)
+        tables.append(str_repo2)
+        tables.append("\n\n")
 
     if var_kod == 1:
+        str_kod1 = f"Оценка файлов с программным кодом. Оцениваемы репозиторий - {user.judgement_rName}\n"
+        tables.append(str_kod1)
         # Данные об оценке кода
         x_y_r = PrettyTable(hrules=HRuleStyle.ALL)
         x_y_r.field_names = ["Field name", "Assessment", "Explanation"]
@@ -71,5 +86,18 @@ def print_assessment(user, assessment, var_kod):
         x_y_r.header = True  # Отображать заголовок таблицы
         x_y_r.padding_width = 1  # Отступ между ячейками
         tables.append(x_y_r)
+        tables.append("\n\n")
+
+    str3 = f"Общая оценка данных о профиле пользователя: {assessment.score_profile}\n"
+    tables.append(str3)
+    if assessment.average_score_repos!=0:
+        str_repo = f"Средняя оценка всех репозиториев: {assessment.average_score_repos}\n"
+        tables.append(str_repo)
+    if var_kod == 1:
+        str_kod = f"Средняя оценка всех файлов с кодом: {assessment.score_kod}\n"
+        tables.append(str_kod)
+
+    str_sum = f"Итоговая оценка: {assessment.score_profile + assessment.average_score_repos+ assessment.score_kod}\n\n\n\n"
+    tables.append(str_sum)
 
     return tables

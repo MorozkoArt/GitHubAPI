@@ -6,8 +6,10 @@ from M_GetInformation import print_assessment
 def take_data (user, publicOrPrivate):
     user_git = User_GitHub(user.login, user.followers, user.following, user.hireable, user.owned_private_repos, user.public_repos,
                            user.updated_at, user.created_at, user.plan, user.blog, user.get_repos(), user.company, user.get_orgs(), publicOrPrivate)
+
     assessment = ProfileAssessment(user_git)
     assessment_profile = assessment.assessment_profile()
+
     var_kod = 2
     if publicOrPrivate == "public" and user_git.public_repos == 0:
         assessment_repos = 0
@@ -43,11 +45,7 @@ def take_data (user, publicOrPrivate):
         save_user_information(user_git, assessment, var_kod)
     elif var == 2:
         tables = print_assessment(user_git, assessment, var_kod)
-        for i in range(len(tables)):
-            print(str(tables[i]))
-            if i == 0:
-                print('\n Репозитории: \n')
-            else:
-                print('\n\n')
+        for table in tables:
+            print(str(table))
     else:
         exit()
