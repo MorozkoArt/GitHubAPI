@@ -16,12 +16,8 @@ def save_user_information(user, assessment, var_kod):
     if file_path:
         with open(file_path, 'w', encoding='utf-8') as f:
             tables_assesment = print_assessment(user, assessment, var_kod)
-            for i in range(len(tables_assesment)):
-                f.write(str(tables_assesment[i]))
-                if i == 0:
-                    f.write('\n Репозитории: \n')
-                else:
-                    f.write('\n\n')
+            for tables in tables_assesment:
+                f.write(str(tables))
 
         print("Информация пользователя сохранена в файл:", file_path)
     else:
