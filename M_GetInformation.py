@@ -1,0 +1,75 @@
+from prettytable import PrettyTable, HRuleStyle
+import textwrap
+
+def print_assessment(user, assessment, var_kod):
+    tables = []
+    assessmen_profile_list = assessment.assessmen_profile_list
+    assessmen_repos_list = assessment.assessmen_repos_list
+    assessment_kod_list = assessment.assessment_kod_list
+
+    # Данные об оценке профиля
+    x = PrettyTable(hrules=HRuleStyle.ALL)
+    x.field_names = ["Field name", "Significance", "Assessment"]
+    x.add_row(["Имя пользователя", user.name, " "])
+    x.add_row(["Доступ к профилю", user.publicOrPrivate, " "])
+    x.add_row(["Количество подписчиков", user.followers, assessmen_profile_list[0]])
+    x.add_row(["Количество подписок", user.following, assessmen_profile_list[1]])
+    x.add_row(["Доступность для найма", user.hireable, assessmen_profile_list[2]])
+    x.add_row(["Количество приватных репозиториев", user.private_repos, assessmen_profile_list[3]])
+    x.add_row(["Количество публичных репозиториев", user.public_repos, assessmen_profile_list[4]])
+    x.add_row(["Дата создания аккаунта", user.created_at, " "])
+    x.add_row(["Дата последнего изменения", user.updated_at, " "])
+    x.add_row(["Продолжительность пользования", str(assessment.total_months) + " Месяц(ев/а)", assessmen_profile_list[5]])
+    x.add_row(["Подписка", user.plan, assessmen_profile_list[6]])
+    x.add_row(["Блог", user.blog, assessmen_profile_list[7]])
+    x.add_row(["Компания", user.company, assessmen_profile_list[8]])
+    x.add_row(["Организации", ' '.join(map(str, user.org)), assessmen_profile_list[9]])
+    x.add_row(["Языки программирования", ' '.join(map(str, user.languages)), assessmen_profile_list[10]])
+    x.align["Field name"] = "l"  # Выравнивание текста в столбце
+    x.align["Significance"] = "l"  # Выравнивание текста в столбце
+    x.align["Assessment"] = "r"  # Выравнивание текста в столбце
+    x.border = True  # Отображать границы таблицы
+    x.header = True  # Отображать заголовок таблицы
+    x.padding_width = 1  # Отступ между ячейками
+
+    tables.append(x)
+
+    # Данные об оценке репозиториев
+    for i in range(len(assessmen_repos_list)):
+        x_r = PrettyTable(hrules=HRuleStyle.ALL)
+        x_r.field_names = ["Field name", "Significance", "Assessment"]
+        x_r.add_row(["Название репозитория", user.repos_user[i].name, " "])
+        x_r.add_row(["Язык программирования", user.repos_user[i].language, " "])
+        x_r.add_row(["Количество веток", user.repos_user[i].forks, assessmen_repos_list[i][0]])
+        x_r.add_row(["Количество звезд", user.repos_user[i].stargazers_count, assessmen_repos_list[i][1]])
+        x_r.add_row(["Количество контрибьютеров", user.repos_user[i].contributors_count, assessmen_repos_list[i][2]])
+        x_r.add_row(["Дата создания репозитория", user.repos_user[i].created_at, " "])
+        x_r.add_row(["Дата последнего изменения репозитория", user.repos_user[i].last_date, " "])
+        total_days = (int((user.repos_user[i].last_date - user.repos_user[i].created_at).days))
+        x_r.add_row(["Продолжительность работы", str(total_days) + " Дн(я/ей)", assessmen_repos_list[i][3]])
+        x_r.add_row(["Количество коммитов внутри репозитория", user.repos_user[i].commits,assessmen_repos_list[i][4]])
+        x_r.add_row(["Количество просмотров репозитория", user.repos_user[i].count_views, assessmen_repos_list[i][5]])
+        x_r.align["Field name"] = "l"  # Выравнивание текста в столбце
+        x_r.align["Significance"] = "l"  # Выравнивание текста в столбце
+        x_r.align["Assessment"] = "r"  # Выравнивание текста в столбце
+        x_r.border = True  # Отображать границы таблицы
+        x_r.header = True  # Отображать заголовок таблицы
+        x_r.padding_width = 1  # Отступ между ячейками
+        tables.append(x_r)
+
+    if var_kod == 1:
+        # Данные об оценке кода
+        x_y_r = PrettyTable(hrules=HRuleStyle.ALL)
+        x_y_r.field_names = ["Field name", "Assessment", "Explanation"]
+        for j in range(len(assessment_kod_list)):
+            text, marks, file_name = assessment_kod_list[j]
+            x_y_r.add_row([file_name, marks, textwrap.fill(text, width=80)])
+        x_y_r.align["Field name"] = "l"  # Выравнивание текста в столбце
+        x_y_r.align["Assessment"] = "l"  # Выравнивание текста в столбце
+        x_y_r.align["Explanation"] = "l"  # Выравнивание текста в столбце
+        x_y_r.border = True  # Отображать границы таблицы
+        x_y_r.header = True  # Отображать заголовок таблицы
+        x_y_r.padding_width = 1  # Отступ между ячейками
+        tables.append(x_y_r)
+
+    return tables
