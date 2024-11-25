@@ -19,7 +19,7 @@ def print_assessment(user, assessment, var_kod):
     x.add_row(["Количество публичных репозиториев", user.public_repos, assessmen_profile_list[4]])
     x.add_row(["Дата создания аккаунта", user.created_at, " "])
     x.add_row(["Дата последнего изменения", user.updated_at, " "])
-    x.add_row(["Продолжительность пользования", str(assessment.total_months) + " Месяц(ев/а)", assessmen_profile_list[5]])
+    x.add_row(["Продолжительность пользования", str(user.month_usege) + " Месяц(ев/а)", assessmen_profile_list[5]])
     x.add_row(["Подписка", user.plan, assessmen_profile_list[6]])
     x.add_row(["Блог", user.blog, assessmen_profile_list[7]])
     x.add_row(["Компания", user.company, assessmen_profile_list[8]])
@@ -54,9 +54,13 @@ def print_assessment(user, assessment, var_kod):
         x_r.add_row(["Количество контрибьюторов", user.repos_user[i].contributors_count, assessmen_repos_list[i][2]])
         x_r.add_row(["Дата создания репозитория", user.repos_user[i].created_at, " "])
         x_r.add_row(["Дата последнего изменения репозитория", user.repos_user[i].last_date, " "])
-        total_days = (int((user.repos_user[i].last_date - user.repos_user[i].created_at).days))
-        x_r.add_row(["Продолжительность работы", str(total_days) + " Дн(я/ей)", assessmen_repos_list[i][3]])
-        x_r.add_row(["Количество коммитов внутри репозитория", user.repos_user[i].commits,assessmen_repos_list[i][4]])
+        x_r.add_row(["Продолжительность работы", str(user.repos_user[i].days_usege) + " Дн(я/ей)", assessmen_repos_list[i][3]])
+        x_r.add_row(["Количество коммитов внутри репозитория", user.repos_user[i].commits_count,assessmen_repos_list[i][4]])
+        x_r.add_row(["Средняя частота коммитов (раз в сколько дней)", user.repos_user[i].commits_frequency, "-"])
+        x_r.add_row(["Среднее число коммитов в день", user.repos_user[i].commits_inDay, "-"])
+        x_r.add_row(["Среднее число добавляемых строк в коммите", user.repos_user[i].commits_addLines, "-"])
+        x_r.add_row(["Среднее число удаляемых строк в коммите", user.repos_user[i].commits_delLines, "-"])
+
         x_r.add_row(["Количество просмотров репозитория", user.repos_user[i].count_views, assessmen_repos_list[i][5]])
         x_r.align["Field name"] = "l"  # Выравнивание текста в столбце
         x_r.align["Significance"] = "l"  # Выравнивание текста в столбце

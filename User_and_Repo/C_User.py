@@ -7,36 +7,27 @@ class User_GitHub:
     max_judgement = 0
     judgement_rName = ""
     main_repo = None
-    def __init__(self, name, followers, following, hireable, private_repos, public_repos,
-                 updated_at, created_at, plan, blog, repos, company, org, publicOrPrivate):
-        total = (repos.totalCount+1)
+    def __init__(self, user, publicOrPrivate):
+        self.repos = user.get_repos()
+        total = (self.repos.totalCount+1)
         prbar = ProgressBar(total)
-        self.name = name
-        self.followers = followers
-        self.following = following
-        self.hireable = hireable
-        self.private_repos = private_repos
-        self.public_repos = public_repos
-        self.updated_at = updated_at
-        self.created_at = created_at
-        self.plan = plan
-        self.blog = blog
-        self.repos = repos
-        self.company = company
+        self.name = user.login
+        self.followers = user.followers
+        self.following = user.following
+        self.hireable = user.hireable
+        self.private_repos = user.owned_private_repos
+        self.public_repos = user.public_repos
+        self.updated_at = user.updated_at
+        self.created_at = user.created_at
+        self.plan = user.plan
+        self.blog = user.blog
+        self.company = user.company
         self.publicOrPrivate = publicOrPrivate
-        self.org = [org_.login for org_ in org]
+        self.org = [org_.login for org_ in user.get_orgs()]
+        self.month_usege = self.month_usege()
         prbar.updatePd()
         for repo in self.repos:
-            if self.publicOrPrivate == "public":
-                repo_user = User_repo(repo.name, repo.language, repo.forks, repo.stargazers_count,
-                                      repo.get_contributors().totalCount,
-                                      repo.created_at,
-                                      repo.updated_at, repo.get_commits().totalCount, "-")
-            else:
-                repo_user = User_repo(repo.name, repo.language, repo.forks, repo.stargazers_count,
-                                      repo.get_contributors().totalCount,
-                                      repo.created_at,
-                                      repo.updated_at, repo.get_commits().totalCount, repo.get_views_traffic()['count'])
+            repo_user = User_repo(repo, publicOrPrivate)
             self.repos_user.append(repo_user)
             if repo_user.language is not None:
                 judgement = repo_user.tournament(repo_user)
@@ -48,3 +39,14 @@ class User_GitHub:
                 self.languages.append(repo_user.language)
         prbar.closePd()
         self.main_repo = User_repo.serch_repo(self.repos, self.judgement_rName)
+
+    def month_usege(self):
+        if self.updated_at is not None and self.created_at is not None:
+            years_diff = self.updated_at.year - self.created_at.year
+            months_diff = self.updated_at.month - self.created_at.month
+            total_months = years_diff * 12 + months_diff
+            if self.updated_at.day < self.created_at.day:
+                total_months -= 1
+            return total_months
+        else:
+            return 0
