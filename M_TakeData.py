@@ -4,10 +4,9 @@ from Interface.M_SaveInformation import save_user_information
 from M_GetInformation import print_assessment
 
 def take_data (user, publicOrPrivate):
-    user_git = User_GitHub(user.login, user.followers, user.following, user.hireable, user.owned_private_repos, user.public_repos,
-                           user.updated_at, user.created_at, user.plan, user.blog, user.get_repos(), user.company, user.get_orgs(), publicOrPrivate)
-
+    user_git = User_GitHub(user, publicOrPrivate)
     assessment = ProfileAssessment(user_git)
+
     assessment_profile = assessment.assessment_profile()
 
     var_kod = 2

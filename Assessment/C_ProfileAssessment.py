@@ -29,7 +29,6 @@ class ProfileAssessment:
     score_profile = 0
     average_score_repos = 0
     score_kod = 0
-    total_months = 0
     def __init__(self, user):
         self.user = user
 
@@ -39,21 +38,12 @@ class ProfileAssessment:
         self.assessmen_profile_list.append(1 * self.coefficient_hireable if self.user.hireable is not None else 0)
         self.assessmen_profile_list.append(int(self.user.private_repos) * self.coefficient_private_repos if self.user.private_repos is not None else 0)
         self.assessmen_profile_list.append(int(self.user.public_repos) * self.coefficient_public_repos if self.user.public_repos is not None else 0)
-        if self.user.updated_at is not None and self.user.created_at is not None:
-            years_diff = self.user.updated_at.year - self.user.created_at.year
-            months_diff = self.user.updated_at.month - self.user.created_at.month
-            self.total_months = years_diff * 12 + months_diff
-            if self.user.updated_at.day < self.user.created_at.day:
-                self.total_months -= 1
-            self.assessmen_profile_list.append(self.total_months * self.coefficient_created_update)
-        else:
-            self.assessmen_profile_list.append(0)
+        self.assessmen_profile_list.append(self.user.month_usege * self.coefficient_created_update)
         self.assessmen_profile_list.append(1 * self.coefficient_plan if self.user.plan is not None and self.user.plan.name != "free" else 0)
         self.assessmen_profile_list.append(1 * self.coefficient_blog if self.user.blog not in (None, "") else 0)
         self.assessmen_profile_list.append(1 * self.coefficient_company if self.user.company is not None else 0)
         self.assessmen_profile_list.append(self.coefficient_org* len(self.user.org))
         self.assessmen_profile_list.append(self.coefficient_languages * len(self.user.languages))
-
         self.score_profile = sum(self.assessmen_profile_list)
         return self.score_profile
 
@@ -65,9 +55,8 @@ class ProfileAssessment:
             assessment_repo.append(int(self.user.repos_user[i].forks) * self.coefficient_forks)
             assessment_repo.append(int(self.user.repos_user[i].stargazers_count) * self.coefficient_stargazers_count)
             assessment_repo.append(int(self.user.repos_user[i].contributors_count) * self.coefficient_contributors_count)
-            total_days = (int((self.user.repos_user[i].last_date - self.user.repos_user[i].created_at).days))
-            assessment_repo.append(total_days * self.coefficient_created_update_r)
-            assessment_repo.append(int(self.user.repos_user[i].commits) * self.coefficient_commits)
+            assessment_repo.append(self.user.repos_user[i].days_usege * self.coefficient_created_update_r)
+            assessment_repo.append(int(self.user.repos_user[i].commits_count) * self.coefficient_commits)
             if self.user.publicOrPrivate == "public":
                 assessment_repo.append(0)
             else:
