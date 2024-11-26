@@ -57,10 +57,7 @@ class ProfileAssessment:
             assessment_repo.append(int(self.user.repos_user[i].contributors_count) * self.coefficient_contributors_count)
             assessment_repo.append(self.user.repos_user[i].days_usege * self.coefficient_created_update_r)
             assessment_repo.append(int(self.user.repos_user[i].commits_count) * self.coefficient_commits)
-            if self.user.publicOrPrivate == "public":
-                assessment_repo.append(0)
-            else:
-                assessment_repo.append(int(self.user.repos_user[i].count_views) * self.coefficient_count_views)
+            assessment_repo.append(int(self.user.repos_user[i].count_views) * self.coefficient_count_views if self.user.repos_user[i].count_views != "-" else 0)
             copy_assessment_repo = deepcopy(assessment_repo)
             self.assessmen_repos_list.append(copy_assessment_repo)
             for j in range (len(assessment_repo)):
@@ -70,7 +67,7 @@ class ProfileAssessment:
         return self.average_score_repos
 
     def assessment_kod(self, full_or_three):
-        list_of_path = User_repo.dounloud_mainRepo(self.user.main_repo)
+        list_of_path = self.user.main_repo.dounloud_mainRepo()
         chat_gpt = GPT(list_of_path)
         self.assessment_kod_list = chat_gpt.evaluate_codeS(full_or_three)
         for i in range (len(self.assessment_kod_list)):

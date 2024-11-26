@@ -20,6 +20,10 @@ def print_assessment(user, assessment, var_kod):
     x.add_row(["Дата создания аккаунта", user.created_at, " "])
     x.add_row(["Дата последнего изменения", user.updated_at, " "])
     x.add_row(["Продолжительность пользования", str(user.month_usege) + " Месяц(ев/а)", assessmen_profile_list[5]])
+    if user.repos.totalCount != 0:
+        x.add_row(["Среднее число коммитов в репозиториях", user.countCommits, " "])
+        x.add_row(["Средняя частота коммитов (раз в сколько дней) в репозиториях", user.frequencyCommits, " "])
+        x.add_row(["Среднее число коммитов в день в репозиториях", user.inDayCommits, " "])
     x.add_row(["Подписка", user.plan, assessmen_profile_list[6]])
     x.add_row(["Блог", user.blog, assessmen_profile_list[7]])
     x.add_row(["Компания", user.company, assessmen_profile_list[8]])
@@ -38,7 +42,7 @@ def print_assessment(user, assessment, var_kod):
     tables.append(str2)
     tables.append(x)
     tables.append("\n\n")
-    if assessment.average_score_repos != 0:
+    if user.repos.totalCount != 0:
         str4 = f"Данные о репозиториях и их оценка: \n\n"
         tables.append(str4)
 
@@ -47,20 +51,18 @@ def print_assessment(user, assessment, var_kod):
         str_repo1 = f"Репозиторий №-{i+1}: {user.repos_user[i].name}\n"
         x_r = PrettyTable(hrules=HRuleStyle.ALL)
         x_r.field_names = ["Field name", "Significance", "Assessment"]
-        x_r.add_row(["Название репозитория", user.repos_user[i].name, " "])
-        x_r.add_row(["Язык программирования", user.repos_user[i].language, " "])
+        x_r.add_row(["Название репозитория", user.repos_user[i].name, "-"])
+        x_r.add_row(["Язык программирования", user.repos_user[i].language, "-"])
         x_r.add_row(["Количество веток", user.repos_user[i].forks, assessmen_repos_list[i][0]])
         x_r.add_row(["Количество звезд", user.repos_user[i].stargazers_count, assessmen_repos_list[i][1]])
         x_r.add_row(["Количество контрибьюторов", user.repos_user[i].contributors_count, assessmen_repos_list[i][2]])
-        x_r.add_row(["Дата создания репозитория", user.repos_user[i].created_at, " "])
-        x_r.add_row(["Дата последнего изменения репозитория", user.repos_user[i].last_date, " "])
-        x_r.add_row(["Продолжительность работы", str(user.repos_user[i].days_usege) + " Дн(я/ей)", assessmen_repos_list[i][3]])
+        x_r.add_row(["Дата создания репозитория", user.repos_user[i].created_at, "-"])
+        x_r.add_row(["Дата последнего изменения репозитория", user.repos_user[i].last_date, "-"])
+        x_r.add_row(["Продолжительность работы (с момента первого коммита - до последнего)", str(user.repos_user[i].days_usege) + " Дн(я/ей)", assessmen_repos_list[i][3]])
+        x_r.add_row(["Кол-во рабочих дней (в сколькии дни добавлялись коммиты)", str(user.repos_user[i].days_work) + " Дн(я/ей)", "-"])
         x_r.add_row(["Количество коммитов внутри репозитория", user.repos_user[i].commits_count,assessmen_repos_list[i][4]])
         x_r.add_row(["Средняя частота коммитов (раз в сколько дней)", user.repos_user[i].commits_frequency, "-"])
         x_r.add_row(["Среднее число коммитов в день", user.repos_user[i].commits_inDay, "-"])
-        x_r.add_row(["Среднее число добавляемых строк в коммите", user.repos_user[i].commits_addLines, "-"])
-        x_r.add_row(["Среднее число удаляемых строк в коммите", user.repos_user[i].commits_delLines, "-"])
-
         x_r.add_row(["Количество просмотров репозитория", user.repos_user[i].count_views, assessmen_repos_list[i][5]])
         x_r.align["Field name"] = "l"  # Выравнивание текста в столбце
         x_r.align["Significance"] = "l"  # Выравнивание текста в столбце
@@ -75,8 +77,41 @@ def print_assessment(user, assessment, var_kod):
         tables.append("\n\n")
 
     if var_kod == 1:
-        str_kod1 = f"Оценка файлов с программным кодом. Оцениваемы репозиторий - {user.judgement_rName}\n"
+        str_repo_main = f"Репозиторий, выбранный для отдельного анализа: {user.main_repo.name}\n"
+        x_r_m = PrettyTable(hrules=HRuleStyle.ALL)
+        x_r_m.field_names = ["Field name", "Significance", "Assessment"]
+        x_r_m.add_row(["Название репозитория", user.main_repo.name, "-"])
+        x_r_m.add_row(["Язык программирования", user.main_repo.language, "-"])
+        x_r_m.add_row(["Количество веток", user.main_repo.forks, "-"])
+        x_r_m.add_row(["Количество звезд", user.main_repo.stargazers_count, "-"])
+        x_r_m.add_row(["Количество контрибьюторов", user.main_repo.contributors_count, "-"])
+        x_r_m.add_row(["Дата создания репозитория", user.main_repo.created_at, "-"])
+        x_r_m.add_row(["Дата последнего изменения репозитория", user.main_repo.last_date, "-"])
+        x_r_m.add_row(["Продолжительность работы (с момента первого коммита - до последнего)", str(user.main_repo.days_usege) + " Дн(я/ей)", "-"])
+        x_r_m.add_row(["Кол-во рабочих дней (в сколькии дни добавлялись коммиты)", str(user.main_repo.days_work) + " Дн(я/ей)", "-"])
+        x_r_m.add_row(["Количество коммитов внутри репозитория", user.main_repo.commits_count, "-"])
+        x_r_m.add_row(["Средняя частота коммитов (раз в сколько дней)", user.main_repo.commits_frequency, "-"])
+        x_r_m.add_row(["Среднее число коммитов в день", user.main_repo.commits_inDay, "-"])
+        x_r_m.add_row(["Среднее число добавляемых строк в коммите", user.main_repo.commits_addLines, "-"])
+        x_r_m.add_row(["Среднее число удаляемых строк в коммите", user.main_repo.commits_delLines, "-"])
+        x_r_m.add_row(["Количество просмотров репозитория", user.main_repo.count_views, "-"])
+        x_r_m.align["Field name"] = "l"  # Выравнивание текста в столбце
+        x_r_m.align["Significance"] = "l"  # Выравнивание текста в столбце
+        x_r_m.align["Assessment"] = "r"  # Выравнивание текста в столбце
+        x_r_m.border = True  # Отображать границы таблицы
+        x_r_m.header = True  # Отображать заголовок таблицы
+        x_r_m.padding_width = 1  # Отступ между ячейками
+        str_repo_main2 = f"\nОбщая оценка репозитория "
+        tables.append(str_repo_main)
+        tables.append(x_r_m)
+        tables.append(str_repo2)
+        tables.append("\n\n")
+
+        str_files = f"Файлы, скаченные для анализа из выбранного репозитория {user.main_repo.name}:\n {textwrap.fill(user.main_repo.nameFiles, width=60)}\n\n"
+        tables.append(str_files)
+        str_kod1 = f"Оценка файлов с программным кодом. Оцениваемы репозиторий - {user.main_repo.name}\n"
         tables.append(str_kod1)
+
         # Данные об оценке кода
         x_y_r = PrettyTable(hrules=HRuleStyle.ALL)
         x_y_r.field_names = ["Field name", "Assessment", "Explanation"]
