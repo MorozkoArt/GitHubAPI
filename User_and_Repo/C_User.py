@@ -1,6 +1,8 @@
 from Interface.C_ProgressBar import ProgressBar
 from User_and_Repo.C_UserRepo import User_repo
 from User_and_Repo.C_MainRepo import Main_repo
+from github import Github, UnknownObjectException
+
 class User_GitHub:
     languages = []
     repos_user = []
@@ -32,20 +34,27 @@ class User_GitHub:
             commits_inDay_list = []
             commits_count = []
             for repo in self.repos:
-                repo_user = User_repo(repo, publicOrPrivate)
-                commits_frequency_list.append(
-                    repo_user.commits_frequency if repo_user.commits_frequency != "NULL" else 0)
-                commits_inDay_list.append(repo_user.commits_inDay if repo_user.commits_inDay != "NULL" else 0)
-                commits_count.append(repo_user.commits_count)
-                self.repos_user.append(repo_user)
-                if repo_user.language is not None:
-                    judgement = repo_user.tournament(repo_user)
-                    if judgement > self.max_judgement:
-                        self.max_judgement = judgement
-                        self.judgement_rName = repo_user.name
-                prbar.updatePd()
-                if repo_user.language not in self.languages and repo_user.language is not None:
-                    self.languages.append(repo_user.language)
+                try:
+                    repo_user = User_repo(repo, publicOrPrivate)  # This might raise an exception if the repo is empty.
+                    commits_frequency_list.append(
+                        repo_user.commits_frequency if repo_user.commits_frequency != "NULL" else 0)
+                    commits_inDay_list.append(repo_user.commits_inDay if repo_user.commits_inDay != "NULL" else 0)
+                    commits_count.append(repo_user.commits_count)
+                    self.repos_user.append(repo_user)
+                    if repo_user.language is not None:
+                        judgement = repo_user.tournament(repo_user)
+                        if judgement > self.max_judgement:
+                            self.max_judgement = judgement
+                            self.judgement_rName = repo_user.name
+                    if repo_user.language not in self.languages and repo_user.language is not None:
+                        self.languages.append(repo_user.language)
+                except UnknownObjectException as e:
+                    print(f"Repository {repo.name} not found or is empty: {e}")
+                    # Consider adding a more sophisticated error logging technique for production-level code.
+                except Exception as e:
+                    ddd= 0
+                finally:
+                    prbar.updatePd()
 
             self.frequencyCommits = sum(commits_frequency_list) / len(commits_frequency_list)
             self.inDayCommits = sum(commits_inDay_list) / len(commits_inDay_list)

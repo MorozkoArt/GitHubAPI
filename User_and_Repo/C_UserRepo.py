@@ -27,9 +27,11 @@ class User_repo:
         commits_inDay_list = []
         day = self.commits[0].commit.author.date.date()
         count_commits_inDay = 0
+        max_coomits = 1000
+        range_commits = (self.commits.totalCount if self.commits.totalCount<=max_coomits else max_coomits)
 
-        for i in range (self.commits.totalCount):
-            if i != (self.commits.totalCount)-1:
+        for i in range (range_commits):
+            if i != (range_commits)-1:
                 frequency = (self.commits[i].commit.author.date.date() - self.commits[i+1].commit.author.date.date()).days
                 commits_frequency_list.append(frequency)
             if day == self.commits[i].commit.author.date.date():
