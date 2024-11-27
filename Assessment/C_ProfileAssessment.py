@@ -30,6 +30,7 @@ class ProfileAssessment:
     assessmen_profile_list = []
     assessmen_repos_list = []
     assessment_kod_list = []
+    assessmen_profile_dict = {}
     score_profile = 0
     average_score_repos = 0
     score_kod = 0
@@ -37,28 +38,23 @@ class ProfileAssessment:
         self.user = user
 
     def assessment_profile(self):
-        self.assessmen_profile_list.append(self.followers_to_score_log(int(self.user.followers)))
-        self.assessmen_profile_list.append(self.following_to_score_log(int(self.user.following)))
-        self.assessmen_profile_list.append(self.coefficient_hireable if self.user.hireable is not None else 0)
-        self.assessmen_profile_list.append(0)
-        self.assessmen_profile_list.append(0)
-        self.assessmen_profile_list.append(self.user.month_usege * self.coefficient_created_update)
-        self.assessmen_profile_list.append(self.plan_to_score(self.user.plan))
-        self.assessmen_profile_list.append(self.blog_to_score(self.user.blog))
-        self.assessmen_profile_list.append(self.company_to_score(self.user.company))
-        self.assessmen_profile_list.append(self.org_to_score_log(len(self.user.org)))
-        self.assessmen_profile_list.append(self.language_to_score_log(len(self.user.languages)))
-        self.assessmen_profile_list.append(self.countCommits_to_score_log(self.user.countCommits))
-        self.assessmen_profile_list.append(self.inDayCommits_to_score_log(self.user.inDayCommits))
-        self.assessmen_profile_list.append(self.frequencyCommits_to_score_exp(self.user.frequencyCommits))
-        self.assessmen_profile_list.append(self.evaluate_repositories(self.assessmen_profile_list[13],
-                                                                          self.assessmen_profile_list[12],
-                                                                          self.assessmen_profile_list[11],
-                                                                          len(self.user.repos_user)))
-        self.assessmen_profile_list.append(self.created_update_to_score_linear(self.assessmen_profile_list[14], self.user.month_usege))
-
-
-        self.score_profile = sum(self.assessmen_profile_list)
+        self.assessmen_profile_dict["followers"] = self.followers_to_score_log(int(self.user.followers))
+        self.assessmen_profile_dict["following"] = self.following_to_score_log(int(self.user.following))
+        self.assessmen_profile_dict["hireable"] = (self.coefficient_hireable if self.user.hireable is not None else 0)
+        self.assessmen_profile_dict["plan"] = self.plan_to_score(self.user.plan)
+        self.assessmen_profile_dict["blog"] = self.blog_to_score(self.user.blog)
+        self.assessmen_profile_dict["company"] = self.company_to_score(self.user.company)
+        self.assessmen_profile_dict["org"] = self.org_to_score_log(len(self.user.org))
+        self.assessmen_profile_dict["language"] = self.language_to_score_log(len(self.user.languages))
+        self.assessmen_profile_dict["countCommits"] = self.countCommits_to_score_log(self.user.countCommits)
+        self.assessmen_profile_dict["inDayCommits"] = self.inDayCommits_to_score_log(self.user.inDayCommits)
+        self.assessmen_profile_dict["frequencyCommits"] = self.frequencyCommits_to_score_exp(self.user.frequencyCommits)
+        self.assessmen_profile_dict["repositories"] = self.evaluate_repositories(self.assessmen_profile_dict.get("frequencyCommits"),
+                                                                          self.assessmen_profile_dict.get("inDayCommits"),
+                                                                          self.assessmen_profile_dict.get("countCommits"),
+                                                                          len(self.user.repos_user))
+        self.assessmen_profile_dict["month_usege"] = self.created_update_to_score_linear(self.assessmen_profile_dict.get("repositories"), self.user.month_usege)
+        self.score_profile = sum(value for value in self.assessmen_profile_dict.values() if isinstance(value, (int, float)))
         return self.score_profile
 
     def assessment_repos(self):
