@@ -3,7 +3,7 @@ import textwrap
 
 def print_assessment(user, assessment, var_kod):
     tables = []
-    assessmen_profile_list = assessment.assessmen_profile_list
+    assessmen_profile_dict = assessment.assessmen_profile_dict
     assessmen_repos_list = assessment.assessmen_repos_list
     assessment_kod_list = assessment.assessment_kod_list
 
@@ -12,22 +12,23 @@ def print_assessment(user, assessment, var_kod):
     x.field_names = ["Field name", "Significance", "Assessment"]
     x.add_row(["Имя пользователя", user.name, " "])
     x.add_row(["Доступ к профилю", user.publicOrPrivate, " "])
-    x.add_row(["Количество подписчиков", user.followers, assessmen_profile_list[0]])
-    x.add_row(["Количество подписок", user.following, assessmen_profile_list[1]])
-    x.add_row(["Доступность для найма", user.hireable, assessmen_profile_list[2]])
-    x.add_row(["Количество приватных репозиториев\nКоличество публичных репозиториев", f"{user.private_repos}\n {user.public_repos}", assessmen_profile_list[14]])
+    x.add_row(["Количество подписчиков", user.followers, assessmen_profile_dict.get("followers")])
+    x.add_row(["Количество подписок", user.following, assessmen_profile_dict.get("following")])
+    x.add_row(["Доступность для найма", user.hireable, assessmen_profile_dict.get("hireable")])
+    x.add_row(["Количество приватных репозиториев\nКоличество публичных репозиториев",
+               f"{user.private_repos}\n {user.public_repos}", assessmen_profile_dict.get("repositories")])
     x.add_row(["Дата создания аккаунта", user.created_at, " "])
     x.add_row(["Дата последнего изменения", user.updated_at, " "])
-    x.add_row(["Продолжительность пользования", str(user.month_usege) + " Месяц(ев/а)", assessmen_profile_list[15]])
+    x.add_row(["Продолжительность пользования", str(user.month_usege) + " Месяц(ев/а)", assessmen_profile_dict.get("month_usege")])
     if len(user.repos_user)!=0:
-        x.add_row(["Среднее число коммитов в репозиториях", user.countCommits, assessmen_profile_list[11]])
-        x.add_row(["Средняя частота коммитов (раз в сколько дней) в репозиториях", user.frequencyCommits, assessmen_profile_list[13]])
-        x.add_row(["Среднее число коммитов в день в репозиториях", user.inDayCommits, assessmen_profile_list[12]])
-    x.add_row(["Подписка", user.plan, assessmen_profile_list[6]])
-    x.add_row(["Блог", user.blog, assessmen_profile_list[7]])
-    x.add_row(["Компания", user.company, assessmen_profile_list[8]])
-    x.add_row(["Организации", ' '.join(map(str, user.org)), assessmen_profile_list[9]])
-    x.add_row(["Языки программирования", ' '.join(map(str, user.languages)), assessmen_profile_list[10]])
+        x.add_row(["Среднее число коммитов в репозиториях", user.countCommits, assessmen_profile_dict.get("countCommits")])
+        x.add_row(["Средняя частота коммитов (раз в сколько дней) в репозиториях", user.frequencyCommits, assessmen_profile_dict.get("frequencyCommits")])
+        x.add_row(["Среднее число коммитов в день в репозиториях", user.inDayCommits, assessmen_profile_dict.get("inDayCommits")])
+    x.add_row(["Подписка", user.plan, assessmen_profile_dict.get("plan")])
+    x.add_row(["Блог", user.blog, assessmen_profile_dict.get("blog")])
+    x.add_row(["Компания", user.company, assessmen_profile_dict.get("company")])
+    x.add_row(["Организации", ' '.join(map(str, user.org)), assessmen_profile_dict.get("org")])
+    x.add_row(["Языки программирования", ' '.join(map(str, user.languages)), assessmen_profile_dict.get("language")])
     x.align["Field name"] = "l"  # Выравнивание текста в столбце
     x.align["Significance"] = "l"  # Выравнивание текста в столбце
     x.align["Assessment"] = "r"  # Выравнивание текста в столбце
