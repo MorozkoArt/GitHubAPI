@@ -1,20 +1,24 @@
+import math
 from copy import deepcopy
 from User_and_Repo.C_UserRepo import User_repo
 from Assessment.C_GPT import GPT
 
+
 class ProfileAssessment:
     #Коэффициенты для оценки профиля
-    coefficient_followers = 1.5
-    coefficient_following = 0.5
-    coefficient_hireable = 0.6
-    coefficient_private_repos = 2.5
-    coefficient_public_repos = 2.3
-    coefficient_created_update = 0.6
-    coefficient_plan = 5.0
-    coefficient_blog = 0.3
-    coefficient_company = 10.0
-    coefficient_org = 1.4
-    coefficient_languages = 4.1
+    coefficient_followers = 10
+    coefficient_following = 4
+    coefficient_hireable = 1
+    coefficient_repos = 40
+    coefficient_created_update = 4
+    coefficient_plan = 2
+    coefficient_blog = 2
+    coefficient_company = 4
+    coefficient_org = 4
+    coefficient_languages = 7
+    coefficient_frequencyCommits = 5
+    coefficient_inDayCommits = 5
+    coefficient_countCommits = 10
     #Коэффициенты для оценки репозиториев
     coefficient_forks = 1.7
     coefficient_stargazers_count = 5.0
@@ -33,17 +37,27 @@ class ProfileAssessment:
         self.user = user
 
     def assessment_profile(self):
-        self.assessmen_profile_list.append(self.coefficient_followers*int(self.user.followers))
-        self.assessmen_profile_list.append(self.coefficient_following*int(self.user.following))
-        self.assessmen_profile_list.append(1 * self.coefficient_hireable if self.user.hireable is not None else 0)
-        self.assessmen_profile_list.append(int(self.user.private_repos) * self.coefficient_private_repos if self.user.private_repos is not None else 0)
-        self.assessmen_profile_list.append(int(self.user.public_repos) * self.coefficient_public_repos if self.user.public_repos is not None else 0)
+        self.assessmen_profile_list.append(self.followers_to_score_log(int(self.user.followers)))
+        self.assessmen_profile_list.append(self.following_to_score_log(int(self.user.following)))
+        self.assessmen_profile_list.append(self.coefficient_hireable if self.user.hireable is not None else 0)
+        self.assessmen_profile_list.append(0)
+        self.assessmen_profile_list.append(0)
         self.assessmen_profile_list.append(self.user.month_usege * self.coefficient_created_update)
-        self.assessmen_profile_list.append(1 * self.coefficient_plan if self.user.plan is not None and self.user.plan.name != "free" else 0)
-        self.assessmen_profile_list.append(1 * self.coefficient_blog if self.user.blog not in (None, "") else 0)
-        self.assessmen_profile_list.append(1 * self.coefficient_company if self.user.company is not None else 0)
-        self.assessmen_profile_list.append(self.coefficient_org* len(self.user.org))
-        self.assessmen_profile_list.append(self.coefficient_languages * len(self.user.languages))
+        self.assessmen_profile_list.append(self.plan_to_score(self.user.plan))
+        self.assessmen_profile_list.append(self.blog_to_score(self.user.blog))
+        self.assessmen_profile_list.append(self.company_to_score(self.user.company))
+        self.assessmen_profile_list.append(self.org_to_score_log(len(self.user.org)))
+        self.assessmen_profile_list.append(self.language_to_score_log(len(self.user.languages)))
+        self.assessmen_profile_list.append(self.countCommits_to_score_log(self.user.countCommits))
+        self.assessmen_profile_list.append(self.inDayCommits_to_score_log(self.user.inDayCommits))
+        self.assessmen_profile_list.append(self.frequencyCommits_to_score_exp(self.user.frequencyCommits))
+        self.assessmen_profile_list.append(self.evaluate_repositories(self.assessmen_profile_list[13],
+                                                                          self.assessmen_profile_list[12],
+                                                                          self.assessmen_profile_list[11],
+                                                                          len(self.user.repos_user)))
+        self.assessmen_profile_list.append(self.created_update_to_score_linear(self.assessmen_profile_list[14], self.user.month_usege))
+
+
         self.score_profile = sum(self.assessmen_profile_list)
         return self.score_profile
 
@@ -75,4 +89,114 @@ class ProfileAssessment:
             self.score_kod+=marks
         self.score_kod = (self.score_kod/len(self.assessment_kod_list))*5
         return self.score_kod
+
+    def followers_to_score_log(self, followers):
+        if followers not in (0, 1):
+            score = (min(self.coefficient_followers * math.log(followers) / math.log(5000), self.coefficient_followers))
+        elif followers == 1:
+            score = (min(self.coefficient_followers * math.log(followers+1) / math.log(5000), self.coefficient_followers))/3
+        else:
+            score = 0
+        return score
+
+    def following_to_score_log(self, following):
+        if following not in (0, 1):
+            score = (min(self.coefficient_following * math.log(following) / math.log(200), self.coefficient_following))
+        elif following == 1:
+            score = (min(self.coefficient_following * math.log(following+1) / math.log(200), self.coefficient_following))/2
+        else:
+            score = 0
+        return score
+
+    def org_to_score_log(self, orgs):
+        if orgs not in  (0, 1):
+            score = (min(self.coefficient_org * math.log(orgs) / math.log(5), self.coefficient_org))
+        elif orgs == 1:
+            score = (min(self.coefficient_org * math.log(orgs+1) / math.log(5), self.coefficient_org))/1.5
+        else:
+            score = 0
+        return score
+
+    def company_to_score(self, company):
+        score = (self.coefficient_company if company is not None else 0)
+        return score
+
+    def plan_to_score(self, plan):
+        score = (self.coefficient_plan if plan is not None and plan.name != "free"  else 0)
+        return score
+
+    def blog_to_score(self, blog):
+        score = (self.coefficient_blog if blog not in (None, "") else 0)
+        return score
+
+    def language_to_score_log(self, languages):
+        if languages not in  (0, 1):
+            score = (min(self.coefficient_languages * math.log(languages) / math.log(10), self.coefficient_languages))
+        elif languages == 1:
+            score = (min(self.coefficient_languages * math.log(languages+1) / math.log(10), self.coefficient_languages))/3
+        else:
+            score = 0
+        return score
+
+    def countCommits_to_score_log(self, countCommits):
+        power = 1.4
+        if countCommits not in  (0, 1):
+            score = (min(self.coefficient_countCommits * (math.log(countCommits) / math.log(100))**power, self.coefficient_countCommits))
+        elif countCommits == 1:
+            score = (min(self.coefficient_countCommits * (math.log(countCommits+1) / math.log(100))**power, self.coefficient_countCommits))/3
+        else:
+            score = 0
+        return score
+
+    def inDayCommits_to_score_log(self, inDayCommits):
+        if inDayCommits not in  (0, 1):
+            score = (min(self.coefficient_inDayCommits * math.log(inDayCommits) / math.log(6), self.coefficient_inDayCommits))
+        elif inDayCommits == 1:
+            score = (min(self.coefficient_inDayCommits * math.log(inDayCommits+1) / math.log(6), self.coefficient_inDayCommits))/3
+        else:
+            score = 0
+        return score
+
+    def frequencyCommits_to_score_exp(self, frequencyCommits):
+        decay_rate = 0.5
+        score = self.coefficient_frequencyCommits * math.exp(-decay_rate * frequencyCommits)
+        return score
+
+    def evaluate_repositories(self, frequency, inDayCommits, countCommits, num_repos):
+        normalized_frequency = min(frequency / self.coefficient_frequencyCommits, 1)
+        normalized_inDayCommits = min(inDayCommits / self.coefficient_inDayCommits, 1)
+        normalized_countCommits = min(countCommits / self.coefficient_countCommits, 1)
+        max_num_repos = 25
+        normalized_num_repos = min(num_repos / max_num_repos, 1)
+        repos_log = normalized_num_repos+normalized_countCommits+normalized_frequency+normalized_inDayCommits
+
+        if repos_log >1:
+            score = (min(self.coefficient_repos * (math.log(repos_log) / math.log(4)),self.coefficient_repos))
+        elif repos_log <=1 and repos_log > 0 :
+            score = (min(self.coefficient_repos * (math.log(repos_log + 1) / math.log(4)),self.coefficient_repos)) / 3
+        else:
+            score = 0
+
+        return score
+
+    def created_update_to_score_linear(self, repos_log , created_update):
+
+        normalized_repos_log = min(repos_log/self.coefficient_repos, 1)
+
+        max_created_update = 36
+        normalized_created_update = min(created_update/max_created_update, 1 )
+
+        created_update_log = (normalized_repos_log + normalized_created_update)*10
+
+        if created_update_log > 1:
+            score = (min(self.coefficient_created_update * (math.log(created_update_log) / math.log(20)), self.coefficient_created_update))
+        elif created_update_log <= 1 and created_update_log > 0:
+            score = (min(self.coefficient_created_update * (math.log(created_update_log + 1) / math.log(20)), self.coefficient_created_update)) / 1.3
+        else:
+            score = 0
+        return score
+
+
+
+
 

@@ -62,6 +62,10 @@ class User_GitHub:
             mainRepo_give = User_repo.serch_repo(self.repos, self.judgement_rName)
             self.main_repo = Main_repo(mainRepo_give, self.publicOrPrivate)
             prbar.updatePd()
+        else:
+            self.frequencyCommits = 0
+            self.inDayCommits = 0
+            self.countCommits = 0
         prbar.closePd()
 
 
