@@ -1,6 +1,7 @@
 from github import Github
 from github import Auth
 from M_TakeData import take_data
+import os
 
 print("Каким способом вы желаете авторизоваться? \n" 
       " 1 - Авторизация через логин \n"
@@ -8,14 +9,17 @@ print("Каким способом вы желаете авторизовать�
       " 3 - Авторизация через токен доступа")
 var_aut  = input(" Введите номер варианта авторизации (от 1-цы до 3-ех) или полность навзвание варианта: ")
 
-MyToken = "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"
+MyToken = os.environ.get("GITHUB_TOKEN")
+
 if var_aut == "1":
     login = input(" Введите логин пользователя: ")
     try:
         g = Github(MyToken)
         user = g.get_user(login)
         publicOrPrivate = "public"
-        take_data(user, publicOrPrivate)
+        var_kod = 1
+        var_kod_2 = 2
+        take_data(user, publicOrPrivate, var_kod, var_kod_2)
     except Exception as e:
         print(f"Произошла ошибка: {e}")
 
