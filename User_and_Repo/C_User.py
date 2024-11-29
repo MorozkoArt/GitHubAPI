@@ -40,8 +40,8 @@ class User_GitHub:
                     commits_inDay_list.append(repo_user.commits_inDay if repo_user.commits_inDay != "NULL" else 0)
                     commits_count.append(repo_user.commits_count)
                     self.repos_user.append(repo_user)
-                    if repo_user.language is not None:
-                        judgement = repo_user.tournament(repo_user)
+                    if repo_user.language is not None and repo.name != self.name:
+                        judgement = repo_user.tournament()
                         if judgement > self.max_judgement:
                             self.max_judgement = judgement
                             self.judgement_rName = repo_user.name

@@ -1,7 +1,16 @@
+import math
+
 class User_repo:
 
     code_extensions = ('.py', '.java', '.js', '.cpp', '.c', '.rb', '.go', '.php',
                        '.html', '.css', '.swift', '.ts', '.json', '.sh', '.pl', '.r', '.cs')
+
+    coefficient_commits_count = 100
+    coefficient_commits_inDay = 15
+    coefficient_days_usege = 60
+    coefficient_stars = 1000
+    coefficient_forks = 10
+    coefficient_frequencyCommits = 5
 
     def __init__(self, repo,  publicOrPrivate):
         self.commits = repo.get_commits()
@@ -57,18 +66,22 @@ class User_repo:
 
 
 
-    def tournament(self, repo_user):
-        coefficient_com = 0.8
-        coefficient_views = 0.08
-        coefficient_stars = 0.1
-        coefficient_forks = 0.2
-        judgement = 0
-        if int(repo_user.contributors_count) <= 1:
-            judgement = (int(repo_user.commits_count)*coefficient_com
-            + int(repo_user.stargazers_count)*coefficient_stars
-            + int(repo_user.forks) * coefficient_forks)
-            if repo_user.count_views != "-":
-                judgement += int(repo_user.count_views) * coefficient_views
+    def tournament(self):
+        normalize_commits_count = min(self.commits_count / self.coefficient_commits_count, 1)
+        decay_rate = 0.5
+        normalize_commits_frequency = min(math.exp(-decay_rate * self.commits_frequency), 1)
+        normalize_commits_inDay = min(self.commits_inDay / self.coefficient_commits_inDay, 1)
+        normalize_days_usege = min(self.days_usege / self.coefficient_days_usege, 1)
+        normalize_stars = min(self.stargazers_count / self.coefficient_stars, 1)
+        normalize_forks = min(self.forks / self.coefficient_forks, 1)
+        repos_log = (normalize_commits_count*5 + normalize_commits_frequency*(1/2) + normalize_commits_inDay +
+                     normalize_days_usege*2 + normalize_stars + normalize_forks)
+        if repos_log >1:
+            judgement = (min(100 * (math.log(repos_log) / math.log(10.5)),100))
+        elif repos_log <=1 and repos_log > 0 :
+            judgement = (min(100 * (math.log(repos_log + 1) / math.log(10.5)),100)) / 3
+        else:
+            judgement = 0
         return judgement
 
     # Проход по файлам в репозитории
