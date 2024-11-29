@@ -36,8 +36,7 @@ class User_GitHub:
             for repo in self.repos:
                 try:
                     repo_user = User_repo(repo, publicOrPrivate)  # This might raise an exception if the repo is empty.
-                    commits_frequency_list.append(
-                        repo_user.commits_frequency if repo_user.commits_frequency != "NULL" else 0)
+                    commits_frequency_list.append(repo_user.commits_frequency if repo_user.commits_frequency != "NULL" else 0)
                     commits_inDay_list.append(repo_user.commits_inDay if repo_user.commits_inDay != "NULL" else 0)
                     commits_count.append(repo_user.commits_count)
                     self.repos_user.append(repo_user)

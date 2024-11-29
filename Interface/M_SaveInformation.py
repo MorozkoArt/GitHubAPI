@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog
-from M_GetInformation import print_assessment
+from Interface.M_GetInformation import print_assessment
 
 def save_user_information(user, assessment, var_kod):
     # Создание диалогового окна для выбора места сохранения файла

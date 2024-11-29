@@ -9,7 +9,9 @@ class Main_repo(User_repo):
         self.repo = repo
         self.commits_addLines = commits_addLines_value
         self.commits_delLines = commits_delLines_value
-        self.nameFiles = ""
+        self.contentsKod = self.get_contentKod()
+        self.nameFiles = ", ".join(content_file.name for content_file in self.contentsKod)
+
     def Commits_LineChange(self):
         commits_addLines_list = []
         commits_delLines_list = []
@@ -25,12 +27,10 @@ class Main_repo(User_repo):
             commits_addLines_value = sum(commits_addLines_list) / len(commits_addLines_list)
         else:
             commits_addLines_value = "NULL"
-
         if len(commits_delLines_list)!=0:
             commits_delLines_value = sum(commits_delLines_list) / len(commits_delLines_list)
         else:
             commits_delLines_value = "NULL"
-
         return  commits_addLines_value, commits_delLines_value
 
     def get_commit_lines_changed(self, commit):
@@ -50,8 +50,20 @@ class Main_repo(User_repo):
             print(f"An unexpected error occurred: {e}")
             return None
 
+    def get_contentKod(self):
+        contentsKod = []
+        contents = self.repo.get_contents("")
+        while contents:
+            file_content = contents.pop(0)
+            if file_content.type == "dir":
+                contents.extend(self.repo.get_contents(file_content.path))
+            elif file_content.type == "file":
+                if file_content.name.endswith(self.code_extensions):
+                    contentsKod.append(file_content)
+        return contentsKod
+
+
     def dounloud_mainRepo(self):
-        namefiles = []
         list_of_paths = []
         print(f"Загрузка файлов из репозитория: {self.repo.name}")
 
@@ -60,24 +72,13 @@ class Main_repo(User_repo):
         else:
             # Проверка, пуста ли директория
             if os.listdir("storage"):
-                # Удаление всего содержимого директории
                 shutil.rmtree("storage")  # Удаляем директорию и всё её содержимое
                 os.makedirs("storage")  # Создаём директорию заново
 
-        contents = self.repo.get_contents("")
-        while contents:
-            file_content = contents.pop(0)
-            if file_content.type == "dir":
-                # Если это директория, получаем содержимое директории
-                contents.extend(self.repo.get_contents(file_content.path))
-            elif file_content.type == "file":
-                # Проверяем, является ли файл кодом по его расширению
-                if file_content.name.endswith(self.code_extensions):
-                    namefiles.append(file_content.name)
-                    path = os.path.join("storage", file_content.name)
-                    with open(path, 'wb') as f:
-                        f.write(file_content.decoded_content)
-                    list_of_paths.append(path)
-        self.nameFiles = ", ".join(namefiles)
+        for file_content in self.contentsKod:
+            path = os.path.join("storage", file_content.name)
+            with open(path, 'wb') as f:
+                f.write(file_content.decoded_content)
+            list_of_paths.append(path)
         return list_of_paths
 

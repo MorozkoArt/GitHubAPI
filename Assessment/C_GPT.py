@@ -7,11 +7,14 @@ class GPT:
         self.listOfPaths = listOfPaths
     def evaluate_codeS(self, full_or_three):
         list_evaluate_codeS = []
-        range_gpt = 0
+        MinNumfiles = 5
         if full_or_three == 1:
             range_gpt = len(self.listOfPaths)
         else:
-            range_gpt = 3
+            if len(self.listOfPaths) > MinNumfiles:
+                range_gpt = MinNumfiles
+            else:
+               range_gpt = len(self.listOfPaths)
         for i in range (range_gpt):
             list_evaluate_codeS.append(self.evaluate_code(self.listOfPaths[i]))
         return list_evaluate_codeS

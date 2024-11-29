@@ -1,48 +1,41 @@
-from github import Github
-from github import Auth
-from M_TakeData import take_data
 import os
+from StartMethods.M_Start_UserAssessment_generation import (Start_user_generation, Start_assessment_generation
+, Start_assessment_generation_empty, Start_userAssessment_generation)
+from StartMethods.M_Authentication import Login, LoginPassword, LoginToken
+MyToken = os.environ.get("GITHUB_TOKEN")
+
 
 print("Каким способом вы желаете авторизоваться? \n" 
       " 1 - Авторизация через логин \n"
       " 2 - Авторизация через логин и пароль \n"
       " 3 - Авторизация через токен доступа")
-var_aut  = input(" Введите номер варианта авторизации (от 1-цы до 3-ех) или полность навзвание варианта: ")
-
-MyToken = os.environ.get("GITHUB_TOKEN")
+var_aut  = input(" Введите номер варианта авторизации (от 1-цы до 3-ех): ")
 
 if var_aut == "1":
+    publicOrPrivate = "public"
     login = input(" Введите логин пользователя: ")
     try:
-        g = Github(MyToken)
-        user = g.get_user(login)
-        publicOrPrivate = "public"
-        var_kod = 1
-        var_kod_2 = 2
-        take_data(user, publicOrPrivate, var_kod, var_kod_2)
+        user = Login(MyToken, login)
+        Start_userAssessment_generation(user, publicOrPrivate)
     except Exception as e:
         print(f"Произошла ошибка: {e}")
 
 elif var_aut == "2":
+    publicOrPrivate = "private"
     login= input(" Введите логин пользователя: ")
     password = input(" Введите пароль: " )
     try:
-        auth = Auth.Login(login, password)
-        g = Github(auth=auth)
-        user = g.get_user()
-        publicOrPrivate = "private"
-        take_data(user,publicOrPrivate)
+        user = LoginPassword(login, password)
+        Start_userAssessment_generation(user, publicOrPrivate)
     except Exception as e:
         print(f"Произошла ошибка: {e}")
 
 elif var_aut == "3":
+    publicOrPrivate = "private"
     access_token = input(" Введите токен доступа пользователя: ")
     try:
-        auth = Auth.Token(access_token)
-        login = Github(auth=auth)
-        user = login.get_user()
-        publicOrPrivate = "private"
-        take_data(user, publicOrPrivate)
+        user = LoginToken(access_token)
+        Start_userAssessment_generation(user, publicOrPrivate)
     except Exception as e:
         print(f"Произошла ошибка: {e}")
 
