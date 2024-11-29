@@ -10,8 +10,8 @@ MyToken = os.environ.get("GITHUB_TOKEN")
 
 @pytest.mark.parametrize("MyToken, login,  var_kod, var_kod_2",
                          [(MyToken, "ProNinjaDev", 2, 2),
-                          (MyToken, "MorozkoArt", 1, 2),
-                          (MyToken, "Tulen4ick", 1, 1),
+                          (MyToken, "MorozkoArt", 1, 1),
+                          (MyToken, "Tulen4ick", 1, 2),
                           (MyToken, "ArtemFedorov2004", 1, 2)])
 def test_FullData(MyToken, login, var_kod, var_kod_2):
     try:

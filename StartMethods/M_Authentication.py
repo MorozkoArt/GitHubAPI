@@ -1,6 +1,5 @@
 from github import Github
 from github import Auth
-from User_and_Repo.C_User import User_GitHub
 
 def Login (MyToken, loginUser):
     login = Github(MyToken)

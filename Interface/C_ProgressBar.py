@@ -1,4 +1,3 @@
-
 import tqdm
 
 class ProgressBar:
