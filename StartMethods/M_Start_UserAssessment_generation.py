@@ -6,6 +6,8 @@ from Interface.M_SaveInformation import save_user_information
 
 def Start_user_generation (user, publicOrPrivate):
     user_git = User_GitHub(user, publicOrPrivate)
+    if user.get_repos().totalCount == 0:
+        return user_git, None
     contentsKod = user_git.main_repo.nameFiles
     return user_git, contentsKod
 
@@ -25,7 +27,6 @@ def Start_assessment_generation (user_git, var_kod, var_kod_2):
     assessment = ProfileAssessment(user_git)
     assessment_profile = assessment.assessment_profile()
     assessment_repos = assessment.assessment_repos()
-
     assessment_kod = 0
     if var_kod == 1:
         assessment_kod = assessment.assessment_kod(var_kod_2)
@@ -35,6 +36,7 @@ def Start_assessment_generation (user_git, var_kod, var_kod_2):
     print(f"Общая оценка: {assessmet}")
 
     save_user_information(user_git, assessment, var_kod)
+
 
 def Start_userAssessment_generation (user, publicOrPrivate):
     user_git, contentKod = Start_user_generation(user, publicOrPrivate)

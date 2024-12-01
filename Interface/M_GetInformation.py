@@ -138,6 +138,4 @@ def print_assessment(user, assessment, var_kod):
 
     str_sum = f"Итоговая оценка: {assessment.score_profile + assessment.average_score_repos+ assessment.score_kod}\n\n\n\n"
     tables.append(str_sum)
-    assessmen_repos_list.clear()
-    assessment_kod_list.clear()
     return tables
