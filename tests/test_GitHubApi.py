@@ -9,7 +9,8 @@ from StartMethods.M_Authentication import Login, LoginPassword, LoginToken
 MyToken = os.environ.get("GITHUB_TOKEN")
 
 @pytest.mark.parametrize("MyToken, login,  var_kod, var_kod_2",
-                         [(MyToken, "ProNinjaDev", 2, 2),
+                         [(MyToken, "Lucik19", 1, 1),
+                          (MyToken, "ProNinjaDev", 1, 2),
                           (MyToken, "MorozkoArt", 1, 1),
                           (MyToken, "Tulen4ick", 1, 2),
                           (MyToken, "ArtemFedorov2004", 1, 2)])

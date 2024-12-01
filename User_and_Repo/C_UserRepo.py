@@ -74,12 +74,12 @@ class User_repo:
         normalize_days_usege = min(self.days_usege / self.coefficient_days_usege, 1)
         normalize_stars = min(self.stargazers_count / self.coefficient_stars, 1)
         normalize_forks = min(self.forks / self.coefficient_forks, 1)
-        repos_log = (normalize_commits_count*5 + normalize_commits_frequency*(1/2) + normalize_commits_inDay +
+        repos_log = (normalize_commits_count*4 + normalize_commits_frequency* + normalize_commits_inDay +
                      normalize_days_usege*2 + normalize_stars + normalize_forks)
         if repos_log >1:
-            judgement = (min(100 * (math.log(repos_log) / math.log(10.5)),100))
+            judgement = (min(100 * (math.log(repos_log) / math.log(10)),100))
         elif repos_log <=1 and repos_log > 0 :
-            judgement = (min(100 * (math.log(repos_log + 1) / math.log(10.5)),100)) / 3
+            judgement = (min(100 * (math.log(repos_log + 1) / math.log(10)),100)) / 3
         else:
             judgement = 0
         return judgement

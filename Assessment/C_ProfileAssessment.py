@@ -27,15 +27,15 @@ class ProfileAssessment:
     coefficient_commits = 0.2
     coefficient_count_views = 0.1
 
-    assessmen_profile_list = []
-    assessmen_repos_list = []
-    assessment_kod_list = []
-    assessmen_profile_dict = {}
-    score_profile = 0
-    average_score_repos = 0
-    score_kod = 0
+
     def __init__(self, user):
         self.user = user
+        self.assessmen_repos_list = []
+        self.assessment_kod_list = []
+        self.assessmen_profile_dict = {}
+        self.score_profile = 0
+        self.average_score_repos = 0
+        self.score_kod = 0
 
     def assessment_profile(self):
         self.assessmen_profile_dict["followers"] = self.followers_to_score_log(int(self.user.followers))
@@ -191,6 +191,7 @@ class ProfileAssessment:
         else:
             score = 0
         return score
+
 
 
 
