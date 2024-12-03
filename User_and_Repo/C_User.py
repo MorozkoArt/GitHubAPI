@@ -7,7 +7,7 @@ class User_GitHub:
     def __init__(self, user, publicOrPrivate):
         self.repos = user.get_repos()
         total = (self.repos.totalCount+2 if self.repos.totalCount!=0 else 1 )
-        prbar = ProgressBar(total)
+        self.prbar = ProgressBar(total)
         self.name = user.login
         self.followers = user.followers
         self.following = user.following
@@ -22,34 +22,27 @@ class User_GitHub:
         self.publicOrPrivate = publicOrPrivate
         self.org = [org_.login for org_ in user.get_orgs()]
         self.month_usege = self.month_usege()
-        prbar.updatePd()
-        self.frequencyCommits, self.inDayCommits, self.countCommits, self.languages, self.repos_user,  self.main_repo= self.generation(prbar)
-        prbar.closePd()
+        self.prbar.updatePd()
+        self.frequencyCommits, self.inDayCommits, self.countCommits, self.languages, self.repos_user,  self.main_repo= self.generation()
+        self.prbar.closePd()
 
-    def generation (self, prbar):
-        commits_frequency_list = []
-        commits_inDay_list = []
-        commits_count = []
-        languages = []
-        repos_user = []
-        main_repo = None
+    def generation (self):
         if self.repos.totalCount !=0:
-            max_judgement = 0
-            judgement_rName = ""
-            commits_frequency_list, commits_inDay_list, commits_count, languages, repos_user, max_judgement, judgement_rName=(
-                self.for_Repo(prbar, commits_frequency_list, commits_inDay_list, commits_count, languages, repos_user, max_judgement, judgement_rName))
+            commits_frequency_list, commits_inDay_list, commits_count_list, languages, repos_user, judgement_rName = self.for_Repo()
             frequencyCommits, inDayCommits, countCommits , main_repo = (
-                self.generation_commitsInf_mainrepo(commits_frequency_list, commits_inDay_list, commits_count, judgement_rName, main_repo))
-            prbar.updatePd()
+                self.generation_commitsInf_mainrepo(commits_frequency_list, commits_inDay_list, commits_count_list, judgement_rName))
+            self.prbar.updatePd()
         else:
             frequencyCommits = 0
             inDayCommits = 0
             countCommits = 0
-
+            languages = []
+            repos_user = []
+            #main_repo = None
         return frequencyCommits, inDayCommits, countCommits, languages, repos_user,  main_repo
 
 
-    def generation_commitsInf_mainrepo(self, commits_frequency_list, commits_inDay_list, commits_count, judgement_rName,  main_repo):
+    def generation_commitsInf_mainrepo(self, commits_frequency_list, commits_inDay_list, commits_count, judgement_rName):
         frequencyCommits = sum(commits_frequency_list) / len(commits_frequency_list)
         inDayCommits = sum(commits_inDay_list) / len(commits_inDay_list)
         countCommits = sum(commits_count) / len(commits_count)
@@ -64,27 +57,36 @@ class User_GitHub:
                 return judgement, repo_user.name
         return max_judgement, judgement_rName
 
-    def for_Repo(self, prbar, commits_frequency_list, commits_inDay_list, commits_count, languages, repos_user, max_judgement, judgement_rName):
+    def for_Repo(self):
+        judgement_rName = ""
+        max_judgement = 0
+        commits_frequency_list = []
+        commits_inDay_list = []
+        commits_count = []
+        languages = []
+        repos_user = []
         for repo in self.repos:
             try:
-                repo_user = User_repo(repo, self.publicOrPrivate)  # This might raise an exception if the repo is empty.
-                commits_frequency_list.append(repo_user.commits_frequency if repo_user.commits_frequency != "NULL" else 0)
-                commits_inDay_list.append(repo_user.commits_inDay if repo_user.commits_inDay != "NULL" else 0)
-                commits_count.append(repo_user.commits_count)
-                repos_user.append(repo_user)
-                max_judgement, judgement_rName = self.generation_value_turnir(repo_user, repo, max_judgement,
-                                                                              judgement_rName)
-                if repo_user.language not in languages and repo_user.language is not None:
-                    languages.append(repo_user.language)
+                repo_user = self.addLists(repo, repos_user, commits_frequency_list, commits_inDay_list, commits_count, languages)
+                max_judgement, judgement_rName = self.generation_value_turnir(repo_user, repo, max_judgement,judgement_rName)
             except UnknownObjectException as e:
                 print(f"Repository {repo.name} not found or is empty: {e}")
                 # Consider adding a more sophisticated error logging technique for production-level code.
             except Exception as e:
                 ddd = 0
             finally:
-                prbar.updatePd()
-        return commits_frequency_list, commits_inDay_list, commits_count, languages, repos_user, max_judgement, judgement_rName
+                self.prbar.updatePd()
+        return commits_frequency_list, commits_inDay_list, commits_count, languages, repos_user, judgement_rName
 
+    def addLists(self, repo, repos_user, commits_frequency_list, commits_inDay_list, commits_count, languages):
+        repo_user = User_repo(repo, self.publicOrPrivate)  # This might raise an exception if the repo is empty.
+        commits_frequency_list.append(repo_user.commits_frequency if repo_user.commits_frequency != "NULL" else 0)
+        commits_inDay_list.append(repo_user.commits_inDay if repo_user.commits_inDay != "NULL" else 0)
+        commits_count.append(repo_user.commits_count)
+        repos_user.append(repo_user)
+        if repo_user.language not in languages and repo_user.language is not None:
+            languages.append(repo_user.language)
+        return repo_user
 
     def month_usege(self):
         if self.updated_at is not None and self.created_at is not None:
