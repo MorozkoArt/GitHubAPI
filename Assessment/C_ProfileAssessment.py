@@ -7,25 +7,34 @@ from Assessment.C_GPT import GPT
 class ProfileAssessment:
     #Коэффициенты для оценки профиля
     coefficient_followers = 10
-    coefficient_following = 4
+    coefficient_following = 3
     coefficient_hireable = 1
     coefficient_repos = 40
-    coefficient_created_update = 4
+    coefficient_created_update = 8
     coefficient_plan = 2
     coefficient_blog = 2
-    coefficient_company = 4
-    coefficient_org = 4
-    coefficient_languages = 7
+    coefficient_company = 3
+    coefficient_org = 3
+    coefficient_languages = 9
     coefficient_frequencyCommits = 5
     coefficient_inDayCommits = 5
-    coefficient_countCommits = 10
+    coefficient_countCommits = 9
+
+    max_value_inDayCommits = 6
+    max_value_countCommits = 100
+
+    max_value_inDayCommitsRepo = 4
+    max_value_countCommitsRepo = 150
+
     #Коэффициенты для оценки репозиториев
-    coefficient_forks = 1.7
-    coefficient_stargazers_count = 5.0
-    coefficient_contributors_count = 3.4
-    coefficient_created_update_r = 0.4
-    coefficient_commits = 0.2
-    coefficient_count_views = 0.1
+    coefficient_forks = 4
+    coefficient_stargazers_count = 6
+    coefficient_contributors_count = 5
+    coefficient_created_update_r = 10
+    coefficient_commits_repo = 30
+    coefficient_frequencyCommits_repo = 20
+    coefficient_inDayCommits_repo = 20
+    coefficient_count_views = 5
 
 
     def __init__(self, user):
@@ -46,9 +55,9 @@ class ProfileAssessment:
         self.assessmen_profile_dict["company"] = self.company_to_score(self.user.company)
         self.assessmen_profile_dict["org"] = self.org_to_score_log(len(self.user.org))
         self.assessmen_profile_dict["language"] = self.language_to_score_log(len(self.user.languages))
-        self.assessmen_profile_dict["countCommits"] = self.countCommits_to_score_log(self.user.countCommits)
-        self.assessmen_profile_dict["inDayCommits"] = self.inDayCommits_to_score_log(self.user.inDayCommits)
-        self.assessmen_profile_dict["frequencyCommits"] = self.frequencyCommits_to_score_exp(self.user.frequencyCommits)
+        self.assessmen_profile_dict["countCommits"] = self.countCommits_to_score_log(self.user.countCommits, self.coefficient_countCommits, self.max_value_countCommits)
+        self.assessmen_profile_dict["inDayCommits"] = self.inDayCommits_to_score_log(self.user.inDayCommits, self.coefficient_inDayCommits, self.max_value_inDayCommits)
+        self.assessmen_profile_dict["frequencyCommits"] = self.frequencyCommits_to_score_exp(self.user.frequencyCommits, self.coefficient_frequencyCommits)
         self.assessmen_profile_dict["repositories"] = self.evaluate_repositories(self.assessmen_profile_dict.get("frequencyCommits"),
                                                                           self.assessmen_profile_dict.get("inDayCommits"),
                                                                           self.assessmen_profile_dict.get("countCommits"),
@@ -58,21 +67,20 @@ class ProfileAssessment:
         return self.score_profile
 
     def assessment_repos(self):
-        assessment_repo = []
         overall_assessment = 0
         average_score = 0
         for i in range (len(self.user.repos_user)):
-            assessment_repo.append(int(self.user.repos_user[i].forks) * self.coefficient_forks)
-            assessment_repo.append(int(self.user.repos_user[i].stargazers_count) * self.coefficient_stargazers_count)
-            assessment_repo.append(int(self.user.repos_user[i].contributors_count) * self.coefficient_contributors_count)
-            assessment_repo.append(self.user.repos_user[i].days_usege * self.coefficient_created_update_r)
-            assessment_repo.append(int(self.user.repos_user[i].commits_count) * self.coefficient_commits)
-            assessment_repo.append(int(self.user.repos_user[i].count_views) * self.coefficient_count_views if self.user.repos_user[i].count_views != "-" else 0)
-            copy_assessment_repo = deepcopy(assessment_repo)
-            self.assessmen_repos_list.append(copy_assessment_repo)
-            for j in range (len(assessment_repo)):
-                overall_assessment += assessment_repo[j]
-            assessment_repo.clear()
+            assessment_repo_dict = {}
+            assessment_repo_dict["forks"]=(int(self.user.repos_user[i].forks) * self.coefficient_forks)
+            assessment_repo_dict["stargazers_count"] = (int(self.user.repos_user[i].stargazers_count) * self.coefficient_stargazers_count)
+            assessment_repo_dict["contributors_count"] = (int(self.user.repos_user[i].contributors_count) * self.coefficient_contributors_count)
+            assessment_repo_dict["days_work"] = (self.user.repos_user[i].days_usege * self.coefficient_created_update_r)
+            assessment_repo_dict["commits_count"] = self.countCommits_to_score_log(self.user.repos_user[i].commits_count, self.coefficient_commits_repo, self.max_value_countCommitsRepo)
+            assessment_repo_dict["inDayCommits"] = self.inDayCommits_to_score_log(self.user.repos_user[i].commits_inDay ,self.coefficient_inDayCommits_repo, self.max_value_inDayCommitsRepo)
+            assessment_repo_dict["frequencyCommits"] = self.frequencyCommits_to_score_exp(self.user.repos_user[i].commits_frequency, self.coefficient_frequencyCommits_repo)
+            assessment_repo_dict["count_views"] = (int(self.user.repos_user[i].count_views) * self.coefficient_count_views if self.user.repos_user[i].count_views != "-" else 0)
+            self.assessmen_repos_list.append(assessment_repo_dict)
+            overall_assessment += sum(value for value in assessment_repo_dict.values() if isinstance(value, (int, float)))
         self.average_score_repos = overall_assessment / len(self.user.repos_user)
         return self.average_score_repos
 
@@ -129,34 +137,37 @@ class ProfileAssessment:
         if languages not in  (0, 1):
             score = (min(self.coefficient_languages * math.log(languages) / math.log(10), self.coefficient_languages))
         elif languages == 1:
-            score = (min(self.coefficient_languages * math.log(languages+1) / math.log(10), self.coefficient_languages))/3
+            score = (min(self.coefficient_languages * math.log(languages+1) / math.log(10), self.coefficient_languages))/2
         else:
             score = 0
         return score
 
-    def countCommits_to_score_log(self, countCommits):
+    def countCommits_to_score_log(self, countCommits, coefficient_countCommits, max_value):
         power = 1.4
+        if countCommits == "NULL": return 0
         if countCommits not in  (0, 1):
-            score = (min(self.coefficient_countCommits * (math.log(countCommits) / math.log(100))**power, self.coefficient_countCommits))
+            score = (min(coefficient_countCommits * (math.log(countCommits) / math.log(max_value))**power, coefficient_countCommits))
         elif countCommits == 1:
-            score = (min(self.coefficient_countCommits * (math.log(countCommits+1) / math.log(100))**power, self.coefficient_countCommits))/3
+            score = (min(coefficient_countCommits * (math.log(countCommits+1) / math.log(max_value))**power, coefficient_countCommits))/3
         else:
             score = 0
         return score
 
-    def inDayCommits_to_score_log(self, inDayCommits):
+    def inDayCommits_to_score_log(self, inDayCommits, coefficient_inDayCommits, max_value):
+        if inDayCommits == "NULL": return 0
         if inDayCommits not in  (0, 1):
-            score = (min(self.coefficient_inDayCommits * math.log(inDayCommits) / math.log(6), self.coefficient_inDayCommits))
+            score = (min(coefficient_inDayCommits * math.log(inDayCommits) / math.log(max_value), coefficient_inDayCommits))
         elif inDayCommits == 1:
-            score = (min(self.coefficient_inDayCommits * math.log(inDayCommits+1) / math.log(6), self.coefficient_inDayCommits))/3
+            score = (min(coefficient_inDayCommits * math.log(inDayCommits+1) / math.log(max_value), coefficient_inDayCommits))/3
         else:
             score = 0
         return score
 
-    def frequencyCommits_to_score_exp(self, frequencyCommits):
+    def frequencyCommits_to_score_exp(self, frequencyCommits, coefficient_frequencyCommits):
         decay_rate = 0.5
-        score = self.coefficient_frequencyCommits * math.exp(-decay_rate * frequencyCommits)
-        return score
+        if len(self.user.repos_user) != 0 and frequencyCommits != "NULL":
+            return coefficient_frequencyCommits * math.exp(-decay_rate * frequencyCommits)
+        return 0
 
     def evaluate_repositories(self, frequency, inDayCommits, countCommits, num_repos):
         normalized_frequency = min(frequency / self.coefficient_frequencyCommits, 1)

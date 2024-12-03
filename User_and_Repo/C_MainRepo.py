@@ -66,7 +66,6 @@ class Main_repo(User_repo):
     def dounloud_mainRepo(self):
         list_of_paths = []
         print(f"Загрузка файлов из репозитория: {self.repo.name}")
-
         if not os.path.exists("storage"):
             os.makedirs("storage")
         else:
