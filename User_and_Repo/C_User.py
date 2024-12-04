@@ -2,6 +2,7 @@ from Interface.C_ProgressBar import ProgressBar
 from User_and_Repo.C_UserRepo import User_repo
 from User_and_Repo.C_MainRepo import Main_repo
 from github import Github, UnknownObjectException
+from typing import List, Tuple, Optional
 
 class User_GitHub:
     def __init__(self, user, publicOrPrivate):
@@ -23,70 +24,83 @@ class User_GitHub:
         self.org = [org_.login for org_ in user.get_orgs()]
         self.month_usege = self.month_usege()
         self.prbar.updatePd()
-        self.frequencyCommits, self.inDayCommits, self.countCommits, self.languages, self.repos_user,  self.main_repo= self.generation()
+        self.generate_data()
         self.prbar.closePd()
 
-    def generation (self):
-        if self.repos.totalCount !=0:
-            commits_frequency_list, commits_inDay_list, commits_count_list, languages, repos_user, judgement_rName = self.for_Repo()
-            frequencyCommits, inDayCommits, countCommits , main_repo = (
-                self.generation_commitsInf_mainrepo(commits_frequency_list, commits_inDay_list, commits_count_list, judgement_rName))
-            self.prbar.updatePd()
-        else:
-            frequencyCommits = 0
-            inDayCommits = 0
-            countCommits = 0
-            languages = []
-            repos_user = []
-            #main_repo = None
-        return frequencyCommits, inDayCommits, countCommits, languages, repos_user,  main_repo
+    def generate_data(self):
+        """Calculates and stores user data from repositories."""
+        repo_data = self.process_repositories()
+
+        if not repo_data:
+            # Handle empty repos gracefully
+            self.frequencyCommits = 0
+            self.inDayCommits = 0
+            self.countCommits = 0
+            self.languages = []
+            self.repos_user = []
+            self.main_repo = None
+            return
+
+        frequencies, daily_commits, counts, languages, repos, main_repo_name = repo_data
+        self.frequencyCommits = self._calculate_average(frequencies)
+        self.inDayCommits = self._calculate_average(daily_commits)
+        self.countCommits = self._calculate_average(counts)
+        self.languages = languages
+        self.repos_user = repos
+        self.main_repo =  self._find_main_repo(main_repo_name)
 
 
-    def generation_commitsInf_mainrepo(self, commits_frequency_list, commits_inDay_list, commits_count, judgement_rName):
-        frequencyCommits = sum(commits_frequency_list) / len(commits_frequency_list)
-        inDayCommits = sum(commits_inDay_list) / len(commits_inDay_list)
-        countCommits = sum(commits_count) / len(commits_count)
-        mainRepo_give = User_repo.serch_repo(self.repos, judgement_rName)
-        main_repo = Main_repo(mainRepo_give, self.publicOrPrivate)
-        return frequencyCommits, inDayCommits, countCommits, main_repo
-
-    def generation_value_turnir(self, repo_user, repo, max_judgement,judgement_rName):
-        if repo_user.language is not None and repo.name != self.name:
-            judgement = repo_user.tournament()
-            if judgement > max_judgement:
-                return judgement, repo_user.name
-        return max_judgement, judgement_rName
-
-    def for_Repo(self):
-        judgement_rName = ""
-        max_judgement = 0
-        commits_frequency_list = []
-        commits_inDay_list = []
+    def process_repositories(self) -> Optional[Tuple[List[float], List[float], List[int], List[str], List['User_repo'], str]]:
+        """Processes user repositories to extract data."""
+        commits_frequency = []
+        commits_in_day = []
         commits_count = []
         languages = []
         repos_user = []
+        main_repo_name = ""
+        max_judgement = 0
+
         for repo in self.repos:
             try:
-                repo_user = self.addLists(repo, repos_user, commits_frequency_list, commits_inDay_list, commits_count, languages)
-                max_judgement, judgement_rName = self.generation_value_turnir(repo_user, repo, max_judgement,judgement_rName)
+                repo_user = User_repo(repo, self.publicOrPrivate)
+                commits_frequency.append(repo_user.commits_frequency if repo_user.commits_frequency != "NULL" else 0)
+                commits_in_day.append(repo_user.commits_inDay if repo_user.commits_inDay != "NULL" else 0)
+                commits_count.append(repo_user.commits_count)
+                repos_user.append(repo_user)
+                max_judgement, main_repo_name = self._find_main_repo_helper(repo_user, repo, max_judgement, main_repo_name)
+                if repo_user.language and repo_user.language not in languages:
+                    languages.append(repo_user.language)
+
             except UnknownObjectException as e:
-                print(f"Repository {repo.name} not found or is empty: {e}")
-                # Consider adding a more sophisticated error logging technique for production-level code.
+                print(f"Error processing repository {repo.name}: {e}")
             except Exception as e:
-                ddd = 0
+                print(f"An unexpected error occurred processing {repo.name}: {e}")
             finally:
                 self.prbar.updatePd()
-        return commits_frequency_list, commits_inDay_list, commits_count, languages, repos_user, judgement_rName
 
-    def addLists(self, repo, repos_user, commits_frequency_list, commits_inDay_list, commits_count, languages):
-        repo_user = User_repo(repo, self.publicOrPrivate)  # This might raise an exception if the repo is empty.
-        commits_frequency_list.append(repo_user.commits_frequency if repo_user.commits_frequency != "NULL" else 0)
-        commits_inDay_list.append(repo_user.commits_inDay if repo_user.commits_inDay != "NULL" else 0)
-        commits_count.append(repo_user.commits_count)
-        repos_user.append(repo_user)
-        if repo_user.language not in languages and repo_user.language is not None:
-            languages.append(repo_user.language)
-        return repo_user
+        return commits_frequency, commits_in_day, commits_count, languages, repos_user, main_repo_name
+
+
+    def _find_main_repo_helper(self, repo_user, repo, max_judgement, main_repo_name):
+        if repo_user.language and repo.name != self.name:  # Simplified condition
+            judgement = repo_user.tournament()
+            if judgement > max_judgement:
+                max_judgement = judgement
+                main_repo_name = repo_user.name
+        return max_judgement, main_repo_name
+
+
+    def _calculate_average(self, data):
+        """Calculates average, handling empty lists."""
+        return sum(data) / len(data) if data else 0
+
+    def _find_main_repo(self, main_repo_name):
+        """Finds main repo."""
+        if main_repo_name:
+            main_repo = Main_repo(User_repo.search_repo(self.repos, main_repo_name), self.publicOrPrivate)
+            self.prbar.updatePd()
+            return main_repo
+        return None
 
     def month_usege(self):
         if self.updated_at is not None and self.created_at is not None:

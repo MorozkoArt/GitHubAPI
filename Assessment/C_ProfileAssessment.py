@@ -5,7 +5,9 @@ from Assessment.C_GPT import GPT
 
 
 class ProfileAssessment:
-    #Коэффициенты для оценки профиля
+    """Коэффиценты для оценки"""
+
+    """Коэффициенты для оценки профиля"""
     coefficient_followers = 10
     coefficient_following = 3
     coefficient_hireable = 1
@@ -26,15 +28,26 @@ class ProfileAssessment:
     max_value_inDayCommitsRepo = 4
     max_value_countCommitsRepo = 150
 
-    #Коэффициенты для оценки репозиториев
+    """Коэффициенты для оценки репозиториев"""
     coefficient_forks = 4
     coefficient_stargazers_count = 6
     coefficient_contributors_count = 5
     coefficient_created_update_r = 10
     coefficient_commits_repo = 30
-    coefficient_frequencyCommits_repo = 20
-    coefficient_inDayCommits_repo = 20
+    coeff_frequency_repo = 20
+    coeff_inDay_repo = 20
+    coeffOneDay_frequency_repo = 5
+    coeffOneDay_inDay_repo = 5
     coefficient_count_views = 5
+    """Коэффиценты для оценки выбранного репозитория"""
+    coeff_commits_MainRepo = 24
+    coeff_frequencyCommits_MainRepo = 13
+    coeff_inDayCommits_MainRepo = 13
+    coeffOneDay_frequency = 3
+    coeffOneDay_inDay = 3
+    coeff_AddLine = 15
+    coeff_DelLine = 5
+
 
 
     def __init__(self, user):
@@ -42,14 +55,16 @@ class ProfileAssessment:
         self.assessmen_repos_list = []
         self.assessment_kod_list = []
         self.assessmen_profile_dict = {}
+        self.assessmen_repoMain_dict = {}
         self.score_profile = 0
         self.average_score_repos = 0
+        self.score_MainRepos = 0
         self.score_kod = 0
 
     def assessment_profile(self):
         self.assessmen_profile_dict["followers"] = self.followers_to_score_log(int(self.user.followers))
         self.assessmen_profile_dict["following"] = self.following_to_score_log(int(self.user.following))
-        self.assessmen_profile_dict["hireable"] = (self.coefficient_hireable if self.user.hireable is not None else 0)
+        self.assessmen_profile_dict["hireable"] = self.hireable_to_score(self.coefficient_hireable)
         self.assessmen_profile_dict["plan"] = self.plan_to_score(self.user.plan)
         self.assessmen_profile_dict["blog"] = self.blog_to_score(self.user.blog)
         self.assessmen_profile_dict["company"] = self.company_to_score(self.user.company)
@@ -71,18 +86,49 @@ class ProfileAssessment:
         average_score = 0
         for i in range (len(self.user.repos_user)):
             assessment_repo_dict = {}
-            assessment_repo_dict["forks"]=(int(self.user.repos_user[i].forks) * self.coefficient_forks)
-            assessment_repo_dict["stargazers_count"] = (int(self.user.repos_user[i].stargazers_count) * self.coefficient_stargazers_count)
-            assessment_repo_dict["contributors_count"] = (int(self.user.repos_user[i].contributors_count) * self.coefficient_contributors_count)
-            assessment_repo_dict["days_work"] = (self.user.repos_user[i].days_usege * self.coefficient_created_update_r)
+            assessment_repo_dict["forks"] = self.forks_to_score_log(self.user.repos_user[i].forks)
+            assessment_repo_dict["stargazers_count"] = self.stargazers_count_to_score_log(self.user.repos_user[i].stargazers_count)
+            assessment_repo_dict["contributors_count"] = self.contributors_count_to_score_log(self.user.repos_user[i].contributors_count)
             assessment_repo_dict["commits_count"] = self.countCommits_to_score_log(self.user.repos_user[i].commits_count, self.coefficient_commits_repo, self.max_value_countCommitsRepo)
-            assessment_repo_dict["inDayCommits"] = self.inDayCommits_to_score_log(self.user.repos_user[i].commits_inDay ,self.coefficient_inDayCommits_repo, self.max_value_inDayCommitsRepo)
-            assessment_repo_dict["frequencyCommits"] = self.frequencyCommits_to_score_exp(self.user.repos_user[i].commits_frequency, self.coefficient_frequencyCommits_repo)
-            assessment_repo_dict["count_views"] = (int(self.user.repos_user[i].count_views) * self.coefficient_count_views if self.user.repos_user[i].count_views != "-" else 0)
+            assessment_repo_dict["inDayCommits"] = self.inDayCommits_repo(self.user.repos_user[i].commits_inDay, self.user.repos_user[i].days_work, self.coeff_inDay_repo, self.coeffOneDay_inDay_repo )
+            assessment_repo_dict["frequencyCommits"] = self.frequencyCommits_repo(self.user.repos_user[i].commits_frequency,self.user.repos_user[i].days_work, self.coeff_frequency_repo, self.coeffOneDay_frequency_repo )
+            assessment_repo_dict["days_work"] = self.days_repo(assessment_repo_dict.get("frequencyCommits"),
+                                                               assessment_repo_dict.get("inDayCommits"),
+                                                               assessment_repo_dict.get("commits_count"),
+                                                               self.user.repos_user[i].days_work)
+            assessment_repo_dict["count_views"] = self.count_views_count_to_score_log(self.user.repos_user[i].count_views)
             self.assessmen_repos_list.append(assessment_repo_dict)
             overall_assessment += sum(value for value in assessment_repo_dict.values() if isinstance(value, (int, float)))
         self.average_score_repos = overall_assessment / len(self.user.repos_user)
         return self.average_score_repos
+
+    def assessment_Mainrepo(self):
+        self.assessmen_repoMain_dict["forks"] = self.forks_to_score_log(self.user.main_repo.forks)
+        self.assessmen_repoMain_dict["stargazers_count"] = self.stargazers_count_to_score_log(self.user.main_repo.stargazers_count)
+        self.assessmen_repoMain_dict["contributors_count"] = self.contributors_count_to_score_log(self.user.main_repo.contributors_count)
+        self.assessmen_repoMain_dict["commits_count"] = self.countCommits_to_score_log(self.user.main_repo.commits_count,
+                                                                               self.coeff_commits_MainRepo,
+                                                                               self.max_value_countCommitsRepo)
+        self.assessmen_repoMain_dict["inDayCommits"] = self.inDayCommits_repo(self.user.main_repo.commits_inDay,
+                                                                              self.user.main_repo.days_work,
+                                                                              self.coeff_inDayCommits_MainRepo,
+                                                                              self.coeffOneDay_inDay)
+        self.assessmen_repoMain_dict["frequencyCommits"] = self.frequencyCommits_repo(self.user.main_repo.commits_frequency,
+                                                                                      self.user.main_repo.days_work,
+                                                                                      self.coeff_frequencyCommits_MainRepo,
+                                                                                      self.coeffOneDay_frequency)
+        self.assessmen_repoMain_dict["addLine"] = self.addLine_log(self.user.main_repo.commits_addLines)
+        self.assessmen_repoMain_dict["delLine"] = self.delLine_log(self.user.main_repo.commits_delLines)
+        self.assessmen_repoMain_dict["days_work"] = self.days_MainRepo(self.assessmen_repoMain_dict.get("frequencyCommits"),
+                                                                   self.assessmen_repoMain_dict.get("inDayCommits"),
+                                                                   self.assessmen_repoMain_dict.get("commits_count"),
+                                                                   self.assessmen_repoMain_dict.get("addLine"),
+                                                                   self.assessmen_repoMain_dict.get("delLine"),
+                                                                   self.user.main_repo.days_work)
+        self.assessmen_repoMain_dict["count_views"] = self.count_views_count_to_score_log(self.user.main_repo.count_views)
+        self.score_MainRepos = sum(value for value in self.assessmen_repoMain_dict.values() if isinstance(value, (int, float)))
+        return self.score_MainRepos
+
 
     def assessment_kod(self, full_or_three):
         list_of_path = self.user.main_repo.dounloud_mainRepo()
@@ -93,6 +139,8 @@ class ProfileAssessment:
             self.score_kod+=marks
         self.score_kod = (self.score_kod/len(self.assessment_kod_list))*5
         return self.score_kod
+
+    """Profile Fields Assessment"""
 
     def followers_to_score_log(self, followers):
         if followers not in (0, 1):
@@ -125,6 +173,10 @@ class ProfileAssessment:
         score = (self.coefficient_company if company is not None else 0)
         return score
 
+    def hireable_to_score(self, hireable):
+        score = (self.coefficient_hireable if hireable is not None and hireable != "" else 0)
+        return score
+
     def plan_to_score(self, plan):
         score = (self.coefficient_plan if plan is not None and plan.name != "free"  else 0)
         return score
@@ -144,7 +196,6 @@ class ProfileAssessment:
 
     def countCommits_to_score_log(self, countCommits, coefficient_countCommits, max_value):
         power = 1.4
-        if countCommits == "NULL": return 0
         if countCommits not in  (0, 1):
             score = (min(coefficient_countCommits * (math.log(countCommits) / math.log(max_value))**power, coefficient_countCommits))
         elif countCommits == 1:
@@ -155,7 +206,7 @@ class ProfileAssessment:
 
     def inDayCommits_to_score_log(self, inDayCommits, coefficient_inDayCommits, max_value):
         if inDayCommits == "NULL": return 0
-        if inDayCommits not in  (0, 1):
+        elif inDayCommits not in  (0, 1):
             score = (min(coefficient_inDayCommits * math.log(inDayCommits) / math.log(max_value), coefficient_inDayCommits))
         elif inDayCommits == 1:
             score = (min(coefficient_inDayCommits * math.log(inDayCommits+1) / math.log(max_value), coefficient_inDayCommits))/3
@@ -170,7 +221,7 @@ class ProfileAssessment:
         return 0
 
     def evaluate_repositories(self, frequency, inDayCommits, countCommits, num_repos):
-        normalized_frequency = min(frequency / self.coefficient_frequencyCommits, 1)
+        normalized_frequency = 1 - (frequency / self.coefficient_frequencyCommits)
         normalized_inDayCommits = min(inDayCommits / self.coefficient_inDayCommits, 1)
         normalized_countCommits = min(countCommits / self.coefficient_countCommits, 1)
         max_num_repos = 25
@@ -202,6 +253,116 @@ class ProfileAssessment:
         else:
             score = 0
         return score
+
+    """Evaluating Repository Fields"""
+
+    def forks_to_score_log(self, forks):
+        if forks not in  (0, 1):
+            score = (min(self.coefficient_forks * math.log(forks) / math.log(10), self.coefficient_forks))
+        elif forks == 1:
+            score = (min(self.coefficient_forks * math.log(forks+1) / math.log(10), self.coefficient_forks))/2
+        else:
+            score = 0
+        return score
+
+    def stargazers_count_to_score_log(self, stargazers_count):
+        if stargazers_count not in  (0, 1):
+            score = (min(self.coefficient_stargazers_count * math.log(stargazers_count) / math.log(1000), self.coefficient_stargazers_count))
+        elif stargazers_count == 1:
+            score = (min(self.coefficient_stargazers_count * math.log(stargazers_count+1) / math.log(1000), self.coefficient_stargazers_count))/2
+        else:
+            score = 0
+        return score
+
+    def contributors_count_to_score_log(self, contributors_count):
+        if contributors_count not in (0, 1):
+            score = (min(self.coefficient_contributors_count * math.log(contributors_count) / math.log(10),
+                         self.coefficient_contributors_count))
+        elif contributors_count == 1:
+            score = (min(self.coefficient_contributors_count * math.log(contributors_count + 1) / math.log(10),
+                         self.coefficient_contributors_count)) / 2
+        else:
+            score = 0
+        return score
+
+    def count_views_count_to_score_log(self, count_views):
+        if count_views == "-": return 0
+        elif count_views not in (0, 1):
+            score = (min(self.coefficient_count_views * math.log(count_views) / math.log(10),self.coefficient_count_views))
+        elif count_views == 1:
+            score = (min(self.coefficient_count_views * math.log(count_views + 1) / math.log(10),self.coefficient_count_views)) / 2
+        else:
+            score = 0
+        return score
+
+    def inDayCommits_repo(self, inDayCommits, day_work, coefficient_1, coefficient_2):
+        coefficient_inDayCommits = (coefficient_1 if day_work!=1 else coefficient_2)
+        score = self.inDayCommits_to_score_log(inDayCommits, coefficient_inDayCommits, self.max_value_inDayCommitsRepo)
+        return score
+
+    def frequencyCommits_repo(self, frequencyCommits, day_work, coefficient_1, coefficient_2):
+        coefficient_frequencyCommits = (coefficient_1 if day_work!=1 else coefficient_2)
+        score = self.frequencyCommits_to_score_exp(frequencyCommits, coefficient_frequencyCommits)
+        return score
+
+    def days_repo(self, frequency, inDayCommits, countCommits, count_day):
+        normalized_frequency = 1 - (frequency / self.coeff_frequency_repo)
+        normalized_inDayCommits = min(inDayCommits / self.coeff_inDay_repo, 1)
+        normalized_countCommits = min(countCommits / self.coefficient_commits_repo, 1)
+        max_count_day = 10
+        normalized_count_day = min(count_day / max_count_day, 1)
+        days_log = normalized_count_day + normalized_countCommits*2 + normalized_frequency*0.5 + normalized_inDayCommits*0.5
+
+        if days_log > 1:
+            score = (min(self.coefficient_created_update_r * (math.log(days_log) / math.log(4)), self.coefficient_created_update_r))
+        elif days_log <= 1 and days_log > 0:
+            score = (min(self.coefficient_created_update_r * (math.log(days_log + 1) / math.log(4)), self.coefficient_created_update_r)) / 3
+        else:
+            score = 0
+        return score
+
+    """Evaluate the fields of the selected repository"""
+
+    def addLine_log(self, addLine):
+        if addLine not in (0, 1):
+            score = (min(self.coeff_AddLine * math.log(addLine) / math.log(100),self.coeff_AddLine))
+        elif addLine == 1:
+            score = (min(self.coeff_AddLine * math.log(addLine + 1) / math.log(100),self.coeff_AddLine)) / 3
+        else:
+            score = 0
+        return score
+
+    def delLine_log(self, delLine):
+        if delLine not in (0, 1):
+            score = (min(self.coeff_DelLine * math.log(delLine) / math.log(30),self.coeff_DelLine))
+        elif delLine == 1:
+            score = (min(self.coeff_DelLine * math.log(delLine + 1) / math.log(30),self.coeff_DelLine)) / 3
+        else:
+            score = 0
+        return score
+
+    def days_MainRepo(self, frequency, inDayCommits, countCommits, addLine, delLine, count_day):
+        normalized_frequency = 1 - (frequency / self.coeff_frequencyCommits_MainRepo)
+        normalized_inDayCommits = min(inDayCommits / self.coeff_inDayCommits_MainRepo, 1)
+        normalized_countCommits = min(countCommits / self.coeff_commits_MainRepo, 1)
+        normalized_addLine = min(addLine / self.coeff_AddLine, 1)
+        normalized_delLine = min(delLine / self.coeff_DelLine, 1)
+        max_count_day = 10
+        normalized_count_day = min(count_day / max_count_day, 1)
+        days_log = (normalized_count_day + normalized_countCommits*2 + normalized_frequency*0.5
+                    + normalized_inDayCommits*0.5 + normalized_addLine*0.5 + normalized_delLine*0.5)
+
+        if days_log > 1:
+            score = (min(self.coefficient_created_update_r * (math.log(days_log) / math.log(5)), self.coefficient_created_update_r))
+        elif days_log <= 1 and days_log > 0:
+            score = (min(self.coefficient_created_update_r * (math.log(days_log + 1) / math.log(5)), self.coefficient_created_update_r)) / 3
+        else:
+            score = 0
+        return score
+
+
+
+
 
 
 
