@@ -5,11 +5,11 @@ class User_repo:
     code_extensions = ('.py', '.java', '.js', '.cpp', '.c', '.rb', '.go', '.php',
                        '.html', '.css', '.swift', '.ts', '.json', '.sh', '.pl', '.r', '.cs')
 
-    coefficient_commits_count = 100
-    coefficient_commits_inDay = 15
-    coefficient_days_usege = 60
-    coefficient_stars = 1000
-    coefficient_forks = 10
+    coefficient_commits_count = 50
+    coefficient_commits_inDay = 7
+    coefficient_days_work = 15
+    coefficient_stars = 50
+    coefficient_forks = 5
     coefficient_frequencyCommits = 5
 
     def __init__(self, repo,  publicOrPrivate):
@@ -69,24 +69,24 @@ class User_repo:
     def tournament(self):
         normalize_commits_count = min(self.commits_count / self.coefficient_commits_count, 1)
         decay_rate = 0.5
-        normalize_commits_frequency = min(math.exp(-decay_rate * self.commits_frequency), 1)
+        normalize_commits_frequency = (math.exp(-decay_rate * self.commits_frequency))
         normalize_commits_inDay = min(self.commits_inDay / self.coefficient_commits_inDay, 1)
-        normalize_days_usege = min(self.days_usege / self.coefficient_days_usege, 1)
+        normalize_days_work = min(self.days_work / self.coefficient_days_work, 1)
         normalize_stars = min(self.stargazers_count / self.coefficient_stars, 1)
         normalize_forks = min(self.forks / self.coefficient_forks, 1)
-        repos_log = (normalize_commits_count*4 + normalize_commits_frequency* + normalize_commits_inDay +
-                     normalize_days_usege*2 + normalize_stars + normalize_forks)
+        repos_log = (normalize_commits_count*4 + normalize_commits_frequency* 0.25+ normalize_commits_inDay*0.25 +
+                     normalize_days_work*2 + normalize_stars + normalize_forks)
         if repos_log >1:
-            judgement = (min(100 * (math.log(repos_log) / math.log(10)),100))
+            judgement = (min(100 * (math.log(repos_log) / math.log(8.5)),100))
         elif repos_log <=1 and repos_log > 0 :
-            judgement = (min(100 * (math.log(repos_log + 1) / math.log(10)),100)) / 3
+            judgement = (min(100 * (math.log(repos_log + 1) / math.log(8.5)),100)) / 20
         else:
             judgement = 0
         return judgement
 
     # Проход по файлам в репозитории
 
-    def serch_repo(repos, name):
+    def search_repo(repos, name):
         for repo in repos:
             if repo.name == name:
                 return repo

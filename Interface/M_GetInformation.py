@@ -5,8 +5,8 @@ def print_assessment(user, assessment, var_kod):
     tables = []
     assessmen_profile_dict = assessment.assessmen_profile_dict
     assessmen_repos_list = assessment.assessmen_repos_list
+    assessmen_repoMain_dict = assessment.assessmen_repoMain_dict
     assessment_kod_list = assessment.assessment_kod_list
-
     # Данные об оценке профиля
     x = PrettyTable(hrules=HRuleStyle.ALL)
     x.field_names = ["Field name", "Significance", "Assessment"]
@@ -16,7 +16,7 @@ def print_assessment(user, assessment, var_kod):
     x.add_row(["Количество подписок", user.following, assessmen_profile_dict.get("following")])
     x.add_row(["Доступность для найма", user.hireable, assessmen_profile_dict.get("hireable")])
     x.add_row(["Количество приватных репозиториев\nКоличество публичных репозиториев",
-               f"{user.private_repos}\n {user.public_repos}", assessmen_profile_dict.get("repositories")])
+               f"{user.private_repos}\n{user.public_repos}", assessmen_profile_dict.get("repositories")])
     x.add_row(["Дата создания аккаунта", user.created_at, " "])
     x.add_row(["Дата последнего изменения", user.updated_at, " "])
     x.add_row(["Продолжительность пользования", str(user.month_usege) + " Месяц(ев/а)", assessmen_profile_dict.get("month_usege")])
@@ -38,6 +38,7 @@ def print_assessment(user, assessment, var_kod):
 
     str1 = f"Результат оценки профиля пользователя - {user.name} \n\n"
     str2 = f"Данные о профиле пользователя и их оценка:\n"
+    str3 = f"Оценка профиля: {assessment.score_profile}"
     tables.append(str1)
     tables.append(str2)
     tables.append(x)
@@ -56,9 +57,11 @@ def print_assessment(user, assessment, var_kod):
         x_r.add_row(["Количество веток", user.repos_user[i].forks, assessmen_repos_list[i].get("forks")])
         x_r.add_row(["Количество звезд", user.repos_user[i].stargazers_count, assessmen_repos_list[i].get("stargazers_count")])
         x_r.add_row(["Количество контрибьюторов", user.repos_user[i].contributors_count, assessmen_repos_list[i].get("contributors_count")])
-        x_r.add_row(["Дата создания репозитория", user.repos_user[i].created_at, "-"])
-        x_r.add_row(["Дата последнего изменения репозитория", user.repos_user[i].last_date, "-"])
-        x_r.add_row(["Продолжительность работы (с момента первого коммита - до последнего)", str(user.repos_user[i].days_usege) + " Дн(я/ей)", "-"])
+        x_r.add_row(["Дата создания репозитория\n"
+                     "Дата последнего изменения репозитория\n"
+                     "Продолжительность работы (с момента первого коммита - до последнего)", f"{user.repos_user[i].created_at}\n"
+                                                                                             f"{user.repos_user[i].last_date}\n"
+                                                                                             f"{user.repos_user[i].days_usege} Дн(я/ей)", "-"])
         x_r.add_row(["Кол-во рабочих дней (в сколькии дни добавлялись коммиты)", str(user.repos_user[i].days_work) + " Дн(я/ей)", assessmen_repos_list[i].get("days_work")])
         x_r.add_row(["Количество коммитов внутри репозитория", user.repos_user[i].commits_count, assessmen_repos_list[i].get("commits_count")])
         x_r.add_row(["Средняя частота коммитов (раз в сколько дней)", user.repos_user[i].commits_frequency, assessmen_repos_list[i].get("frequencyCommits")])
@@ -82,29 +85,31 @@ def print_assessment(user, assessment, var_kod):
         x_r_m.field_names = ["Field name", "Significance", "Assessment"]
         x_r_m.add_row(["Название репозитория", user.main_repo.name, "-"])
         x_r_m.add_row(["Язык программирования", user.main_repo.language, "-"])
-        x_r_m.add_row(["Количество веток", user.main_repo.forks, "-"])
-        x_r_m.add_row(["Количество звезд", user.main_repo.stargazers_count, "-"])
-        x_r_m.add_row(["Количество контрибьюторов", user.main_repo.contributors_count, "-"])
-        x_r_m.add_row(["Дата создания репозитория", user.main_repo.created_at, "-"])
-        x_r_m.add_row(["Дата последнего изменения репозитория", user.main_repo.last_date, "-"])
-        x_r_m.add_row(["Продолжительность работы (с момента первого коммита - до последнего)", str(user.main_repo.days_usege) + " Дн(я/ей)", "-"])
-        x_r_m.add_row(["Кол-во рабочих дней (в сколькии дни добавлялись коммиты)", str(user.main_repo.days_work) + " Дн(я/ей)", "-"])
-        x_r_m.add_row(["Количество коммитов внутри репозитория", user.main_repo.commits_count, "-"])
-        x_r_m.add_row(["Средняя частота коммитов (раз в сколько дней)", user.main_repo.commits_frequency, "-"])
-        x_r_m.add_row(["Среднее число коммитов в день", user.main_repo.commits_inDay, "-"])
-        x_r_m.add_row(["Среднее число добавляемых строк в коммите", user.main_repo.commits_addLines, "-"])
-        x_r_m.add_row(["Среднее число удаляемых строк в коммите", user.main_repo.commits_delLines, "-"])
-        x_r_m.add_row(["Количество просмотров репозитория", user.main_repo.count_views, "-"])
+        x_r_m.add_row(["Количество веток", user.main_repo.forks, assessmen_repoMain_dict.get("forks")])
+        x_r_m.add_row(["Количество звезд", user.main_repo.stargazers_count, assessmen_repoMain_dict.get("stargazers_count")])
+        x_r_m.add_row(["Количество контрибьюторов", user.main_repo.contributors_count, assessmen_repoMain_dict.get("contributors_count")])
+        x_r_m.add_row(["Дата создания репозитория\n"
+                       "Дата последнего изменения репозитория\n"
+                       "Продолжительность работы (с момента первого коммита - до последнего)", f"{user.main_repo.created_at}\n"
+                                                                                               f"{user.main_repo.last_date}\n"
+                                                                                               f"{user.main_repo.days_usege} Дн(я/ей)", "-"])
+        x_r_m.add_row(["Кол-во рабочих дней (в сколькии дни добавлялись коммиты)", str(user.main_repo.days_work) + " Дн(я/ей)", assessmen_repoMain_dict.get("days_work") ])
+        x_r_m.add_row(["Количество коммитов внутри репозитория", user.main_repo.commits_count, assessmen_repoMain_dict.get("commits_count")])
+        x_r_m.add_row(["Средняя частота коммитов (раз в сколько дней)", user.main_repo.commits_frequency, assessmen_repoMain_dict.get("frequencyCommits")])
+        x_r_m.add_row(["Среднее число коммитов в день", user.main_repo.commits_inDay, assessmen_repoMain_dict.get("inDayCommits")])
+        x_r_m.add_row(["Среднее число добавляемых строк в коммите", user.main_repo.commits_addLines, assessmen_repoMain_dict.get("addLine")])
+        x_r_m.add_row(["Среднее число удаляемых строк в коммите", user.main_repo.commits_delLines, assessmen_repoMain_dict.get("delLine")])
+        x_r_m.add_row(["Количество просмотров репозитория", user.main_repo.count_views, assessmen_repoMain_dict.get("count_views")])
         x_r_m.align["Field name"] = "l"  # Выравнивание текста в столбце
         x_r_m.align["Significance"] = "l"  # Выравнивание текста в столбце
         x_r_m.align["Assessment"] = "r"  # Выравнивание текста в столбце
         x_r_m.border = True  # Отображать границы таблицы
         x_r_m.header = True  # Отображать заголовок таблицы
         x_r_m.padding_width = 1  # Отступ между ячейками
-        str_repo_main2 = f"\nОбщая оценка репозитория "
+        str_repo_main2 = f"\nОбщая оценка репозитория {assessment.score_MainRepos}"
         tables.append(str_repo_main)
         tables.append(x_r_m)
-        tables.append(str_repo2)
+        tables.append(str_repo_main2)
         tables.append("\n\n")
 
         str_files = f"Файлы, скаченные для анализа из выбранного репозитория {user.main_repo.name}:\n {textwrap.fill(user.main_repo.nameFiles, width=60)}\n\n"
