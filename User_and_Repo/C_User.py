@@ -39,24 +39,27 @@ class User_GitHub:
             self.languages = []
             self.repos_user = []
             self.main_repo = None
+            self.empty_repos = []
             return
 
-        frequencies, daily_commits, counts, languages, repos, main_repo_name = repo_data
+        frequencies, daily_commits, counts, languages, repos, main_repo_name, empty_repos = repo_data
         self.frequencyCommits = self._calculate_average(frequencies)
         self.inDayCommits = self._calculate_average(daily_commits)
         self.countCommits = self._calculate_average(counts)
         self.languages = languages
         self.repos_user = repos
         self.main_repo =  self._find_main_repo(main_repo_name)
+        self.empty_repos = empty_repos
 
 
-    def process_repositories(self) -> Optional[Tuple[List[float], List[float], List[int], List[str], List['User_repo'], str]]:
+    def process_repositories(self):
         """Processes user repositories to extract data."""
         commits_frequency = []
         commits_in_day = []
         commits_count = []
         languages = []
         repos_user = []
+        empty_repos = []
         main_repo_name = ""
         max_judgement = 0
 
@@ -67,22 +70,22 @@ class User_GitHub:
                 commits_in_day.append(repo_user.commits_inDay if repo_user.commits_inDay != "NULL" else 0)
                 commits_count.append(repo_user.commits_count)
                 repos_user.append(repo_user)
-                max_judgement, main_repo_name = self._find_main_repo_helper(repo_user, repo, max_judgement, main_repo_name)
+                max_judgement, main_repo_name = self._find_main_repo_helper(repo_user, max_judgement, main_repo_name)
                 if repo_user.language and repo_user.language not in languages:
                     languages.append(repo_user.language)
 
             except UnknownObjectException as e:
                 print(f"Error processing repository {repo.name}: {e}")
             except Exception as e:
-                print(f"An unexpected error occurred processing {repo.name}: {e}")
+                empty_repos.append(repo.name)
             finally:
                 self.prbar.updatePd()
 
-        return commits_frequency, commits_in_day, commits_count, languages, repos_user, main_repo_name
+        return commits_frequency, commits_in_day, commits_count, languages, repos_user, main_repo_name, empty_repos
 
 
-    def _find_main_repo_helper(self, repo_user, repo, max_judgement, main_repo_name):
-        if repo_user.language and repo.name != self.name:  # Simplified condition
+    def _find_main_repo_helper(self, repo_user, max_judgement, main_repo_name):
+        if repo_user.language is not None and repo_user.name != self.name:  # Simplified condition
             judgement = repo_user.tournament()
             if judgement > max_judgement:
                 max_judgement = judgement

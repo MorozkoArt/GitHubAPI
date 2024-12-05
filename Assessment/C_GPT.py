@@ -5,15 +5,15 @@ import re
 class GPT:
     def __init__(self, listOfPaths):
         self.listOfPaths = listOfPaths
+        self.MinNumfiles = 5
 
     def evaluate_codeS(self, full_or_three):
         list_evaluate_codeS = []
-        MinNumfiles = 5
         if full_or_three == 1:
             range_gpt = len(self.listOfPaths)
         else:
-            if len(self.listOfPaths) > MinNumfiles:
-                range_gpt = MinNumfiles
+            if len(self.listOfPaths) > self.MinNumfiles:
+                range_gpt = self.MinNumfiles
             else:
                range_gpt = len(self.listOfPaths)
         for i in range (range_gpt):
@@ -21,13 +21,21 @@ class GPT:
         return list_evaluate_codeS
 
     def evaluate_code(self, file_path):
+        try:
+            file_name = os.path.basename(file_path)
+            with open(file_path, 'r', encoding='utf-8', errors='replace') as file:  # Specify encoding
+                code = file.read()
+        except FileNotFoundError:
+            print(f"Файл {file_path} не найден.")
+            return
+
+        text = (f"{code}\nОцени этот код от 1 до 10-ти (1 - низшее качество, 10 - высочайшее качество)."
+                f"Предоставьте оценку и пояснение в формате:\n "
+                f"Оценка: [число от 1 до 10]]\n"
+                f"Пояснение оценки: [краткое пояснение, макс. 60 слов на русском языке")
+
         while True:
             try:
-                file_name = os.path.basename(file_path)
-                with open(file_path, 'r', encoding='utf-8', errors='replace') as file:  # Specify encoding
-                    code = file.read()
-                text = (f"{code}: оцени этот код от 1 до 10-ти, и выведи ответ в следующем формате: "
-                        f"Оценка: [число оценки] Пояснение оценки: [пояснение оценки]. Оценку произведи на русском языке, максимальное число слов не больше 50")
                 client = Client()
                 response = client.chat.completions.create(
                     model="gpt-4o-mini",
@@ -39,12 +47,8 @@ class GPT:
                         print(f"Оценка файла {file_name}: {marks}")
                         return response.choices[0].message.content, marks, file_name
                         break  # Выход из цикла при успешном выполнении
-
-            except FileNotFoundError:
-                print(f"Файл {file_path} не найден.")
-                return
             except Exception as e:
-                print(f"Произошла ошибка: {e}. Перезагрузка алгоритма...")
+                print(f"Произошла ошибка. Перезагрузка алгоритма...")
 
 
     def is_request_ended_with_status_code(self, s):

@@ -18,7 +18,6 @@ class User_repo:
         self.commits_count = self.commits.totalCount
         self.commits_frequency = commits_frequency_value
         self.commits_inDay = commits_inDay_value
-
         self.name = repo.name
         self.language = repo.language
         self.forks = repo.forks
@@ -69,8 +68,8 @@ class User_repo:
     def tournament(self):
         normalize_commits_count = min(self.commits_count / self.coefficient_commits_count, 1)
         decay_rate = 0.5
-        normalize_commits_frequency = (math.exp(-decay_rate * self.commits_frequency))
-        normalize_commits_inDay = min(self.commits_inDay / self.coefficient_commits_inDay, 1)
+        normalize_commits_frequency = (math.exp(-decay_rate * self.commits_frequency) if self.commits_frequency != "NULL" else 0)
+        normalize_commits_inDay = (min(self.commits_inDay / self.coefficient_commits_inDay, 1) if self.commits_inDay != "NULL" else 0)
         normalize_days_work = min(self.days_work / self.coefficient_days_work, 1)
         normalize_stars = min(self.stargazers_count / self.coefficient_stars, 1)
         normalize_forks = min(self.forks / self.coefficient_forks, 1)
