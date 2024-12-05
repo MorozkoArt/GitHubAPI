@@ -7,7 +7,7 @@ def print_assessment(user, assessment, var_kod):
     assessmen_repos_list = assessment.assessmen_repos_list
     assessmen_repoMain_dict = assessment.assessmen_repoMain_dict
     assessment_kod_list = assessment.assessment_kod_list
-    # Данные об оценке профиля
+
     x = PrettyTable(hrules=HRuleStyle.ALL)
     x.field_names = ["Field name", "Significance", "Assessment"]
     x.add_row(["Имя пользователя", user.name, " "])
@@ -29,25 +29,30 @@ def print_assessment(user, assessment, var_kod):
     x.add_row(["Компания", user.company, assessmen_profile_dict.get("company")])
     x.add_row(["Организации", ' '.join(map(str, user.org)), assessmen_profile_dict.get("org")])
     x.add_row(["Языки программирования", ' '.join(map(str, user.languages)), assessmen_profile_dict.get("language")])
-    x.align["Field name"] = "l"  # Выравнивание текста в столбце
-    x.align["Significance"] = "l"  # Выравнивание текста в столбце
-    x.align["Assessment"] = "r"  # Выравнивание текста в столбце
-    x.border = True  # Отображать границы таблицы
-    x.header = True  # Отображать заголовок таблицы
-    x.padding_width = 1  # Отступ между ячейками
+    x.align["Field name"] = "l"
+    x.align["Significance"] = "l"
+    x.align["Assessment"] = "r"
+    x.border = True
+    x.header = True
+    x.padding_width = 1
 
     str1 = f"Результат оценки профиля пользователя - {user.name} \n\n"
     str2 = f"Данные о профиле пользователя и их оценка:\n"
-    str3 = f"Оценка профиля: {assessment.score_profile}"
+    str3 = f"\nОценка профиля: {assessment.score_profile}\n"
     tables.append(str1)
     tables.append(str2)
     tables.append(x)
+    tables.append(str3)
     tables.append("\n\n")
     if user.repos.totalCount != 0:
-        str4 = f"Данные о репозиториях и их оценка: \n\n"
+        str4 = f"Данные о репозиториях и их оценка: \n"
         tables.append(str4)
+        if len(user.empty_repos) != 0:
+            str_empty = f"Пустые репозитории: {textwrap.fill(', '.join(map(str, user.empty_repos)), width=60)}\n"
+            tables.append(str_empty)
+        tables.append("\n")
 
-    # Данные об оценке репозиториев
+
     for i in range(len(assessmen_repos_list)):
         str_repo1 = f"Репозиторий №-{i+1}: {user.repos_user[i].name}\n"
         x_r = PrettyTable(hrules=HRuleStyle.ALL)
@@ -67,12 +72,12 @@ def print_assessment(user, assessment, var_kod):
         x_r.add_row(["Средняя частота коммитов (раз в сколько дней)", user.repos_user[i].commits_frequency, assessmen_repos_list[i].get("frequencyCommits")])
         x_r.add_row(["Среднее число коммитов в день", user.repos_user[i].commits_inDay, assessmen_repos_list[i].get("inDayCommits")])
         x_r.add_row(["Количество просмотров репозитория", user.repos_user[i].count_views, assessmen_repos_list[i].get("count_views")])
-        x_r.align["Field name"] = "l"  # Выравнивание текста в столбце
-        x_r.align["Significance"] = "l"  # Выравнивание текста в столбце
-        x_r.align["Assessment"] = "r"  # Выравнивание текста в столбце
-        x_r.border = True  # Отображать границы таблицы
-        x_r.header = True  # Отображать заголовок таблицы
-        x_r.padding_width = 1  # Отступ между ячейками
+        x_r.align["Field name"] = "l"
+        x_r.align["Significance"] = "l"
+        x_r.align["Assessment"] = "r"
+        x_r.border = True
+        x_r.header = True
+        x_r.padding_width = 1
         str_repo2 = f"\nОбщая оценка репозитория {sum(value for value in assessmen_repos_list[i].values() if isinstance(value, (int, float)))}"
         tables.append(str_repo1)
         tables.append(x_r)
@@ -100,19 +105,19 @@ def print_assessment(user, assessment, var_kod):
         x_r_m.add_row(["Среднее число добавляемых строк в коммите", user.main_repo.commits_addLines, assessmen_repoMain_dict.get("addLine")])
         x_r_m.add_row(["Среднее число удаляемых строк в коммите", user.main_repo.commits_delLines, assessmen_repoMain_dict.get("delLine")])
         x_r_m.add_row(["Количество просмотров репозитория", user.main_repo.count_views, assessmen_repoMain_dict.get("count_views")])
-        x_r_m.align["Field name"] = "l"  # Выравнивание текста в столбце
-        x_r_m.align["Significance"] = "l"  # Выравнивание текста в столбце
-        x_r_m.align["Assessment"] = "r"  # Выравнивание текста в столбце
-        x_r_m.border = True  # Отображать границы таблицы
-        x_r_m.header = True  # Отображать заголовок таблицы
-        x_r_m.padding_width = 1  # Отступ между ячейками
+        x_r_m.align["Field name"] = "l"
+        x_r_m.align["Significance"] = "l"
+        x_r_m.align["Assessment"] = "r"
+        x_r_m.border = True
+        x_r_m.header = True
+        x_r_m.padding_width = 1
         str_repo_main2 = f"\nОбщая оценка репозитория {assessment.score_MainRepos}"
         tables.append(str_repo_main)
         tables.append(x_r_m)
         tables.append(str_repo_main2)
         tables.append("\n\n")
 
-        str_files = f"Файлы, скаченные для анализа из выбранного репозитория {user.main_repo.name}:\n {textwrap.fill(user.main_repo.nameFiles, width=60)}\n\n"
+        str_files = f"Файлы, скаченные для анализа из выбранного репозитория:\n{textwrap.fill(user.main_repo.nameFiles, width=60)}\n\n"
         tables.append(str_files)
         str_kod1 = f"Оценка файлов с программным кодом. Оцениваемы репозиторий - {user.main_repo.name}\n"
         tables.append(str_kod1)
@@ -123,13 +128,15 @@ def print_assessment(user, assessment, var_kod):
         for j in range(len(assessment_kod_list)):
             text, marks, file_name = assessment_kod_list[j]
             x_y_r.add_row([file_name, marks, textwrap.fill(text, width=80)])
-        x_y_r.align["Field name"] = "l"  # Выравнивание текста в столбце
-        x_y_r.align["Assessment"] = "l"  # Выравнивание текста в столбце
-        x_y_r.align["Explanation"] = "l"  # Выравнивание текста в столбце
-        x_y_r.border = True  # Отображать границы таблицы
-        x_y_r.header = True  # Отображать заголовок таблицы
-        x_y_r.padding_width = 1  # Отступ между ячейками
+        x_y_r.align["Field name"] = "l"
+        x_y_r.align["Assessment"] = "l"
+        x_y_r.align["Explanation"] = "l"
+        x_y_r.border = True
+        x_y_r.header = True
+        x_y_r.padding_width = 1
         tables.append(x_y_r)
+        str_kod_score = f"\nОбщая оценка всех файлов с программным кодом: {assessment.score_kod}\n"
+        tables.append(str_kod_score)
         tables.append("\n\n")
 
     str3 = f"Общая оценка данных о профиле пользователя: {assessment.score_profile}\n"
@@ -138,9 +145,11 @@ def print_assessment(user, assessment, var_kod):
         str_repo = f"Средняя оценка всех репозиториев: {assessment.average_score_repos}\n"
         tables.append(str_repo)
     if var_kod == 1:
+        str_mainRepo = f"Оценка основного репозитория: {assessment.score_MainRepos}\n"
         str_kod = f"Средняя оценка всех файлов с кодом: {assessment.score_kod}\n"
+        tables.append(str_mainRepo)
         tables.append(str_kod)
 
-    str_sum = f"Итоговая оценка: {assessment.score_profile + assessment.average_score_repos+ assessment.score_kod}\n\n\n\n"
+    str_sum = f"Итоговая оценка: {assessment.score_profile + assessment.average_score_repos+ assessment.score_MainRepos + assessment.score_kod}\n\n\n\n"
     tables.append(str_sum)
     return tables
