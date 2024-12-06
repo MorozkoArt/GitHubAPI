@@ -27,8 +27,8 @@ def print_assessment(user, assessment, var_kod):
     x.add_row(["Подписка", user.plan, assessmen_profile_dict.get("plan")])
     x.add_row(["Блог", user.blog, assessmen_profile_dict.get("blog")])
     x.add_row(["Компания", user.company, assessmen_profile_dict.get("company")])
-    x.add_row(["Организации", ' '.join(map(str, user.org)), assessmen_profile_dict.get("org")])
-    x.add_row(["Языки программирования", ' '.join(map(str, user.languages)), assessmen_profile_dict.get("language")])
+    x.add_row(["Организации", textwrap.fill(', '.join(map(str, user.org)), width=40), assessmen_profile_dict.get("org")])
+    x.add_row(["Языки программирования", textwrap.fill(', '.join(map(str, user.languages)), width=40), assessmen_profile_dict.get("language")])
     x.align["Field name"] = "l"
     x.align["Significance"] = "l"
     x.align["Assessment"] = "r"
