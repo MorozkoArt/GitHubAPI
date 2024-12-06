@@ -1,18 +1,13 @@
 import math
+from Config.M_LoadConfig import _load_config
 
 class User_repo:
 
     code_extensions = ('.py', '.java', '.js', '.cpp', '.c', '.rb', '.go', '.php',
                        '.html', '.css', '.swift', '.ts', '.json', '.sh', '.pl', '.r', '.cs')
 
-    coefficient_commits_count = 50
-    coefficient_commits_inDay = 7
-    coefficient_days_work = 15
-    coefficient_stars = 50
-    coefficient_forks = 5
-    coefficient_frequencyCommits = 5
 
-    def __init__(self, repo,  publicOrPrivate):
+    def __init__(self, repo,  publicOrPrivate, config_file="tour_field.json"):
         self.commits = repo.get_commits()
         commits_frequency_value, commits_inDay_value, commits_days = self.commits_frequency_inDay()
         self.commits_count = self.commits.totalCount
@@ -29,6 +24,7 @@ class User_repo:
         self.days_work = commits_days
         self.publicOrPrivate = publicOrPrivate
         self.count_views = "-" if self.publicOrPrivate == "public" else repo.get_views_traffic()['count']
+        self.tour_field = _load_config(config_file)
 
     def commits_frequency_inDay(self):
         commits_frequency_list = []
@@ -64,15 +60,14 @@ class User_repo:
         return commits_frequency_value, commits_inDay_value , len(commits_inDay_list)
 
 
-
     def tournament(self):
-        normalize_commits_count = min(self.commits_count / self.coefficient_commits_count, 1)
+        normalize_commits_count = min(self.commits_count / self.tour_field["commits_count"], 1)
         decay_rate = 0.5
         normalize_commits_frequency = (math.exp(-decay_rate * self.commits_frequency) if self.commits_frequency != "NULL" else 0)
-        normalize_commits_inDay = (min(self.commits_inDay / self.coefficient_commits_inDay, 1) if self.commits_inDay != "NULL" else 0)
-        normalize_days_work = min(self.days_work / self.coefficient_days_work, 1)
-        normalize_stars = min(self.stargazers_count / self.coefficient_stars, 1)
-        normalize_forks = min(self.forks / self.coefficient_forks, 1)
+        normalize_commits_inDay = (min(self.commits_inDay / self.tour_field["commits_inDay"], 1) if self.commits_inDay != "NULL" else 0)
+        normalize_days_work = min(self.days_work / self.tour_field["days_work"], 1)
+        normalize_stars = min(self.stargazers_count / self.tour_field["stars"], 1)
+        normalize_forks = min(self.forks / self.tour_field["forks"], 1)
         repos_log = (normalize_commits_count*4 + normalize_commits_frequency* 0.25+ normalize_commits_inDay*0.25 +
                      normalize_days_work*2 + normalize_stars + normalize_forks)
         if repos_log >1:
