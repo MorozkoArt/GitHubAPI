@@ -1,2 +1,3 @@
 Пока полный позор
 Но я стараюсь, правда...
+Ссылка на файлы с результатами запуска и отчет: https://drive.google.com/drive/folders/18Q0nS8e0jUeByKjYreqZ1MXWn0KfvMVV?usp=drive_link
