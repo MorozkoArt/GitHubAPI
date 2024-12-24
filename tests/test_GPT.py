@@ -2,11 +2,10 @@ import textwrap
 import pytest
 from Assessment.C_GPT import GPT
 from g4f.client import Client
-import os
-import re
+from Assessment import C_ProfileAssessment
 
-file_path = ["C:\Python\PycharmProjects\GitHubAPI\Assessment\C_ProfileAssessment.py"]
-@pytest.mark.parametrize("listOfPaths" , [(file_path)])
+file_path = C_ProfileAssessment.__file__
+@pytest.mark.parametrize("listOfPaths" , [([file_path])])
 def test_Gpt(listOfPaths):
     gpt = GPT(listOfPaths)
     results = gpt.evaluate_codeS(1)
