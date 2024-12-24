@@ -32,8 +32,9 @@ def Start_assessment_generation (user_git, var_kod, var_kod_2):
         assessment_Mainrepo = assessment.assessment_Mainrepo()
         assessment_kod = assessment.assessment_kod(var_kod_2)
     print(
-        f"Оценка профиля: {assessment_profile}, Оценка репозиториев: {assessment_repos}, Оценка выбранного репозитория: {assessment_Mainrepo}, Оценка кода: {assessment_kod}")
-    assessmet = assessment_profile + assessment_repos + assessment_Mainrepo + assessment_kod
+        f"Оценка профиля: {round(assessment_profile,2)}, Оценка репозиториев: {round(assessment_repos,2)},"
+        f" Оценка выбранного репозитория: {round(assessment_Mainrepo,2)}, Оценка кода: {round(assessment_kod,2)}")
+    assessmet = round((assessment_profile + assessment_repos + assessment_Mainrepo + assessment_kod),2)
     print(f"Общая оценка: {assessmet}")
 
     save_user_information(user_git, assessment, var_kod)

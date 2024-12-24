@@ -197,12 +197,8 @@ class ProfileAssessment:
 
 
     def created_update_to_score_linear(self, repos_log , created_update):
-
         normalized_repos_log = min(repos_log/self.field_score["repos"], 1)
-
-        max_created_update = 36
-        normalized_created_update = min(created_update/max_created_update, 1 )
-
+        normalized_created_update = min(created_update/self.maxValue["created_update"], 1 )
         created_update_log = (normalized_repos_log + normalized_created_update)*10
 
         if created_update_log > 1:
@@ -247,9 +243,9 @@ class ProfileAssessment:
     def count_views_count_to_score_log(self, count_views):
         if count_views == "-": return 0
         elif count_views not in (0, 1):
-            score = (min(self.field_score["count_views"] * math.log(count_views) / math.log(10), self.field_score["count_views"]))
+            score = (min(self.field_score["count_views"] * math.log(count_views) / math.log(3000), self.field_score["count_views"]))
         elif count_views == 1:
-            score = (min(self.field_score["count_views"] * math.log(count_views + 1) / math.log(10), self.field_score["count_views"])) / 2
+            score = (min(self.field_score["count_views"] * math.log(count_views + 1) / math.log(3000), self.field_score["count_views"])) / 2
         else:
             score = 0
         return score
@@ -265,11 +261,10 @@ class ProfileAssessment:
         return score
 
     def days_repo(self, frequency, inDayCommits, countCommits, count_day):
-        normalized_frequency = 1 - (frequency / self.field_score["frequency_repo"])
+        normalized_frequency = (frequency / self.field_score["frequency_repo"])
         normalized_inDayCommits = min(inDayCommits / self.field_score["inDay_repo"], 1)
         normalized_countCommits = min(countCommits / self.field_score["commits_repo"], 1)
-        max_count_day = 10
-        normalized_count_day = min(count_day / max_count_day, 1)
+        normalized_count_day = min(count_day / self.maxValue["count_day"], 1)
         days_log = normalized_count_day + normalized_countCommits*2 + normalized_frequency*0.5 + normalized_inDayCommits*0.5
 
         if days_log > 1:
@@ -306,8 +301,8 @@ class ProfileAssessment:
         normalized_countCommits = min(countCommits / self.field_score["commits_MainRepo"], 1)
         normalized_addLine = min(addLine / self.field_score["addLine"], 1)
         normalized_delLine = min(delLine / self.field_score["delLine"], 1)
-        max_count_day = 10
-        normalized_count_day = min(count_day / max_count_day, 1)
+        normalized_count_day = min(count_day / self.maxValue["count_day"], 1)
+
         days_log = (normalized_count_day + normalized_countCommits*2 + normalized_frequency*0.5
                     + normalized_inDayCommits*0.5 + normalized_addLine*0.5 + normalized_delLine*0.5)
 
