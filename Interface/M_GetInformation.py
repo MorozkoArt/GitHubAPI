@@ -119,7 +119,7 @@ def print_assessment(user, assessment, var_kod):
 
         str_files = f"Файлы, скаченные для анализа из выбранного репозитория:\n{textwrap.fill(user.main_repo.nameFiles, width=60)}\n\n"
         tables.append(str_files)
-        str_kod1 = f"Оценка файлов с программным кодом. Оцениваемы репозиторий - {user.main_repo.name}\n"
+        str_kod1 = f"Оценка файлов с программным кодом. Оцениваемый репозиторий - {user.main_repo.name}\n"
         tables.append(str_kod1)
 
         # Данные об оценке кода

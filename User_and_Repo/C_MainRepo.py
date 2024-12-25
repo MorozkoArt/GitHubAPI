@@ -1,16 +1,22 @@
 import os
 import shutil
 from User_and_Repo.C_UserRepo import User_repo
+from Interface.C_ProgressBar import ProgressBar
 
 class Main_repo(User_repo):
-    def __init__(self, repo, publicOrPrivate):
-        super().__init__(repo, publicOrPrivate)
+    def __init__(self, user_repo, repo):
+        total = (repo.get_commits().totalCount + 2)
+        self.prbar = ProgressBar(total, "Загрузка данных о репозитории: ")
+        self.__dict__.update(user_repo.__dict__)
+        self.prbar.updatePd()
         commits_addLines_value, commits_delLines_value = self.Commits_LineChange()
         self.repo = repo
         self.commits_addLines = commits_addLines_value
         self.commits_delLines = commits_delLines_value
         self.contentsKod = self.get_contentKod()
+        self.prbar.updatePd()
         self.nameFiles = ", ".join(content_file.name for content_file in self.contentsKod)
+        self.prbar.closePd()
 
     def Commits_LineChange(self):
         commits_addLines_list = []
@@ -22,6 +28,7 @@ class Main_repo(User_repo):
                 if added!=0 or removed!=0:
                     commits_addLines_list.append(added)
                     commits_delLines_list.append(removed)
+            self.prbar.updatePd()
 
         if len(commits_addLines_list)!=0:
             commits_addLines_value = sum(commits_addLines_list) / len(commits_addLines_list)

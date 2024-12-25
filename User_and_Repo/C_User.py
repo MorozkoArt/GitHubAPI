@@ -7,8 +7,8 @@ from typing import List, Tuple, Optional
 class User_GitHub:
     def __init__(self, user, publicOrPrivate):
         self.repos = user.get_repos()
-        total = (self.repos.totalCount+2 if self.repos.totalCount!=0 else 1 )
-        self.prbar = ProgressBar(total)
+        total = (self.repos.totalCount+1)
+        self.prbar = ProgressBar(total, "Загрузка данных о пользователе: ")
         self.name = user.login
         self.followers = user.followers
         self.following = user.following
@@ -24,6 +24,7 @@ class User_GitHub:
         self.org = [org_.login for org_ in user.get_orgs()]
         self.month_usege = self.month_usege()
         self.prbar.updatePd()
+        self.main_repo = None
         self.generate_data()
         self.prbar.closePd()
 
@@ -38,7 +39,7 @@ class User_GitHub:
             self.countCommits = 0
             self.languages = []
             self.repos_user = []
-            self.main_repo = None
+            self.main_repo_name = ""
             self.empty_repos = []
             return
 
@@ -48,7 +49,7 @@ class User_GitHub:
         self.countCommits = self._calculate_average(counts)
         self.languages = languages
         self.repos_user = repos
-        self.main_repo =  self._find_main_repo(main_repo_name)
+        self.main_repo_name =  main_repo_name
         self.empty_repos = empty_repos
 
 
@@ -97,13 +98,15 @@ class User_GitHub:
         """Calculates average, handling empty lists."""
         return sum(data) / len(data) if data else 0
 
-    def _find_main_repo(self, main_repo_name):
+    def _find_main_repo(self):
         """Finds main repo."""
-        if main_repo_name:
-            main_repo = Main_repo(User_repo.search_repo(self.repos, main_repo_name), self.publicOrPrivate)
-            self.prbar.updatePd()
-            return main_repo
-        return None
+        if self.main_repo_name:
+            user_repo_main = self.repos_user[0]
+            for user_repo in self.repos_user:
+                if user_repo.name == self.main_repo_name:
+                    user_repo_main = user_repo
+                    break
+            self.main_repo = Main_repo(user_repo_main, User_repo.search_repo(self.repos, self.main_repo_name))
 
     def month_usege(self):
         if self.updated_at is not None and self.created_at is not None:
