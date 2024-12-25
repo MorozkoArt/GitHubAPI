@@ -1,10 +1,10 @@
 import tqdm
 
 class ProgressBar:
-    def __init__(self, total):
+    def __init__(self, total, text):
         self.total = total
         self.pd = tqdm.tqdm(
-            desc="Загрузка данных о пользователе: ",
+            desc=text,
             total=self.total,
             miniters=1,
             ncols=100,
