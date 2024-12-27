@@ -2,16 +2,6 @@ import math
 from Config.M_LoadConfig import _load_config
 
 class User_repo:
-
-    code_extensions = code_extensions = (
-    '.py', '.java', '.js', '.cpp', '.c', '.rb', '.go', '.php',
-    '.html', '.css', '.swift', '.ts', '.json', '.sh', '.pl', '.r',
-    '.cs', '.bat', '.scala', '.lua', '.rust', '.kotlin', '.vb',
-    '.sql', '.xml', '.yaml', '.dockerfile', '.m', '.swift',
-    '.d', '.user', '.clj', '.coffee', '.groovy', '.f90', '.asm'
-)
-
-
     def __init__(self, repo,  publicOrPrivate, config_file="tour_field.json"):
         self.commits = repo.get_commits()
         commits_frequency_value, commits_inDay_value, commits_days = self.commits_frequency_inDay()
@@ -28,7 +18,7 @@ class User_repo:
         self.days_usege = (int((self.last_date - self.created_at).days)+1)
         self.days_work = commits_days
         self.publicOrPrivate = publicOrPrivate
-        self.count_views = "-" if self.publicOrPrivate == "public" else repo.get_views_traffic()['count']
+        self.count_views = "-" if self.publicOrPrivate == "public" else repo.get_views_traffic()['uniques']
         self.tour_field = _load_config(config_file)
 
     def commits_frequency_inDay(self):

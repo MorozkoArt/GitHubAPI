@@ -48,7 +48,7 @@ class GPT:
                         return response.choices[0].message.content, marks, file_name
                         break  # Выход из цикла при успешном выполнении
             except Exception as e:
-                print(f"Произошла ошибка. Перезагрузка алгоритма...")
+                continue
 
 
     def is_request_ended_with_status_code(self, s):

@@ -61,13 +61,13 @@ def Start_userAssessment_generation (user, publicOrPrivate):
     else:
         var_kod_2 = 2
         if user_git.main_repo_name:
-            print(f"Желаете ли вы оценить один репозиторий({user_git.main_repo_name}) более подробно?(репозиторий выбирался по уровню активности)\n"
+            print(f"\nЖелаете ли вы оценить один репозиторий({user_git.main_repo_name}) более подробно?(репозиторий выбирался по уровню активности)\n"
                 "Будет произведена оценка репозитория, а так же файлов с кодом внутри репозитория")
             var_kod = int(input("Введите 1, если - оценить, введите 2 - оценка не нужна: "))
             if var_kod == 1:
                 contentKod = Start_mainRepo_generation(user_git)
-                print("Оценка кода займет достаточно много времени (от 1 минуты до 15)")
-                print(f"Файлы с кодом, которые содержатся в репозитории {user_git.main_repo.name} для оценки:\n\n{textwrap.fill(contentKod, width=65)}\n")
+                print("\nОценка кода займет достаточно много времени (от 1 минуты до 15)")
+                print(f"Файлы с кодом, которые содержатся в репозитории {user_git.main_repo.name} для оценки:\n{textwrap.fill(contentKod, width=65)}\n")
                 print("Если репозиторий содержит много файлов с кодом, оценивать все или первые пять?")
                 var_kod_2 = int(input("Введите 1, если - оценить все, введите 2 - оценить первые пять: "))
             Start_assessment_generation(user_git, var_kod, var_kod_2)

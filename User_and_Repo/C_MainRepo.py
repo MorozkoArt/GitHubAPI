@@ -4,6 +4,15 @@ from User_and_Repo.C_UserRepo import User_repo
 from Interface.C_ProgressBar import ProgressBar
 
 class Main_repo(User_repo):
+
+    code_extensions = code_extensions = (
+        '.py', '.java', '.js', '.cpp', '.c', '.rb', '.go', '.php',
+        '.html', '.css', '.swift', '.ts', '.json', '.sh', '.pl', '.r',
+        '.cs', '.bat', '.scala', '.lua', '.rust', '.kotlin', '.vb',
+        '.sql', '.yaml', '.dockerfile', '.m', '.swift',
+        '.d', '.user', '.clj', '.coffee', '.groovy', '.f90', '.asm'
+    )
+
     def __init__(self, user_repo, repo):
         total = (repo.get_commits().totalCount + 2)
         self.prbar = ProgressBar(total, "Загрузка данных о репозитории: ")
@@ -44,7 +53,7 @@ class Main_repo(User_repo):
         try:
             lines_added = 0
             lines_removed = 0
-            if hasattr(commit, 'files'):  # Check if commit.files exists to avoid AttributeError
+            if hasattr(commit, 'files'):
                 for file_data in commit.files:
                     if file_data.filename.lower().endswith(tuple(self.code_extensions)):
                         lines_added += file_data.additions
@@ -65,7 +74,7 @@ class Main_repo(User_repo):
             if file_content.type == "dir":
                 contents.extend(self.repo.get_contents(file_content.path))
             elif file_content.type == "file":
-                if file_content.name.endswith(self.code_extensions):
+                if file_content.name.lower().endswith(self.code_extensions):
                     contentsKod.append(file_content)
         return contentsKod
 
