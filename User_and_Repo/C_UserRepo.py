@@ -3,8 +3,13 @@ from Config.M_LoadConfig import _load_config
 
 class User_repo:
 
-    code_extensions = ('.py', '.java', '.js', '.cpp', '.c', '.rb', '.go', '.php',
-                       '.html', '.css', '.swift', '.ts', '.json', '.sh', '.pl', '.r', '.cs')
+    code_extensions = code_extensions = (
+    '.py', '.java', '.js', '.cpp', '.c', '.rb', '.go', '.php',
+    '.html', '.css', '.swift', '.ts', '.json', '.sh', '.pl', '.r',
+    '.cs', '.bat', '.scala', '.lua', '.rust', '.kotlin', '.vb',
+    '.sql', '.xml', '.yaml', '.dockerfile', '.m', '.swift',
+    '.d', '.user', '.clj', '.coffee', '.groovy', '.f90', '.asm'
+)
 
 
     def __init__(self, repo,  publicOrPrivate, config_file="tour_field.json"):
