@@ -29,7 +29,6 @@ class User_GitHub:
         self.prbar.closePd()
 
     def generate_data(self):
-        """Calculates and stores user data from repositories."""
         repo_data = self.process_repositories()
 
         if not repo_data:
@@ -54,7 +53,6 @@ class User_GitHub:
 
 
     def process_repositories(self):
-        """Processes user repositories to extract data."""
         commits_frequency = []
         commits_in_day = []
         commits_count = []
@@ -95,11 +93,9 @@ class User_GitHub:
 
 
     def _calculate_average(self, data):
-        """Calculates average, handling empty lists."""
         return sum(data) / len(data) if data else 0
 
     def _find_main_repo(self):
-        """Finds main repo."""
         if self.main_repo_name:
             user_repo_main = self.repos_user[0]
             for user_repo in self.repos_user:
