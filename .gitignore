@@ -1,4 +1,9 @@
-.venv
-storage
-tests/storage
-.idea
+.venv/
+storage/
+tests/storage/
+.idea/
+.pytest_cache/
+__pycache__/
+# Игнорировать временные файлы
+*~
+*.py[cod]
