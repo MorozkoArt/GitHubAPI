@@ -20,14 +20,14 @@ def save_user_information(user, assessment, var_kod):
         root.destroy()
         return
     try:
-        _save_to_file(file_path, user, assessment, var_kod)
+        save_to_file(file_path, user, assessment, var_kod)
         print("Информация пользователя сохранена в файл:", file_path)
     except Exception as e:
         print(f"Ошибка при сохранении файла: {e}")
     finally:
         root.destroy()
 
-def _save_to_file(file_path, user, assessment, var_kod):
+def save_to_file(file_path, user, assessment, var_kod):
     tables_assessment = print_assessment(user, assessment, var_kod)
     with open(file_path, 'w', encoding='utf-8') as file:
         for table in tables_assessment:

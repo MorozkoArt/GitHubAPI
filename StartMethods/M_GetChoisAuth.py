@@ -1,7 +1,7 @@
-from StartMethods.M_Start_UserAssessment_generation import Start_userAssessment_generation
-from StartMethods.M_Authentication import Login, LoginPassword, LoginToken
+from StartMethods.M_Start_UserAssessment_generation import start_user_assessment_generation
+from StartMethods.M_Authentication import login_auth, login_password, login_token
 
-def Get_user_auth_method():
+def get_user_auth_method():
     print("How would you like to authenticate? \n"
           " 1 - Login with username \n"
           " 2 - Login with username and password \n"
@@ -12,21 +12,21 @@ def Get_user_auth_method():
             return choice
         print("Invalid choice. Please enter 1, 2, or 3.")
 
-def authenticate_user(method, MyToken=None):
+def authenticate_user(method, my_token=None):
     if method == "1":
         login = input("Enter the username: ")
-        return Login(MyToken, login), "public"
+        return login_auth(my_token, login), "public"
     elif method == "2":
         login = input("Enter the username: ")
         password = input("Enter the password: ")
-        return LoginPassword(login, password), "private"
+        return login_password(login, password), "private"
     elif method == "3":
         access_token = input("Enter the access token: ")
-        return LoginToken(access_token), "private"
+        return login_token(access_token), "private"
 
-def Chois_start(var_aut, MyToken=None):
+def option_start(var_aut, my_token=None):
     try:
-        user, publicOrPrivate = authenticate_user(var_aut, MyToken)
-        Start_userAssessment_generation(user, publicOrPrivate)
+        user, public_or_private = authenticate_user(var_aut, my_token)
+        start_user_assessment_generation(user, public_or_private)
     except Exception as e:
         print(f"An error occurred: {e}")

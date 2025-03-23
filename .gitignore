@@ -7,3 +7,4 @@ __pycache__/
 # Игнорировать временные файлы
 *~
 *.py[cod]
+har_and_cookies/

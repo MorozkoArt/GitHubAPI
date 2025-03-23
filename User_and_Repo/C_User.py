@@ -5,7 +5,7 @@ from github import Github, UnknownObjectException
 from typing import List, Tuple, Optional
 
 class User_GitHub:
-    def __init__(self, user, publicOrPrivate):
+    def __init__(self, user, public_or_private):
         self.repos = user.get_repos()
         total = (self.repos.totalCount+1)
         self.prbar = ProgressBar(total, "Загрузка данных о пользователе: ")
@@ -20,19 +20,18 @@ class User_GitHub:
         self.plan = user.plan
         self.blog = user.blog
         self.company = user.company
-        self.publicOrPrivate = publicOrPrivate
+        self.public_or_private = public_or_private
         self.org = [org_.login for org_ in user.get_orgs()]
         self.month_usege = self.month_usege()
-        self.prbar.updatePd()
+        self.prbar.update_pd()
         self.main_repo = None
         self.generate_data()
-        self.prbar.closePd()
+        self.prbar.close_pd()
 
     def generate_data(self):
         repo_data = self.process_repositories()
 
         if not repo_data:
-            # Handle empty repos gracefully
             self.frequencyCommits = 0
             self.inDayCommits = 0
             self.countCommits = 0
@@ -43,9 +42,9 @@ class User_GitHub:
             return
 
         frequencies, daily_commits, counts, languages, repos, main_repo_name, empty_repos = repo_data
-        self.frequencyCommits = self._calculate_average(frequencies)
-        self.inDayCommits = self._calculate_average(daily_commits)
-        self.countCommits = self._calculate_average(counts)
+        self.frequencyCommits = self.calculate_average(frequencies)
+        self.inDayCommits = self.calculate_average(daily_commits)
+        self.countCommits = self.calculate_average(counts)
         self.languages = languages
         self.repos_user = repos
         self.main_repo_name =  main_repo_name
@@ -64,12 +63,12 @@ class User_GitHub:
 
         for repo in self.repos:
             try:
-                repo_user = User_repo(repo, self.publicOrPrivate)
+                repo_user = User_repo(repo, self.public_or_private)
                 commits_frequency.append(repo_user.commits_frequency if repo_user.commits_frequency != "NULL" else 0)
-                commits_in_day.append(repo_user.commits_inDay if repo_user.commits_inDay != "NULL" else 0)
+                commits_in_day.append(repo_user.commits_in_day if repo_user.commits_in_day != "NULL" else 0)
                 commits_count.append(repo_user.commits_count)
                 repos_user.append(repo_user)
-                max_judgement, main_repo_name = self._find_main_repo_helper(repo_user, max_judgement, main_repo_name)
+                max_judgement, main_repo_name = self.find_main_repo_helper(repo_user, max_judgement, main_repo_name)
                 if repo_user.language and repo_user.language not in languages:
                     languages.append(repo_user.language)
 
@@ -78,12 +77,12 @@ class User_GitHub:
             except Exception as e:
                 empty_repos.append(repo.name)
             finally:
-                self.prbar.updatePd()
+                self.prbar.update_pd()
 
         return commits_frequency, commits_in_day, commits_count, languages, repos_user, main_repo_name, empty_repos
 
 
-    def _find_main_repo_helper(self, repo_user, max_judgement, main_repo_name):
+    def find_main_repo_helper(self, repo_user, max_judgement, main_repo_name):
         if repo_user.language is not None and repo_user.name != self.name:  # Simplified condition
             judgement = repo_user.tournament()
             if judgement > max_judgement:
@@ -92,10 +91,10 @@ class User_GitHub:
         return max_judgement, main_repo_name
 
 
-    def _calculate_average(self, data):
+    def calculate_average(self, data):
         return sum(data) / len(data) if data else 0
 
-    def _find_main_repo(self):
+    def find_main_repo(self):
         if self.main_repo_name:
             user_repo_main = self.repos_user[0]
             for user_repo in self.repos_user:

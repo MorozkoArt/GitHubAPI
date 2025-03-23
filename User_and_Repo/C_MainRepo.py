@@ -7,47 +7,53 @@ class Main_repo(User_repo):
 
     code_extensions = code_extensions = (
         '.py', '.java', '.js', '.cpp', '.c', '.rb', '.go', '.php',
-        '.html', '.css', '.swift', '.ts', '.json', '.sh', '.pl', '.r',
+        '.html', '.css', '.swift', '.ts', '.sh', '.pl', '.r',
         '.cs', '.bat', '.scala', '.lua', '.rust', '.kotlin', '.vb',
         '.sql', '.yaml', '.dockerfile', '.m', '.swift',
-        '.d', '.user', '.clj', '.coffee', '.groovy', '.f90', '.asm'
+        '.d', '.user', '.clj', '.coffee', '.groovy', '.f90', '.asm',
+        '.hs', '.erl', '.ex', '.elm', '.fs', '.fsx', '.ml', '.mli',
+        '.jl', '.nim', '.pas', '.purs', '.re', '.v', '.vhd', '.vhdl',
+        '.zig', '.odin', '.dart', '.tcl', '.awk', '.sed', '.ps1',
+        '.jsx', '.tsx', '.vue', '.svelte', '.pug', '.jade', '.ejs',
+        '.hbs', '.handlebars', '.mustache', '.twig', '.haml', '.scss',
+        '.less', '.styl', '.sass', '.stylus',
     )
 
     def __init__(self, user_repo, repo):
         total = (repo.get_commits().totalCount + 2)
         self.prbar = ProgressBar(total, "Загрузка данных о репозитории: ")
         self.__dict__.update(user_repo.__dict__)
-        self.prbar.updatePd()
-        commits_addLines_value, commits_delLines_value = self.Commits_LineChange()
+        self.prbar.update_pd()
+        commits_add_lines_value, commits_del_lines_value = self.commits_line_change()
         self.repo = repo
-        self.commits_addLines = commits_addLines_value
-        self.commits_delLines = commits_delLines_value
-        self.contentsKod = self.get_contentKod()
-        self.prbar.updatePd()
-        self.nameFiles = ", ".join(content_file.name for content_file in self.contentsKod)
-        self.prbar.closePd()
+        self.commits_add_lines = commits_add_lines_value
+        self.commits_del_lines = commits_del_lines_value
+        self.contents_kod = self.get_content_kod()
+        self.prbar.update_pd()
+        self.name_files = ", ".join(content_file.name for content_file in self.contents_kod)
+        self.prbar.close_pd()
 
-    def Commits_LineChange(self):
-        commits_addLines_list = []
-        commits_delLines_list = []
+    def commits_line_change(self):
+        commits_add_lines_list = []
+        commits_del_lines_list = []
         for i in range (self.commits.totalCount):
             line_changes = self.get_commit_lines_changed(self.commits[i])
             if line_changes:
                 added, removed = line_changes
                 if added!=0 or removed!=0:
-                    commits_addLines_list.append(added)
-                    commits_delLines_list.append(removed)
-            self.prbar.updatePd()
+                    commits_add_lines_list.append(added)
+                    commits_del_lines_list.append(removed)
+            self.prbar.update_pd()
 
-        if len(commits_addLines_list)!=0:
-            commits_addLines_value = sum(commits_addLines_list) / len(commits_addLines_list)
+        if len(commits_add_lines_list)!=0:
+            commits_add_lines_value = sum(commits_add_lines_list) / len(commits_add_lines_list)
         else:
-            commits_addLines_value = "NULL"
-        if len(commits_delLines_list)!=0:
-            commits_delLines_value = sum(commits_delLines_list) / len(commits_delLines_list)
+            commits_add_lines_value = "NULL"
+        if len(commits_del_lines_list)!=0:
+            commits_del_lines_value = sum(commits_del_lines_list) / len(commits_del_lines_list)
         else:
-            commits_delLines_value = "NULL"
-        return  commits_addLines_value, commits_delLines_value
+            commits_del_lines_value = "NULL"
+        return  commits_add_lines_value, commits_del_lines_value
 
     def get_commit_lines_changed(self, commit):
         try:
@@ -66,8 +72,8 @@ class Main_repo(User_repo):
             print(f"An unexpected error occurred: {e}")
             return None
 
-    def get_contentKod(self):
-        contentsKod = []
+    def get_content_kod(self):
+        contents_kod = []
         contents = self.repo.get_contents("")
         while contents:
             file_content = contents.pop(0)
@@ -75,8 +81,8 @@ class Main_repo(User_repo):
                 contents.extend(self.repo.get_contents(file_content.path))
             elif file_content.type == "file":
                 if file_content.name.lower().endswith(self.code_extensions):
-                    contentsKod.append(file_content)
-        return contentsKod
+                    contents_kod.append(file_content)
+        return contents_kod
 
 
     def dounloud_mainRepo(self):
@@ -90,7 +96,7 @@ class Main_repo(User_repo):
                 shutil.rmtree("storage")  # Удаляем директорию и всё её содержимое
                 os.makedirs("storage")  # Создаём директорию заново
 
-        for file_content in self.contentsKod:
+        for file_content in self.contents_kod:
             path = os.path.join("storage", file_content.name)
             with open(path, 'wb') as f:
                 f.write(file_content.decoded_content)

@@ -1,8 +1,8 @@
 import os
-from StartMethods.M_GetChoisAuth import Chois_start, Get_user_auth_method
+from StartMethods.M_GetChoisAuth import option_start, get_user_auth_method
 
 if __name__ == "__main__":
-    MyToken = os.environ.get("GITHUB_TOKEN")
-    Chois_start(Get_user_auth_method(), MyToken)
+    my_token = os.environ.get("GITHUB_TOKEN")
+    option_start(get_user_auth_method(), my_token)
 
 
