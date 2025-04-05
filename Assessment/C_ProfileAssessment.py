@@ -26,9 +26,9 @@ class ProfileAssessment:
         self.assessment_profile_dict["company"] = self.company_to_score(self.user.company)
         self.assessment_profile_dict["org"] = self.org_to_score_log(len(self.user.org))
         self.assessment_profile_dict["language"] = self.language_to_score_log(len(self.user.languages))
-        self.assessment_profile_dict["countCommits"] = self.count_commits_to_score_log(self.user.countCommits, self.field_score["countCommits"], self.max_value["countCommits"])
-        self.assessment_profile_dict["inDayCommits"] = self.in_day_commits_to_score_log(self.user.inDayCommits, self.field_score["inDayCommits"], self.max_value["inDayCommits"])
-        self.assessment_profile_dict["frequencyCommits"] = self.frequency_commits_to_score_exp(self.user.frequencyCommits, self.field_score["frequencyCommits"])
+        self.assessment_profile_dict["countCommits"] = self.count_commits_to_score_log(self.user.count_commits, self.field_score["countCommits"], self.max_value["countCommits"])
+        self.assessment_profile_dict["inDayCommits"] = self.in_day_commits_to_score_log(self.user.in_day_commits, self.field_score["inDayCommits"], self.max_value["inDayCommits"])
+        self.assessment_profile_dict["frequencyCommits"] = self.frequency_commits_to_score_exp(self.user.frequency_commits, self.field_score["frequencyCommits"])
         self.assessment_profile_dict["repositories"] = self.evaluate_repositories(self.assessment_profile_dict.get("frequencyCommits"),
                                                                                   self.assessment_profile_dict.get("inDayCommits"),
                                                                                   self.assessment_profile_dict.get("countCommits"),
@@ -174,11 +174,11 @@ class ProfileAssessment:
             return coefficient_frequency_commits * math.exp(-decay_rate * frequency_commits)
         return 0
 
-    def evaluate_repositories(self, frequency, inDayCommits, countCommits, num_repos):
+    def evaluate_repositories(self, frequency, in_day_commits, count_commits, num_repos):
         if len(self.user.repos_user) != 0:
             normalized_frequency = (frequency / self.field_score["frequencyCommits"])
-            normalized_inDayCommits = min(inDayCommits / self.field_score["inDayCommits"], 1)
-            normalized_countCommits = min(countCommits / self.field_score["countCommits"], 1)
+            normalized_inDayCommits = min(in_day_commits / self.field_score["inDayCommits"], 1)
+            normalized_countCommits = min(count_commits / self.field_score["countCommits"], 1)
             max_num_repos = 25
             normalized_num_repos = min(num_repos / max_num_repos, 1)
             repos_log = normalized_num_repos + normalized_countCommits + normalized_frequency + normalized_inDayCommits
@@ -246,20 +246,20 @@ class ProfileAssessment:
             score = 0
         return score
 
-    def in_day_commits_repo(self, inDayCommits, day_work, coefficient_1, coefficient_2):
+    def in_day_commits_repo(self, in_day_commits, day_work, coefficient_1, coefficient_2):
         coefficient_in_day_commits = (coefficient_1 if day_work!=1 else coefficient_2)
-        score = self.in_day_commits_to_score_log(inDayCommits, coefficient_in_day_commits, self.max_value["inDayCommitsRepo"])
+        score = self.in_day_commits_to_score_log(in_day_commits, coefficient_in_day_commits, self.max_value["inDayCommitsRepo"])
         return score
 
-    def frequency_commits_repo(self, frequencyCommits, day_work, coefficient_1, coefficient_2):
+    def frequency_commits_repo(self, frequency_commits, day_work, coefficient_1, coefficient_2):
         coefficient_frequency_commits = (coefficient_1 if day_work!=1 else coefficient_2)
-        score = self.frequency_commits_to_score_exp(frequencyCommits, coefficient_frequency_commits)
+        score = self.frequency_commits_to_score_exp(frequency_commits, coefficient_frequency_commits)
         return score
 
-    def days_repo(self, frequency, inDayCommits, countCommits, count_day):
+    def days_repo(self, frequency, in_day_commits, count_commits, count_day):
         normalized_frequency = (frequency / self.field_score["frequency_repo"])
-        normalized_in_day_commits = min(inDayCommits / self.field_score["inDay_repo"], 1)
-        normalized_count_commits = min(countCommits / self.field_score["commits_repo"], 1)
+        normalized_in_day_commits = min(in_day_commits / self.field_score["inDay_repo"], 1)
+        normalized_count_commits = min(count_commits / self.field_score["commits_repo"], 1)
         normalized_count_day = min(count_day / self.max_value["count_day"], 1)
         days_log = normalized_count_day + normalized_count_commits*2 + normalized_frequency*0.5 + normalized_in_day_commits*0.5
 
@@ -271,11 +271,11 @@ class ProfileAssessment:
             score = 0
         return score
 
-    def add_line_log(self, addLine):
-        if addLine not in (0, 1):
-            score = (min(self.field_score["addLine"] * math.log(addLine) / math.log(100),self.field_score["addLine"]))
-        elif addLine == 1:
-            score = (min(self.field_score["addLine"] * math.log(addLine + 1) / math.log(100),self.field_score["addLine"])) / 3
+    def add_line_log(self, add_line):
+        if add_line not in (0, 1):
+            score = (min(self.field_score["addLine"] * math.log(add_line) / math.log(100), self.field_score["addLine"]))
+        elif add_line == 1:
+            score = (min(self.field_score["addLine"] * math.log(add_line + 1) / math.log(100), self.field_score["addLine"])) / 3
         else:
             score = 0
         return score

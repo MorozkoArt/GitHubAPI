@@ -3,11 +3,6 @@ from User_and_Repo.C_User import User_GitHub
 from Assessment.C_ProfileAssessment import ProfileAssessment
 from Interface.M_SaveInformation import save_user_information
 
-
-def start_user_generation(user, public_or_private):
-    return User_GitHub(user, public_or_private)
-
-
 def start_main_repo_generation(user_git):
     user_git.find_main_repo()
     return user_git.main_repo.name_files
@@ -26,12 +21,12 @@ def start_assessment_generation_empty(user_git):
             assessment_repos = assessment.assessment_repos()
             print(f"Profile assessment: {round(assessment_profile, 2)}")
             print(f"Repositories assessment: {round(assessment_repos, 2)}")
-            assessment = round((assessment_profile + assessment_repos), 2)
+            assessment_value = round((assessment_profile + assessment_repos), 2)
         else:
             print("All existing repositories are empty.")
             print(f"Profile assessment: {round(assessment_profile, 2)}")
-            assessment = round(assessment_profile, 2)
-        print(f"Total assessment: {assessment}")
+            assessment_value = round(assessment_profile, 2)
+        print(f"Total assessment: {assessment_value}")
 
     save_user_information(user_git, assessment, var_kod=2)
 
@@ -60,7 +55,7 @@ def start_assessment_generation(user_git, var_kod, var_kod_2):
 
 
 def start_user_assessment_generation(user, public_or_private):
-    user_git = start_user_generation(user, public_or_private)
+    user_git = User_GitHub(user, public_or_private)
 
     if user_git.repos.totalCount == 0:
         start_assessment_generation_empty(user_git)

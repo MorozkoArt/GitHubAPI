@@ -8,7 +8,6 @@ def print_assessment(user, assessment, var_kod):
     assessment_repo_main_dict = assessment.assessment_repo_main_dict
     assessment_kod_list = assessment.assessment_kod_list
 
-    # Profile assessment table
     x = PrettyTable(hrules=HRuleStyle.ALL)
     x.field_names = ["Field name", "Significance", "Assessment"]
     x.add_row(["Username", user.name, " "])
@@ -22,9 +21,9 @@ def print_assessment(user, assessment, var_kod):
     x.add_row(["Last update date", user.updated_at, " "])
     x.add_row(["Account age", f"{user.month_usege} Month(s)", round(assessment_profile_dict.get("month_usege"), 2)])
     if len(user.repos_user) != 0:
-        x.add_row(["Average number of commits per repository", round(user.countCommits, 2), round(assessment_profile_dict.get("countCommits"), 2)])
-        x.add_row(["Average commit frequency (days between commits)", round(user.frequencyCommits, 2), round(assessment_profile_dict.get("frequencyCommits"), 2)])
-        x.add_row(["Average number of commits per day", round(user.inDayCommits, 2), round(assessment_profile_dict.get("inDayCommits"), 2)])
+        x.add_row(["Average number of commits per repository", round(user.count_commits, 2), round(assessment_profile_dict.get("countCommits"), 2)])
+        x.add_row(["Average commit frequency (days between commits)", round(user.frequency_commits, 2), round(assessment_profile_dict.get("frequencyCommits"), 2)])
+        x.add_row(["Average number of commits per day", round(user.in_day_commits, 2), round(assessment_profile_dict.get("inDayCommits"), 2)])
     x.add_row(["Subscription plan", user.plan, round(assessment_profile_dict.get("plan"), 2)])
     x.add_row(["Blog", user.blog, round(assessment_profile_dict.get("blog"), 2)])
     x.add_row(["Company", user.company, round(assessment_profile_dict.get("company"), 2)])

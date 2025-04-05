@@ -32,9 +32,9 @@ class User_GitHub:
         repo_data = self.process_repositories()
 
         if not repo_data:
-            self.frequencyCommits = 0
-            self.inDayCommits = 0
-            self.countCommits = 0
+            self.frequency_commits = 0
+            self.in_day_commits = 0
+            self.count_commits = 0
             self.languages = []
             self.repos_user = []
             self.main_repo_name = ""
@@ -42,9 +42,9 @@ class User_GitHub:
             return
 
         frequencies, daily_commits, counts, languages, repos, main_repo_name, empty_repos = repo_data
-        self.frequencyCommits = self.calculate_average(frequencies)
-        self.inDayCommits = self.calculate_average(daily_commits)
-        self.countCommits = self.calculate_average(counts)
+        self.frequency_commits = self.calculate_average(frequencies)
+        self.in_day_commits = self.calculate_average(daily_commits)
+        self.count_commits = self.calculate_average(counts)
         self.languages = languages
         self.repos_user = repos
         self.main_repo_name =  main_repo_name

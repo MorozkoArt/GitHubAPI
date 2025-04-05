@@ -73,8 +73,6 @@ class User_repo:
             judgement = 0
         return judgement
 
-    # Проход по файлам в репозитории
-
     def search_repo(repos, name):
         for repo in repos:
             if repo.name == name:
