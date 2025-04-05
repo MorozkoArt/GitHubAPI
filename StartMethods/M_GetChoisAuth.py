@@ -1,43 +1,32 @@
-from StartMethods.M_Start_UserAssessment_generation import  Start_userAssessment_generation
-from StartMethods.M_Authentication import Login, LoginPassword, LoginToken
+from StartMethods.M_Start_UserAssessment_generation import start_user_assessment_generation
+from StartMethods.M_Authentication import login_auth, login_password, login_token
 
-def Get_user_auth_method():
-    print("Каким способом вы желаете авторизоваться? \n"
-          " 1 - Авторизация через логин \n"
-          " 2 - Авторизация через логин и пароль \n"
-          " 3 - Авторизация через токен доступа")
+def get_user_auth_method():
+    print("How would you like to authenticate? \n"
+          " 1 - Login with username \n"
+          " 2 - Login with username and password \n"
+          " 3 - Login with access token")
     while True:
-        choice = input("Введите номер варианта авторизации (от 1 до 3): ")
+        choice = input("Enter the number of the authentication method (1 to 3): ")
         if choice in ("1", "2", "3"):
             return choice
-        print("Неверный выбор. Пожалуйста, введите 1, 2 или 3.")
+        print("Invalid choice. Please enter 1, 2, or 3.")
 
-def Chois_start(var_aut, MyToken):
-    if var_aut == "1":
-        publicOrPrivate = "public"
-        login = input(" Введите логин пользователя: ")
-        try:
-            user = Login(MyToken, login)
-            Start_userAssessment_generation(user, publicOrPrivate)
-        except Exception as e:
-            print(f"Произошла ошибка: {e}")
+def authenticate_user(method, my_token=None):
+    if method == "1":
+        login = input("Enter the username: ")
+        return login_auth(my_token, login), "public"
+    elif method == "2":
+        login = input("Enter the username: ")
+        password = input("Enter the password: ")
+        return login_password(login, password), "private"
+    elif method == "3":
+        access_token = input("Enter the access token: ")
+        return login_token(access_token), "private"
 
-    elif var_aut == "2":
-        publicOrPrivate = "private"
-        login = input(" Введите логин пользователя: ")
-        password = input(" Введите пароль: ")
-        try:
-            user = LoginPassword(login, password)
-            Start_userAssessment_generation(user, publicOrPrivate)
-        except Exception as e:
-            print(f"Произошла ошибка: {e}")
-
-    elif var_aut == "3":
-        publicOrPrivate = "private"
-        access_token = input(" Введите токен доступа пользователя: ")
-        try:
-            user = LoginToken(access_token)
-            Start_userAssessment_generation(user, publicOrPrivate)
-        except Exception as e:
-            print(f"Произошла ошибка: {e}")
-
+def option_start(var_aut, my_token=None):
+    try:
+        user, public_or_private = authenticate_user(var_aut, my_token)
+        start_user_assessment_generation(user, public_or_private)
+    except Exception as e:
+        print(f"An error occurred: {e}")

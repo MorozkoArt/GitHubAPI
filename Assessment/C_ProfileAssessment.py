@@ -1,40 +1,40 @@
 import math
 from Assessment.C_GPT import GPT
-from Config.M_LoadConfig import _load_config
+from Config.M_LoadConfig import load_config
 
 class ProfileAssessment:
 
     def __init__(self, user, config_file="field_score.json", config_file2 = "max_value.json"):
-        self.field_score = _load_config(config_file)
-        self.maxValue = _load_config(config_file2)
+        self.field_score = load_config(config_file)
+        self.max_value = load_config(config_file2)
         self.user = user
-        self.assessmen_repos_list = []
+        self.assessment_repos_list = []
         self.assessment_kod_list = []
-        self.assessmen_profile_dict = {}
-        self.assessmen_repoMain_dict = {}
+        self.assessment_profile_dict = {}
+        self.assessment_repo_main_dict = {}
         self.score_profile = 0
         self.average_score_repos = 0
-        self.score_MainRepos = 0
+        self.score_main_repos = 0
         self.score_kod = 0
 
     def assessment_profile(self):
-        self.assessmen_profile_dict["followers"] = self.followers_to_score_log(int(self.user.followers))
-        self.assessmen_profile_dict["following"] = self.following_to_score_log(int(self.user.following))
-        self.assessmen_profile_dict["hireable"] = self.hireable_to_score(self.user.hireable)
-        self.assessmen_profile_dict["plan"] = self.plan_to_score(self.user.plan)
-        self.assessmen_profile_dict["blog"] = self.blog_to_score(self.user.blog)
-        self.assessmen_profile_dict["company"] = self.company_to_score(self.user.company)
-        self.assessmen_profile_dict["org"] = self.org_to_score_log(len(self.user.org))
-        self.assessmen_profile_dict["language"] = self.language_to_score_log(len(self.user.languages))
-        self.assessmen_profile_dict["countCommits"] = self.countCommits_to_score_log(self.user.countCommits, self.field_score["countCommits"], self.maxValue["countCommits"])
-        self.assessmen_profile_dict["inDayCommits"] = self.inDayCommits_to_score_log(self.user.inDayCommits, self.field_score["inDayCommits"], self.maxValue["inDayCommits"])
-        self.assessmen_profile_dict["frequencyCommits"] = self.frequencyCommits_to_score_exp(self.user.frequencyCommits, self.field_score["frequencyCommits"])
-        self.assessmen_profile_dict["repositories"] = self.evaluate_repositories(self.assessmen_profile_dict.get("frequencyCommits"),
-                                                                          self.assessmen_profile_dict.get("inDayCommits"),
-                                                                          self.assessmen_profile_dict.get("countCommits"),
-                                                                          len(self.user.repos_user))
-        self.assessmen_profile_dict["month_usege"] = self.created_update_to_score_linear(self.assessmen_profile_dict.get("repositories"), self.user.month_usege)
-        self.score_profile = sum(value for value in self.assessmen_profile_dict.values() if isinstance(value, (int, float)))
+        self.assessment_profile_dict["followers"] = self.followers_to_score_log(int(self.user.followers))
+        self.assessment_profile_dict["following"] = self.following_to_score_log(int(self.user.following))
+        self.assessment_profile_dict["hireable"] = self.hireable_to_score(self.user.hireable)
+        self.assessment_profile_dict["plan"] = self.plan_to_score(self.user.plan)
+        self.assessment_profile_dict["blog"] = self.blog_to_score(self.user.blog)
+        self.assessment_profile_dict["company"] = self.company_to_score(self.user.company)
+        self.assessment_profile_dict["org"] = self.org_to_score_log(len(self.user.org))
+        self.assessment_profile_dict["language"] = self.language_to_score_log(len(self.user.languages))
+        self.assessment_profile_dict["countCommits"] = self.count_commits_to_score_log(self.user.count_commits, self.field_score["countCommits"], self.max_value["countCommits"])
+        self.assessment_profile_dict["inDayCommits"] = self.in_day_commits_to_score_log(self.user.in_day_commits, self.field_score["inDayCommits"], self.max_value["inDayCommits"])
+        self.assessment_profile_dict["frequencyCommits"] = self.frequency_commits_to_score_exp(self.user.frequency_commits, self.field_score["frequencyCommits"])
+        self.assessment_profile_dict["repositories"] = self.evaluate_repositories(self.assessment_profile_dict.get("frequencyCommits"),
+                                                                                  self.assessment_profile_dict.get("inDayCommits"),
+                                                                                  self.assessment_profile_dict.get("countCommits"),
+                                                                                  len(self.user.repos_user))
+        self.assessment_profile_dict["month_usege"] = self.created_update_to_score_linear(self.assessment_profile_dict.get("repositories"), self.user.month_usege)
+        self.score_profile = sum(value for value in self.assessment_profile_dict.values() if isinstance(value, (int, float)))
         return self.score_profile
 
     def assessment_repos(self):
@@ -45,45 +45,45 @@ class ProfileAssessment:
             assessment_repo_dict["forks"] = self.forks_to_score_log(self.user.repos_user[i].forks)
             assessment_repo_dict["stargazers_count"] = self.stargazers_count_to_score_log(self.user.repos_user[i].stargazers_count)
             assessment_repo_dict["contributors_count"] = self.contributors_count_to_score_log(self.user.repos_user[i].contributors_count)
-            assessment_repo_dict["commits_count"] = self.countCommits_to_score_log(self.user.repos_user[i].commits_count, self.field_score["commits_repo"], self.maxValue["countCommitsRepo"])
-            assessment_repo_dict["inDayCommits"] = self.inDayCommits_repo(self.user.repos_user[i].commits_inDay, self.user.repos_user[i].days_work, self.field_score["inDay_repo"], self.field_score["oneDay_inDay_repo"] )
-            assessment_repo_dict["frequencyCommits"] = self.frequencyCommits_repo(self.user.repos_user[i].commits_frequency,self.user.repos_user[i].days_work, self.field_score["frequency_repo"], self.field_score["oneDay_frequency_repo"])
+            assessment_repo_dict["commits_count"] = self.count_commits_to_score_log(self.user.repos_user[i].commits_count, self.field_score["commits_repo"], self.max_value["countCommitsRepo"])
+            assessment_repo_dict["inDayCommits"] = self.in_day_commits_repo(self.user.repos_user[i].commits_in_day, self.user.repos_user[i].days_work, self.field_score["inDay_repo"], self.field_score["oneDay_inDay_repo"])
+            assessment_repo_dict["frequencyCommits"] = self.frequency_commits_repo(self.user.repos_user[i].commits_frequency, self.user.repos_user[i].days_work, self.field_score["frequency_repo"], self.field_score["oneDay_frequency_repo"])
             assessment_repo_dict["days_work"] = self.days_repo(assessment_repo_dict.get("frequencyCommits"),
                                                                assessment_repo_dict.get("inDayCommits"),
                                                                assessment_repo_dict.get("commits_count"),
                                                                self.user.repos_user[i].days_work)
             assessment_repo_dict["count_views"] = self.count_views_count_to_score_log(self.user.repos_user[i].count_views)
-            self.assessmen_repos_list.append(assessment_repo_dict)
+            self.assessment_repos_list.append(assessment_repo_dict)
             overall_assessment += sum(value for value in assessment_repo_dict.values() if isinstance(value, (int, float)))
         self.average_score_repos = overall_assessment / len(self.user.repos_user)
         return self.average_score_repos
 
-    def assessment_Mainrepo(self):
-        self.assessmen_repoMain_dict["forks"] = self.forks_to_score_log(self.user.main_repo.forks)
-        self.assessmen_repoMain_dict["stargazers_count"] = self.stargazers_count_to_score_log(self.user.main_repo.stargazers_count)
-        self.assessmen_repoMain_dict["contributors_count"] = self.contributors_count_to_score_log(self.user.main_repo.contributors_count)
-        self.assessmen_repoMain_dict["commits_count"] = self.countCommits_to_score_log(self.user.main_repo.commits_count,
-                                                                               self.field_score["commits_MainRepo"],
-                                                                               self.maxValue["countCommitsRepo"])
-        self.assessmen_repoMain_dict["inDayCommits"] = self.inDayCommits_repo(self.user.main_repo.commits_inDay,
-                                                                              self.user.main_repo.days_work,
-                                                                              self.field_score["inDayComm_MainRepo"],
-                                                                              self.field_score["oneDay_inDay"])
-        self.assessmen_repoMain_dict["frequencyCommits"] = self.frequencyCommits_repo(self.user.main_repo.commits_frequency,
-                                                                                      self.user.main_repo.days_work,
-                                                                                      self.field_score["frequencyComm_MainRepo"],
-                                                                                      self.field_score["oneDay_frequency"])
-        self.assessmen_repoMain_dict["addLine"] = self.addLine_log(self.user.main_repo.commits_addLines)
-        self.assessmen_repoMain_dict["delLine"] = self.delLine_log(self.user.main_repo.commits_delLines)
-        self.assessmen_repoMain_dict["days_work"] = self.days_MainRepo(self.assessmen_repoMain_dict.get("frequencyCommits"),
-                                                                   self.assessmen_repoMain_dict.get("inDayCommits"),
-                                                                   self.assessmen_repoMain_dict.get("commits_count"),
-                                                                   self.assessmen_repoMain_dict.get("addLine"),
-                                                                   self.assessmen_repoMain_dict.get("delLine"),
-                                                                   self.user.main_repo.days_work)
-        self.assessmen_repoMain_dict["count_views"] = self.count_views_count_to_score_log(self.user.main_repo.count_views)
-        self.score_MainRepos = sum(value for value in self.assessmen_repoMain_dict.values() if isinstance(value, (int, float)))
-        return self.score_MainRepos
+    def assessment_mainrepo(self):
+        self.assessment_repo_main_dict["forks"] = self.forks_to_score_log(self.user.main_repo.forks)
+        self.assessment_repo_main_dict["stargazers_count"] = self.stargazers_count_to_score_log(self.user.main_repo.stargazers_count)
+        self.assessment_repo_main_dict["contributors_count"] = self.contributors_count_to_score_log(self.user.main_repo.contributors_count)
+        self.assessment_repo_main_dict["commits_count"] = self.count_commits_to_score_log(self.user.main_repo.commits_count,
+                                                                                          self.field_score["commits_MainRepo"],
+                                                                                          self.max_value["countCommitsRepo"])
+        self.assessment_repo_main_dict["inDayCommits"] = self.in_day_commits_repo(self.user.main_repo.commits_in_day,
+                                                                                  self.user.main_repo.days_work,
+                                                                                  self.field_score["inDayComm_MainRepo"],
+                                                                                  self.field_score["oneDay_inDay"])
+        self.assessment_repo_main_dict["frequencyCommits"] = self.frequency_commits_repo(self.user.main_repo.commits_frequency,
+                                                                                         self.user.main_repo.days_work,
+                                                                                         self.field_score["frequencyComm_MainRepo"],
+                                                                                         self.field_score["oneDay_frequency"])
+        self.assessment_repo_main_dict["addLine"] = self.add_line_log(self.user.main_repo.commits_add_lines)
+        self.assessment_repo_main_dict["delLine"] = self.del_line_log(self.user.main_repo.commits_del_lines)
+        self.assessment_repo_main_dict["days_work"] = self.days_main_repo(self.assessment_repo_main_dict.get("frequencyCommits"),
+                                                                          self.assessment_repo_main_dict.get("inDayCommits"),
+                                                                          self.assessment_repo_main_dict.get("commits_count"),
+                                                                          self.assessment_repo_main_dict.get("addLine"),
+                                                                          self.assessment_repo_main_dict.get("delLine"),
+                                                                          self.user.main_repo.days_work)
+        self.assessment_repo_main_dict["count_views"] = self.count_views_count_to_score_log(self.user.main_repo.count_views)
+        self.score_main_repos = sum(value for value in self.assessment_repo_main_dict.values() if isinstance(value, (int, float)))
+        return self.score_main_repos
 
 
     def assessment_kod(self, full_or_three):
@@ -95,8 +95,6 @@ class ProfileAssessment:
             self.score_kod+=marks
         self.score_kod = (self.score_kod/len(self.assessment_kod_list))*5
         return self.score_kod
-
-    """Profile Fields Assessment"""
 
     def followers_to_score_log(self, followers):
         if followers not in (0, 1):
@@ -150,37 +148,37 @@ class ProfileAssessment:
             score = 0
         return score
 
-    def countCommits_to_score_log(self, countCommits, coefficient_countCommits, max_value):
+    def count_commits_to_score_log(self, count_commits, coefficient_count_commits, max_value):
         power = 1.4
-        if countCommits not in  (0, 1):
-            score = (min(coefficient_countCommits * (math.log(countCommits) / math.log(max_value))**power, coefficient_countCommits))
-        elif countCommits == 1:
-            score = (min(coefficient_countCommits * (math.log(countCommits+1) / math.log(max_value))**power, coefficient_countCommits))/3
+        if count_commits not in  (0, 1):
+            score = (min(coefficient_count_commits * (math.log(count_commits) / math.log(max_value)) ** power, coefficient_count_commits))
+        elif count_commits == 1:
+            score = (min(coefficient_count_commits * (math.log(count_commits + 1) / math.log(max_value)) ** power, coefficient_count_commits)) / 3
         else:
             score = 0
         return score
 
-    def inDayCommits_to_score_log(self, inDayCommits, coefficient_inDayCommits, max_value):
-        if inDayCommits == "NULL": return 0
-        elif inDayCommits not in  (0, 1):
-            score = (min(coefficient_inDayCommits * math.log(inDayCommits) / math.log(max_value), coefficient_inDayCommits))
-        elif inDayCommits == 1:
-            score = (min(coefficient_inDayCommits * math.log(inDayCommits+1) / math.log(max_value), coefficient_inDayCommits))/3
+    def in_day_commits_to_score_log(self, in_day_commits, coefficient_in_day_commits, max_value):
+        if in_day_commits == "NULL": return 0
+        elif in_day_commits not in  (0, 1):
+            score = (min(coefficient_in_day_commits * math.log(in_day_commits) / math.log(max_value), coefficient_in_day_commits))
+        elif in_day_commits == 1:
+            score = (min(coefficient_in_day_commits * math.log(in_day_commits + 1) / math.log(max_value), coefficient_in_day_commits)) / 3
         else:
             score = 0
         return score
 
-    def frequencyCommits_to_score_exp(self, frequencyCommits, coefficient_frequencyCommits):
+    def frequency_commits_to_score_exp(self, frequency_commits, coefficient_frequency_commits):
         decay_rate = 0.5
-        if len(self.user.repos_user) != 0 and frequencyCommits != "NULL":
-            return coefficient_frequencyCommits * math.exp(-decay_rate * frequencyCommits)
+        if len(self.user.repos_user) != 0 and frequency_commits != "NULL":
+            return coefficient_frequency_commits * math.exp(-decay_rate * frequency_commits)
         return 0
 
-    def evaluate_repositories(self, frequency, inDayCommits, countCommits, num_repos):
+    def evaluate_repositories(self, frequency, in_day_commits, count_commits, num_repos):
         if len(self.user.repos_user) != 0:
             normalized_frequency = (frequency / self.field_score["frequencyCommits"])
-            normalized_inDayCommits = min(inDayCommits / self.field_score["inDayCommits"], 1)
-            normalized_countCommits = min(countCommits / self.field_score["countCommits"], 1)
+            normalized_inDayCommits = min(in_day_commits / self.field_score["inDayCommits"], 1)
+            normalized_countCommits = min(count_commits / self.field_score["countCommits"], 1)
             max_num_repos = 25
             normalized_num_repos = min(num_repos / max_num_repos, 1)
             repos_log = normalized_num_repos + normalized_countCommits + normalized_frequency + normalized_inDayCommits
@@ -198,7 +196,7 @@ class ProfileAssessment:
 
     def created_update_to_score_linear(self, repos_log , created_update):
         normalized_repos_log = min(repos_log/self.field_score["repos"], 1)
-        normalized_created_update = min(created_update/self.maxValue["created_update"], 1 )
+        normalized_created_update = min(created_update / self.max_value["created_update"], 1)
         created_update_log = (normalized_repos_log + normalized_created_update)*10
 
         if created_update_log > 1:
@@ -208,8 +206,6 @@ class ProfileAssessment:
         else:
             score = 0
         return score
-
-    """Evaluating Repository Fields"""
 
     def forks_to_score_log(self, forks):
         if forks not in  (0, 1):
@@ -250,22 +246,22 @@ class ProfileAssessment:
             score = 0
         return score
 
-    def inDayCommits_repo(self, inDayCommits, day_work, coefficient_1, coefficient_2):
-        coefficient_inDayCommits = (coefficient_1 if day_work!=1 else coefficient_2)
-        score = self.inDayCommits_to_score_log(inDayCommits, coefficient_inDayCommits, self.maxValue["inDayCommitsRepo"])
+    def in_day_commits_repo(self, in_day_commits, day_work, coefficient_1, coefficient_2):
+        coefficient_in_day_commits = (coefficient_1 if day_work!=1 else coefficient_2)
+        score = self.in_day_commits_to_score_log(in_day_commits, coefficient_in_day_commits, self.max_value["inDayCommitsRepo"])
         return score
 
-    def frequencyCommits_repo(self, frequencyCommits, day_work, coefficient_1, coefficient_2):
-        coefficient_frequencyCommits = (coefficient_1 if day_work!=1 else coefficient_2)
-        score = self.frequencyCommits_to_score_exp(frequencyCommits, coefficient_frequencyCommits)
+    def frequency_commits_repo(self, frequency_commits, day_work, coefficient_1, coefficient_2):
+        coefficient_frequency_commits = (coefficient_1 if day_work!=1 else coefficient_2)
+        score = self.frequency_commits_to_score_exp(frequency_commits, coefficient_frequency_commits)
         return score
 
-    def days_repo(self, frequency, inDayCommits, countCommits, count_day):
+    def days_repo(self, frequency, in_day_commits, count_commits, count_day):
         normalized_frequency = (frequency / self.field_score["frequency_repo"])
-        normalized_inDayCommits = min(inDayCommits / self.field_score["inDay_repo"], 1)
-        normalized_countCommits = min(countCommits / self.field_score["commits_repo"], 1)
-        normalized_count_day = min(count_day / self.maxValue["count_day"], 1)
-        days_log = normalized_count_day + normalized_countCommits*2 + normalized_frequency*0.5 + normalized_inDayCommits*0.5
+        normalized_in_day_commits = min(in_day_commits / self.field_score["inDay_repo"], 1)
+        normalized_count_commits = min(count_commits / self.field_score["commits_repo"], 1)
+        normalized_count_day = min(count_day / self.max_value["count_day"], 1)
+        days_log = normalized_count_day + normalized_count_commits*2 + normalized_frequency*0.5 + normalized_in_day_commits*0.5
 
         if days_log > 1:
             score = (min(self.field_score["created_update_r"] * (math.log(days_log) / math.log(4)), self.field_score["created_update_r"]))
@@ -275,36 +271,34 @@ class ProfileAssessment:
             score = 0
         return score
 
-    """Evaluate the fields of the selected repository"""
-
-    def addLine_log(self, addLine):
-        if addLine not in (0, 1):
-            score = (min(self.field_score["addLine"] * math.log(addLine) / math.log(100),self.field_score["addLine"]))
-        elif addLine == 1:
-            score = (min(self.field_score["addLine"] * math.log(addLine + 1) / math.log(100),self.field_score["addLine"])) / 3
+    def add_line_log(self, add_line):
+        if add_line not in (0, 1):
+            score = (min(self.field_score["addLine"] * math.log(add_line) / math.log(100), self.field_score["addLine"]))
+        elif add_line == 1:
+            score = (min(self.field_score["addLine"] * math.log(add_line + 1) / math.log(100), self.field_score["addLine"])) / 3
         else:
             score = 0
         return score
 
-    def delLine_log(self, delLine):
-        if delLine not in (0, 1):
-            score = (min(self.field_score["delLine"] * math.log(delLine) / math.log(30),self.field_score["delLine"]))
-        elif delLine == 1:
-            score = (min(self.field_score["delLine"] * math.log(delLine + 1) / math.log(30),self.field_score["delLine"])) / 3
+    def del_line_log(self, del_line):
+        if del_line not in (0, 1):
+            score = (min(self.field_score["delLine"] * math.log(del_line) / math.log(30), self.field_score["delLine"]))
+        elif del_line == 1:
+            score = (min(self.field_score["delLine"] * math.log(del_line + 1) / math.log(30), self.field_score["delLine"])) / 3
         else:
             score = 0
         return score
 
-    def days_MainRepo(self, frequency, inDayCommits, countCommits, addLine, delLine, count_day):
+    def days_main_repo(self, frequency, in_day_commits, count_commits, add_line, del_line, count_day):
         normalized_frequency =  (frequency / self.field_score["frequencyComm_MainRepo"])
-        normalized_inDayCommits = min(inDayCommits / self.field_score["inDayComm_MainRepo"], 1)
-        normalized_countCommits = min(countCommits / self.field_score["commits_MainRepo"], 1)
-        normalized_addLine = min(addLine / self.field_score["addLine"], 1)
-        normalized_delLine = min(delLine / self.field_score["delLine"], 1)
-        normalized_count_day = min(count_day / self.maxValue["count_day"], 1)
+        normalized_in_day_commits = min(in_day_commits / self.field_score["inDayComm_MainRepo"], 1)
+        normalized_count_commits = min(count_commits / self.field_score["commits_MainRepo"], 1)
+        normalized_add_line = min(add_line / self.field_score["addLine"], 1)
+        normalized_del_line = min(del_line / self.field_score["delLine"], 1)
+        normalized_count_day = min(count_day / self.max_value["count_day"], 1)
 
-        days_log = (normalized_count_day + normalized_countCommits*2 + normalized_frequency*0.5
-                    + normalized_inDayCommits*0.5 + normalized_addLine*0.5 + normalized_delLine*0.5)
+        days_log = (normalized_count_day + normalized_count_commits*2 + normalized_frequency*0.5
+                    + normalized_in_day_commits*0.5 + normalized_add_line*0.5 + normalized_del_line*0.5)
 
         if days_log > 1:
             score = (min(self.field_score["created_update_r"] * (math.log(days_log) / math.log(5)), self.field_score["created_update_r"]))

@@ -1,13 +1,13 @@
 import math
-from Config.M_LoadConfig import _load_config
+from Config.M_LoadConfig import load_config
 
 class User_repo:
     def __init__(self, repo,  publicOrPrivate, config_file="tour_field.json"):
         self.commits = repo.get_commits()
-        commits_frequency_value, commits_inDay_value, commits_days = self.commits_frequency_inDay()
+        commits_frequency_value, commits_in_day_value, commits_days = self.commits_frequency_in_day()
         self.commits_count = self.commits.totalCount
         self.commits_frequency = commits_frequency_value
-        self.commits_inDay = commits_inDay_value
+        self.commits_in_day = commits_in_day_value
         self.name = repo.name
         self.language = repo.language
         self.forks = repo.forks
@@ -19,13 +19,13 @@ class User_repo:
         self.days_work = commits_days
         self.publicOrPrivate = publicOrPrivate
         self.count_views = "-" if self.publicOrPrivate == "public" else repo.get_views_traffic()['uniques']
-        self.tour_field = _load_config(config_file)
+        self.tour_field = load_config(config_file)
 
-    def commits_frequency_inDay(self):
+    def commits_frequency_in_day(self):
         commits_frequency_list = []
-        commits_inDay_list = []
+        commits_in_day_list = []
         day = self.commits[0].commit.author.date.date()
-        count_commits_inDay = 0
+        count_commits_in_day = 0
         max_coomits = 1000
         range_commits = (self.commits.totalCount if self.commits.totalCount<=max_coomits else max_coomits)
 
@@ -34,36 +34,36 @@ class User_repo:
                 frequency = (self.commits[i].commit.author.date.date() - self.commits[i+1].commit.author.date.date()).days
                 commits_frequency_list.append(frequency)
             if day == self.commits[i].commit.author.date.date():
-                count_commits_inDay += 1
+                count_commits_in_day += 1
             else:
-                commits_inDay_list.append(count_commits_inDay)
-                count_commits_inDay = 1
+                commits_in_day_list.append(count_commits_in_day)
+                count_commits_in_day = 1
                 day = self.commits[i].commit.author.date.date()
             if i == (self.commits.totalCount)-1:
-                commits_inDay_list.append(count_commits_inDay)
+                commits_in_day_list.append(count_commits_in_day)
 
         if len(commits_frequency_list)!=0:
             commits_frequency_value = sum(commits_frequency_list) / len(commits_frequency_list)
         else:
             commits_frequency_value = "NULL"
 
-        if len(commits_inDay_list)!=0:
-            commits_inDay_value = sum(commits_inDay_list) / len(commits_inDay_list)
+        if len(commits_in_day_list)!=0:
+            commits_in_day_value = sum(commits_in_day_list) / len(commits_in_day_list)
         else:
-            commits_inDay_value = "NULL"
+            commits_in_day_value = "NULL"
 
-        return commits_frequency_value, commits_inDay_value , len(commits_inDay_list)
+        return commits_frequency_value, commits_in_day_value , len(commits_in_day_list)
 
 
     def tournament(self):
         normalize_commits_count = min(self.commits_count / self.tour_field["commits_count"], 1)
         decay_rate = 0.5
         normalize_commits_frequency = (math.exp(-decay_rate * self.commits_frequency) if self.commits_frequency != "NULL" else 0)
-        normalize_commits_inDay = (min(self.commits_inDay / self.tour_field["commits_inDay"], 1) if self.commits_inDay != "NULL" else 0)
+        normalize_commits_in_day = (min(self.commits_in_day / self.tour_field["commits_inDay"], 1) if self.commits_in_day != "NULL" else 0)
         normalize_days_work = min(self.days_work / self.tour_field["days_work"], 1)
         normalize_stars = min(self.stargazers_count / self.tour_field["stars"], 1)
         normalize_forks = min(self.forks / self.tour_field["forks"], 1)
-        repos_log = (normalize_commits_count*4 + normalize_commits_frequency* 0.25+ normalize_commits_inDay*0.25 +
+        repos_log = (normalize_commits_count*4 + normalize_commits_frequency* 0.25+ normalize_commits_in_day*0.25 +
                      normalize_days_work*2 + normalize_stars + normalize_forks)
         if repos_log >1:
             judgement = (min(100 * (math.log(repos_log) / math.log(8.5)),100))
@@ -72,8 +72,6 @@ class User_repo:
         else:
             judgement = 0
         return judgement
-
-    # Проход по файлам в репозитории
 
     def search_repo(repos, name):
         for repo in repos:

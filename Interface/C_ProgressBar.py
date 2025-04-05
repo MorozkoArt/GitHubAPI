@@ -12,7 +12,7 @@ class ProgressBar:
             unit_scale=True,
             unit_divisor=1024,
         )
-    def updatePd(self):
+    def update_pd(self):
         self.pd.update(1)
-    def closePd(self):
+    def close_pd(self):
         self.pd.close()
