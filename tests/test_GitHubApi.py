@@ -1,9 +1,9 @@
 import os
 import pytest
-import textwrap
-from StartMethods.M_Start_UserAssessment_generation import (start_user_generation, start_assessment_generation
+from src.api.User_and_Repo.C_User import User_GitHub
+from src.api.StartMethods.M_Start_UserAssessment_generation import (start_assessment_generation
 , start_assessment_generation_empty, start_main_repo_generation)
-from StartMethods.M_Authentication import login_auth, login_password, login_token
+from src.api.StartMethods.M_Authentication import login_auth
 
 my_token = os.environ.get("GITHUB_TOKEN")
 @pytest.mark.parametrize("my_token, login,  var_kod, var_kod_2",
@@ -17,7 +17,7 @@ my_token = os.environ.get("GITHUB_TOKEN")
 def test_full_data(my_token, login, var_kod, var_kod_2):
     public_or_private = "public"
     user = login_auth(my_token, login)
-    user_git = start_user_generation(user, public_or_private)
+    user_git = User_GitHub(user, public_or_private)
     if user_git.repos.totalCount == 0:
         start_assessment_generation_empty(user_git)
     else:

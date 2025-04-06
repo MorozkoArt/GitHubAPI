@@ -1,7 +1,7 @@
 import textwrap
-from User_and_Repo.C_User import User_GitHub
-from Assessment.C_ProfileAssessment import ProfileAssessment
-from Interface.M_SaveInformation import save_user_information
+from src.api.User_and_Repo.C_User import User_GitHub
+from src.api.Assessment.C_ProfileAssessment import ProfileAssessment
+from src.api.Interface.M_SaveInformation import save_user_information
 
 def start_main_repo_generation(user_git):
     user_git.find_main_repo()

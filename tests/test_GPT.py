@@ -1,8 +1,7 @@
 import textwrap
 import pytest
-from Assessment.C_GPT import GPT
-from g4f.client import Client
-from Assessment import C_ProfileAssessment
+from src.api.Assessment.C_GPT import GPT
+from src.api.Assessment import C_ProfileAssessment
 
 file_path = C_ProfileAssessment.__file__
 @pytest.mark.parametrize("list_of_paths", [([file_path])])

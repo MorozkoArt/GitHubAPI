@@ -1,8 +1,8 @@
-from Interface.C_ProgressBar import ProgressBar
-from User_and_Repo.C_UserRepo import User_repo
-from User_and_Repo.C_MainRepo import Main_repo
-from github import Github, UnknownObjectException
-from typing import List, Tuple, Optional
+from src.api.Interface.C_ProgressBar import ProgressBar
+from src.api.User_and_Repo.C_UserRepo import User_repo
+from src.api.User_and_Repo.C_MainRepo import Main_repo
+from github import UnknownObjectException
+
 
 class User_GitHub:
     def __init__(self, user, public_or_private):

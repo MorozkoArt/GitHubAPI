@@ -1,6 +1,6 @@
 import math
-from Assessment.C_GPT import GPT
-from Config.M_LoadConfig import load_config
+from src.api.Assessment.C_GPT import GPT
+from src.api.Config.M_LoadConfig import load_config
 
 class ProfileAssessment:
 

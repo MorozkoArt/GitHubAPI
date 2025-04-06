@@ -1,9 +1,9 @@
 import pytest
 import os
-from Assessment.C_ProfileAssessment import ProfileAssessment
-from User_and_Repo.C_UserRepo import User_repo
-from User_and_Repo.C_User import User_GitHub
-from StartMethods.M_Authentication import login_auth, login_password, login_token
+from src.api.Assessment.C_ProfileAssessment import ProfileAssessment
+from src.api.User_and_Repo.C_UserRepo import User_repo
+from src.api.User_and_Repo.C_User import User_GitHub
+from src.api.StartMethods.M_Authentication import login_auth
 
 my_token = os.environ.get("GITHUB_TOKEN")
 user = login_auth(my_token, "Lucik19")
