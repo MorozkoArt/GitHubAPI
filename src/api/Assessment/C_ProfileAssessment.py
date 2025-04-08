@@ -177,11 +177,11 @@ class ProfileAssessment:
     def evaluate_repositories(self, frequency, in_day_commits, count_commits, num_repos):
         if len(self.user.repos_user) != 0:
             normalized_frequency = (frequency / self.field_score["frequencyCommits"])
-            normalized_inDayCommits = min(in_day_commits / self.field_score["inDayCommits"], 1)
-            normalized_countCommits = min(count_commits / self.field_score["countCommits"], 1)
+            normalized_in_day_commits = min(in_day_commits / self.field_score["inDayCommits"], 1)
+            normalized_count_commits = min(count_commits / self.field_score["countCommits"], 1)
             max_num_repos = 25
             normalized_num_repos = min(num_repos / max_num_repos, 1)
-            repos_log = normalized_num_repos + normalized_countCommits + normalized_frequency + normalized_inDayCommits
+            repos_log = normalized_num_repos + normalized_count_commits + normalized_frequency + normalized_in_day_commits
 
             if repos_log > 1:
                 score = (min(self.field_score["repos"] * (math.log(repos_log) / math.log(4)), self.field_score["repos"]))
@@ -265,7 +265,7 @@ class ProfileAssessment:
 
         if days_log > 1:
             score = (min(self.field_score["created_update_r"] * (math.log(days_log) / math.log(4)), self.field_score["created_update_r"]))
-        elif days_log <= 1 and days_log > 0:
+        elif 1 >= days_log > 0:
             score = (min(self.field_score["created_update_r"] * (math.log(days_log + 1) / math.log(4)), self.field_score["created_update_r"])) / 3
         else:
             score = 0

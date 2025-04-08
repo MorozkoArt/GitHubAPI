@@ -160,12 +160,12 @@ class Assessment:
     def in_day_commits_repo(self, in_day_commits, day_work, coefficient_1, coefficient_2):
         coefficient_in_day_commits = (coefficient_1 if day_work!=1 else coefficient_2)
         score = self.in_day_commits_to_score_log(in_day_commits, coefficient_in_day_commits, self.max_value["inDayCommitsRepo"])
-        return score
+        return round(score, 3)
 
     def frequency_commits_repo(self,repos, frequency_commits, day_work, coefficient_1, coefficient_2):
         coefficient_frequency_commits = (coefficient_1 if day_work!=1 else coefficient_2)
         score = self.frequency_commits_to_score_exp(repos,frequency_commits, coefficient_frequency_commits)
-        return score
+        return round(score, 3)
 
     def days_repo(self, frequency, in_day_commits, count_commits, count_day):
         normalized_frequency = (frequency / self.field_score["frequency_repo"])
@@ -180,7 +180,7 @@ class Assessment:
             score = (min(self.field_score["created_update_r"] * (math.log(days_log + 1) / math.log(4)), self.field_score["created_update_r"])) / 3
         else:
             score = 0
-        return score
+        return round(score, 3)
 
     def add_line_log(self, add_line):
         if add_line not in (0, 1):
@@ -189,7 +189,7 @@ class Assessment:
             score = (min(self.field_score["addLine"] * math.log(add_line + 1) / math.log(100), self.field_score["addLine"])) / 3
         else:
             score = 0
-        return score
+        return round(score, 3)
 
     def del_line_log(self, del_line):
         if del_line not in (0, 1):
@@ -198,7 +198,7 @@ class Assessment:
             score = (min(self.field_score["delLine"] * math.log(del_line + 1) / math.log(30), self.field_score["delLine"])) / 3
         else:
             score = 0
-        return score
+        return round(score, 3)
 
     def days_main_repo(self, frequency, in_day_commits, count_commits, add_line, del_line, count_day):
         normalized_frequency =  (frequency / self.field_score["frequencyComm_MainRepo"])
@@ -217,7 +217,7 @@ class Assessment:
             score = (min(self.field_score["created_update_r"] * (math.log(days_log + 1) / math.log(5)), self.field_score["created_update_r"])) / 3
         else:
             score = 0
-        return score
+        return round(score, 3)
 
 
 

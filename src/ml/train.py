@@ -1,19 +1,27 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from С_generation_fake_users import GitHubUserGenerator
+import os
 
+base_dir = "C:/PycharmProjects/GitHubAPI"
+path = os.path.join(base_dir, "data", "training.csv")
 
-df = pd.read_csv("C:/PycharmProjects/GitHubAPI/data/training.csv")
+generator = GitHubUserGenerator()
+dff = generator.generate_users()
+generator.save_to_csv(dff, path)
 
+df = pd.read_csv(path)
 
 X = df.drop(columns=["user", "followers", "following", "hireable", "repos", "created_update",
     "plan", "blog", "company", "org", "languages", "frequencyCommits",
     "inDayCommits", "countCommits", "forks", "stargazers_count",
     "contributors_count", "created_update_r", "commits_repo",
-    "frequency_repo", "inDay_repo", "count_views", "addLine", "delLine"])
+    "frequency_repo", "inDay_repo", "addLine", "delLine", "count_views"])
 
-y = df[["followers_s", "following_s", "hireable_s", "plan_s", "blog_s", "company_s",
+y = df[["followers_s", "following_s", "hireable_s", "repos_s", "created_update_s", "plan_s", "blog_s", "company_s",
     "org_s", "langs_s", "freq_commits_s", "in_day_commits_s", "count_commits_s",
-    "forks_s", "stars_s", "contributors_s", "repos_s", "created_update_s", "count_views_s"]]
+    "forks_s", "stars_s", "contributors_s", "created_update_r_s", "commits_repo_s", "in_day_repo_s",
+    "frequency_repo_s", "add_line_s", "del_line_s","count_views_s"]]
 
 
 X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.4, random_state=42)
