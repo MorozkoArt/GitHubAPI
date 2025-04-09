@@ -1,8 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from С_generation_fake_users import GitHubUserGenerator
+from src.ml.GenerationUsers.С_generation_fake_users import GitHubUserGenerator
 from pathlib import Path
-import os
 
 base_dir = Path(__file__).parents[2]
 path = base_dir / "data" / "training.csv"

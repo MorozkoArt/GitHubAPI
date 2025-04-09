@@ -45,7 +45,7 @@ class ProfileAssessment:
             assessment_repo_dict["forks"] = self.forks_to_score_log(self.user.repos_user[i].forks)
             assessment_repo_dict["stargazers_count"] = self.stargazers_count_to_score_log(self.user.repos_user[i].stargazers_count)
             assessment_repo_dict["contributors_count"] = self.contributors_count_to_score_log(self.user.repos_user[i].contributors_count)
-            assessment_repo_dict["commits_count"] = self.count_commits_to_score_log(self.user.repos_user[i].commits_count, self.field_score["commits_repo"], self.max_value["countCommitsRepo"])
+            assessment_repo_dict["commits_count"] = self.count_commits_to_score_log(self.user.repos_user[i].commits_count, self.field_score["commits_repo"], self.max_value["commits_repo"])
             assessment_repo_dict["inDayCommits"] = self.in_day_commits_repo(self.user.repos_user[i].commits_in_day, self.user.repos_user[i].days_work, self.field_score["inDay_repo"], self.field_score["oneDay_inDay_repo"])
             assessment_repo_dict["frequencyCommits"] = self.frequency_commits_repo(self.user.repos_user[i].commits_frequency, self.user.repos_user[i].days_work, self.field_score["frequency_repo"], self.field_score["oneDay_frequency_repo"])
             assessment_repo_dict["days_work"] = self.days_repo(assessment_repo_dict.get("frequencyCommits"),
@@ -64,7 +64,7 @@ class ProfileAssessment:
         self.assessment_repo_main_dict["contributors_count"] = self.contributors_count_to_score_log(self.user.main_repo.contributors_count)
         self.assessment_repo_main_dict["commits_count"] = self.count_commits_to_score_log(self.user.main_repo.commits_count,
                                                                                           self.field_score["commits_MainRepo"],
-                                                                                          self.max_value["countCommitsRepo"])
+                                                                                          self.max_value["commits_repo"])
         self.assessment_repo_main_dict["inDayCommits"] = self.in_day_commits_repo(self.user.main_repo.commits_in_day,
                                                                                   self.user.main_repo.days_work,
                                                                                   self.field_score["inDayComm_MainRepo"],
@@ -248,7 +248,7 @@ class ProfileAssessment:
 
     def in_day_commits_repo(self, in_day_commits, day_work, coefficient_1, coefficient_2):
         coefficient_in_day_commits = (coefficient_1 if day_work!=1 else coefficient_2)
-        score = self.in_day_commits_to_score_log(in_day_commits, coefficient_in_day_commits, self.max_value["inDayCommitsRepo"])
+        score = self.in_day_commits_to_score_log(in_day_commits, coefficient_in_day_commits, self.max_value["inDay_repo"])
         return score
 
     def frequency_commits_repo(self, frequency_commits, day_work, coefficient_1, coefficient_2):
@@ -260,7 +260,7 @@ class ProfileAssessment:
         normalized_frequency = (frequency / self.field_score["frequency_repo"])
         normalized_in_day_commits = min(in_day_commits / self.field_score["inDay_repo"], 1)
         normalized_count_commits = min(count_commits / self.field_score["commits_repo"], 1)
-        normalized_count_day = min(count_day / self.max_value["count_day"], 1)
+        normalized_count_day = min(count_day / self.max_value["active_days_r"], 1)
         days_log = normalized_count_day + normalized_count_commits*2 + normalized_frequency*0.5 + normalized_in_day_commits*0.5
 
         if days_log > 1:
@@ -295,7 +295,7 @@ class ProfileAssessment:
         normalized_count_commits = min(count_commits / self.field_score["commits_MainRepo"], 1)
         normalized_add_line = min(add_line / self.field_score["addLine"], 1)
         normalized_del_line = min(del_line / self.field_score["delLine"], 1)
-        normalized_count_day = min(count_day / self.max_value["count_day"], 1)
+        normalized_count_day = min(count_day / self.max_value["active_days_r"], 1)
 
         days_log = (normalized_count_day + normalized_count_commits*2 + normalized_frequency*0.5
                     + normalized_in_day_commits*0.5 + normalized_add_line*0.5 + normalized_del_line*0.5)
