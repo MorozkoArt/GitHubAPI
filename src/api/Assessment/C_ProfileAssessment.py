@@ -209,18 +209,18 @@ class ProfileAssessment:
 
     def forks_to_score_log(self, forks):
         if forks not in  (0, 1):
-            score = (min(self.field_score["forks"] * math.log(forks) / math.log(10), self.field_score["forks"]))
+            score = (min(self.field_score["forks_r"] * math.log(forks) / math.log(10), self.field_score["forks_r"]))
         elif forks == 1:
-            score = (min(self.field_score["forks"] * math.log(forks+1) / math.log(10), self.field_score["forks"]))/2
+            score = (min(self.field_score["forks_r"] * math.log(forks+1) / math.log(10), self.field_score["forks_r"]))/2
         else:
             score = 0
         return score
 
     def stargazers_count_to_score_log(self, stargazers_count):
         if stargazers_count not in  (0, 1):
-            score = (min(self.field_score["stargazers_count"] * math.log(stargazers_count) / math.log(1000), self.field_score["stargazers_count"]))
+            score = (min(self.field_score["stars_r"] * math.log(stargazers_count) / math.log(1000), self.field_score["stars_r"]))
         elif stargazers_count == 1:
-            score = (min(self.field_score["stargazers_count"] * math.log(stargazers_count+1) / math.log(1000), self.field_score["stargazers_count"]))/2
+            score = (min(self.field_score["stars_r"] * math.log(stargazers_count+1) / math.log(1000), self.field_score["stars_r"]))/2
         else:
             score = 0
         return score
@@ -302,7 +302,7 @@ class ProfileAssessment:
 
         if days_log > 1:
             score = (min(self.field_score["created_update_r"] * (math.log(days_log) / math.log(5)), self.field_score["created_update_r"]))
-        elif days_log <= 1 and days_log > 0:
+        elif 1 >= days_log > 0:
             score = (min(self.field_score["created_update_r"] * (math.log(days_log + 1) / math.log(5)), self.field_score["created_update_r"])) / 3
         else:
             score = 0
