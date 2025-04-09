@@ -62,6 +62,15 @@ class Assessment:
     def stars_to_score_log(self, stars):
         return self._log_score(stars, self.max_value["stars"], self.field_score["stars"])
 
+    def avg_cont_to_score_log(self, avg_cont):
+        return self._log_score(avg_cont, self.max_value["avg_cont"], self.field_score["avg_cont"])
+
+    def avg_views_to_score_log(self, avg_views):
+        return self._log_score(avg_views, self.max_value["avg_views"], self.field_score["avg_views"])
+
+    def avg_a_days_to_score_log(self, avg_a_days):
+        return self._log_score(avg_a_days, self.max_value["avg_a_days"], self.field_score["avg_a_days"])
+
     def commits_to_score_log(self, count_commits):
         return self._log_score(count_commits, self.max_value["countCommits"], self.field_score["countCommits"], power=1.4, one_divider=3)
 
@@ -105,14 +114,14 @@ class Assessment:
         return self._log_score(count_views, self.max_value["count_views"], self.field_score["count_views"])
 
     def commits_r_to_score_log(self, count_commits):
-        return self._log_score(count_commits, self.max_value["commits_repo"], self.field_score["commits_repo"], power=1.4, one_divider=3)
+        return self._log_score(count_commits, self.max_value["commits_repo"], self.field_score["commits_MainRepo"], power=1.4, one_divider=3)
 
     def in_day_r_to_score_log(self, in_day_commits, day_work):
-        coefficient = self.field_score["inDay_repo"] if day_work != 1 else self.field_score["oneDay_inDay_repo"]
+        coefficient = self.field_score["inDayComm_MainRepo"] if day_work != 1 else self.field_score["oneDay_inDay"]
         return self._log_score(in_day_commits, self.max_value["inDay_repo"], coefficient, one_divider=3)
 
     def frequency_r_to_score_exp(self, repos, frequency_commits, day_work):
-        coefficient = self.field_score["frequency_repo"] if day_work != 1 else self.field_score["oneDay_frequency_repo"]
+        coefficient = self.field_score["frequencyComm_MainRepo"] if day_work != 1 else self.field_score["oneDay_frequency"]
         return self._exp_score(frequency_commits, coefficient) if repos != 0 else 0
 
     def days_repo(self, frequency, in_day_commits, count_commits, count_day):
@@ -132,7 +141,7 @@ class Assessment:
 
     def days_main_repo(self, frequency, in_day_commits, count_commits, add_line, del_line, count_day):
         components = [
-            min(count_day / self.max_value["count_day"], 1),
+            min(count_day / self.max_value["active_days_r"], 1),
             min(count_commits / self.field_score["commits_MainRepo"], 1) * 2,
             (frequency / self.field_score["frequencyComm_MainRepo"]) * 0.5,
             min(in_day_commits / self.field_score["inDayComm_MainRepo"], 1) * 0.5,
