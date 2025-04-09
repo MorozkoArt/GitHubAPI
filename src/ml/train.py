@@ -1,14 +1,16 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from С_generation_fake_users import GitHubUserGenerator
+from pathlib import Path
 import os
 
-base_dir = "C:/PycharmProjects/GitHubAPI"
-path = os.path.join(base_dir, "data", "training.csv")
+base_dir = Path(__file__).parents[2]
+path = base_dir / "data" / "training.csv"
 
-generator = GitHubUserGenerator()
-dff = generator.generate_users()
-generator.save_to_csv(dff, path)
+if not Path(path).exists():
+    generator = GitHubUserGenerator()
+    dff = generator.generate_users()
+    generator.save_to_csv(dff, path)
 
 df = pd.read_csv(path)
 

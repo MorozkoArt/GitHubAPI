@@ -29,7 +29,38 @@ class GitHubUserGenerator:
         ]
 
     def _generate_user_data(self, user_type: str) -> dict[str | Any, int | Any] | None:
-        if user_type == "beginner":
+        if user_type == "low_values":
+            return {
+                "followers": 0,
+                "following": 0,
+                "hireable": 0,
+                "repos": 0,
+                "created_update": 0,
+                "plan": 0,
+                "blog": 0,
+                "company": 0,
+                "org": 0,
+                "languages": 0,
+                "forks": 0,
+                "stars": 0,
+                "avg_cont": 0,
+                "avg_a_days": 0,
+                "frequencyCommits": 0,
+                "inDayCommits": 0,
+                "countCommits": 0,
+                "avg_views": 0,
+                "forks_r": 0,
+                "stars_r": 0,
+                "cont_count": 0,
+                "active_days_r": 0,
+                "commits_repo": 0,
+                "frequency_repo": -1,
+                "inDay_repo": 0,
+                "addLine": 0,
+                "delLine": 0,
+                "count_views": 0
+            }
+        elif user_type == "beginner":
             return {
                 "followers": random.randint(0, 30),
                 "following": random.randint(0, 10),
@@ -167,16 +198,12 @@ class GitHubUserGenerator:
         scores["langs_s"] = self.assessment.language_to_score_log(user_data["languages"])
         scores["forks_s"] = self.assessment.forks_to_score_log(user_data["forks"])
         scores["stars_s"] = self.assessment.stars_to_score_log(user_data["stars"])
-
         scores["avg_cont_s"] = self.assessment.avg_cont_to_score_log(user_data["avg_cont"])
         scores["avg_a_days_s"] = self.assessment.avg_a_days_to_score_log(user_data["avg_a_days"])
-
         scores["freq_commits_s"] = self.assessment.frequency_to_score_exp(user_data["repos"],user_data["frequencyCommits"])
         scores["in_day_commits_s"] = self.assessment.in_day_to_score_log(user_data["inDayCommits"])
         scores["count_commits_s"] = self.assessment.commits_to_score_log(user_data["countCommits"])
-
         scores["avg_views_s"] = self.assessment.avg_views_to_score_log(user_data["avg_views"])
-
         scores["repos_s"] = self.assessment.evaluate_repositories(
             scores["freq_commits_s"],
             scores["in_day_commits_s"],
@@ -207,14 +234,16 @@ class GitHubUserGenerator:
         )
         return scores
 
-    def generate_users(self, count: int = 451) -> pd.DataFrame:
+    def generate_users(self, count: int = 450) -> pd.DataFrame:
         data = []
         for i in range(count):
-            if i < 150:
+            if i == 0:
+                user_type = "low_values"
+            elif 1 <= i < 150:
                 user_type = "beginner"
             elif 150 <= i < 300:
                 user_type = "intermediate"
-            elif 300 <= i < 450:
+            elif 300 <= i < 449:
                 user_type = "advanced"
             else:
                 user_type = "maximum_values"
@@ -230,5 +259,4 @@ class GitHubUserGenerator:
         return pd.DataFrame(data, columns=self.columns)
 
     def save_to_csv(self, df: pd.DataFrame, path: str) -> None:
-        os.makedirs(os.path.dirname(path), exist_ok=True)
         df.to_csv(path, index=False)
