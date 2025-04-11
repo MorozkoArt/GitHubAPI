@@ -1,6 +1,9 @@
 import math
 from src.api.Assessment.C_GPT import GPT
 from src.api.Config.M_LoadConfig import load_config
+"""import torch
+import pandas as pd
+from src.ml.ForModel.C_model import GitHubModel"""
 
 class ProfileAssessment:
 
@@ -307,6 +310,62 @@ class ProfileAssessment:
         else:
             score = 0
         return score
+
+
+
+""" model = GitHubModel(input_size=28, output_size=28)
+    model.load_state_dict(torch.load('C:/PycharmProjects/GitHubAPI/src/ml/best_model.pth'))
+    model.eval()
+
+    new_data = pd.DataFrame({
+        "followers": [8],
+        "following": [14],
+        "hireable": [1],
+        "repos": [42],
+        "created_update": [9],
+        "plan": [0],
+        "blog": [1],
+        "company": [1],
+        "org": [1],
+        "languages": [7],
+        "forks": [0],
+        "stars": [1],
+        "avg_cont": [1],
+        "avg_a_days": [7],
+        "frequencyCommits": [0.16],
+        "inDayCommits": [3.21],
+        "countCommits": [6.47],
+        "avg_views": [3],
+        "forks_r": [0],
+        "stars_r": [1],
+        "cont_count": [1],
+        "active_days_r": [20],
+        "commits_repo": [55],
+        "frequency_repo": [1.5],
+        "inDay_repo": [2.43],
+        "addLine": [80.0],
+        "delLine": [43.33],
+        "count_views": [1]
+    })
+
+    inputs = torch.tensor(new_data.values, dtype=torch.float32)
+
+    with torch.no_grad():
+        predictions = model(inputs)
+
+    # Преобразуем предсказания в удобный формат
+    predicted_scores = predictions.numpy()
+    print(predicted_scores)
+
+    summ = 0
+    for i in range (0,18):
+        summ += predicted_scores[0][i]
+    print(summ)
+
+    summ2 = 0
+    for j in range(18,28):
+        summ2 += predicted_scores[0][j]
+    print(summ2)"""
 
 
 

@@ -6,7 +6,7 @@ import numpy as np
 class GitHubDataset(Dataset):
     def __init__(self, features, targets, transform=None):
         self.features = torch.tensor(features.values if hasattr(features, 'values')
-                                     else features.astype(np.float32), dtype=torch.float32)
+                                    else features.astype(np.float32), dtype=torch.float32)
         self.targets = torch.tensor(targets.values if hasattr(targets, 'values')
                                     else targets.astype(np.float32), dtype=torch.float32)
         self.transform = transform
