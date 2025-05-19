@@ -1,0 +1,12 @@
+PyGithub==2.5.0
+g4f==0.4.9.1
+numpy==2.2.4
+pandas==2.2.3
+tqdm==4.67.0
+requests==2.32.3
+prettytable==3.12.0
+pytest==8.3.3
+--extra-index-url https://download.pytorch.org/whl/cu126
+torch
+torchvision
+torchaudio

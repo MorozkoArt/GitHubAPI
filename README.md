@@ -17,3 +17,140 @@
 <img src="https://raw.githubusercontent.com/MorozkoArt/MorozkoArt/446de453fb12c56c11adfb43cde081d484777abb/Resources/python-original.svg" title="python" width="40" height="40"/>&nbsp;
 <img src="https://raw.githubusercontent.com/MorozkoArt/MorozkoArt/446de453fb12c56c11adfb43cde081d484777abb/Resources/pycharm-original.svg" title="pycharm" width="40" height="40"/>&nbsp;
 ---
+
+## Main features
+
+1. **GitHub Profile Analysis**:
+   - Evaluating user activity
+   - Analyze repositories and code
+   - Generate a comprehensive report
+
+2. **Machine Learning**:
+   - Predicting profile quality
+   - Evaluating contributions to projects
+
+3. **Working with the GitHub API**:
+   - Multiple authentication methods
+   - Getting detailed information about users
+
+## Installation and startup
+
+1. Establish dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+2. Set the environment variables:
+```bash
+export GITHUB_TOKEN="your_github_token"
+```
+
+3. Start the project:
+```bash
+python main.py
+```
+
+## Project Architecture
+
+```plaintext
+📂project/
+├── 📂src/
+│   ├──📂api/
+│   │   ├──📂Assessment         # User evaluation techniques
+│   │   ├──📂Config/            # Configuration files
+│   │   ├──📂Interface/         # Visualization techniques
+│   │   ├──📂StartMethods/      # Startup methods
+│   │   ├──📂User_and_Repo/     # Classes for working with users
+│   └── ml/
+│       ├──📂GenerationUsers/   # Data generation
+│       ├──📂ForModel/          # Model ML
+│       └──📄train.py           # Model training
+├──📂data/                      # Training data
+├──📂tests/                     # Test directory
+└──📄main.py                    # Main script
+```
+
+## Example output
+
+```
+User profile assessment results - MorozkoArt 
+
+Profile data and their assessment:
++-------------------------------------------------+---------------------------------------+------------+
+| Field name                                      | Significance                          | Assessment |
++-------------------------------------------------+---------------------------------------+------------+
+| Username                                        | MorozkoArt                            |            |
++-------------------------------------------------+---------------------------------------+------------+
+| Profile access                                  | public                                |            |
++-------------------------------------------------+---------------------------------------+------------+
+| Number of followers                             | 7                                     |       1.37 |
++-------------------------------------------------+---------------------------------------+------------+
+| Number of following                             | 17                                    |        1.6 |
++-------------------------------------------------+---------------------------------------+------------+
+| Hireable status                                 | True                                  |          1 |
++-------------------------------------------------+---------------------------------------+------------+
+| Number of private repositories                  | 2                                     |       9.33 |
+| Number of public repositories                   | 49                                    |            |
++-------------------------------------------------+---------------------------------------+------------+
+| Account creation date                           | 2024-06-07 13:38:22+00:00             |            |
++-------------------------------------------------+---------------------------------------+------------+
+| Last update date                                | 2025-04-29 16:31:32+00:00             |            |
++-------------------------------------------------+---------------------------------------+------------+
+| Account age                                     | 10 Month(s)                           |        9.0 |
++-------------------------------------------------+---------------------------------------+------------+
+| Average number of commits per repository        | 10.98                                 |       3.61 |
++-------------------------------------------------+---------------------------------------+------------+
+| Average commit frequency (days between commits) | 5.58                                  |       0.31 |
++-------------------------------------------------+---------------------------------------+------------+
+| Average number of commits per day               | 2.88                                  |       2.95 |
++-------------------------------------------------+---------------------------------------+------------+
+| Subscription plan                               | Plan(name="free")                     |          0 |
++-------------------------------------------------+---------------------------------------+------------+
+| Blog                                            | https://vk.com/poc_norm               |          2 |
++-------------------------------------------------+---------------------------------------+------------+
+| Company                                         | What Entertainment                    |          3 |
++-------------------------------------------------+---------------------------------------+------------+
+| Organizations                                   | BigShishkaLove                        |       0.86 |
++-------------------------------------------------+---------------------------------------+------------+
+| Programming languages                           | C++, Python, C#, HTML, SCSS, CMake, C |       6.76 |
++-------------------------------------------------+---------------------------------------+------------+
+Profile assessment: 41.8
+
+...
+```
+
+## Technologies used
+
+| Technology   | Assignment                  | Version |
+|--------------|-----------------------------|---------|
+| PyTorch      | Machine Learning            | 2.0+    |
+| PyGithub     | Working with the GitHub API | 1.55+   |
+| PrettyTable  | Data Visualization          | 3.0+    |
+| tqdm         | Progress Bars               | 4.0+    |
+| pandas       | data processing             | 1.5+    |
+| scikit-learn | Evaluation Metrics          | 1.2+    |
+| GPT-4        | Code Analysis               | -       |
+
+## Конфигурация
+
+Evaluation parameters are customized via JSON files:
+- `field_score.json` - weights for different metrics
+- `max_value.json` - maximum values for normalization
+- `tour_field.json` - tournament evaluation parameters
+
+## Additional features
+
+1. **Synthetic Data Generation**:
+   - Creates profiles of different levels (beginner, intermediate, expert)
+   - Used for model training
+
+2. **Detailed Repository Analysis**:
+   - Activity estimation
+   - Commits analysis
+   - Popularity estimation
+
+3. **Saving results**:
+   - TXT format
+   - With a choice of saving location
+
+

@@ -4,6 +4,7 @@ tests/storage/
 .idea/
 .pytest_cache/
 __pycache__/
+for_pr_readme.md
 # Игнорировать временные файлы
 *~
 *.py[cod]
