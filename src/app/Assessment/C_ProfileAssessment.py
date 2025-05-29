@@ -27,12 +27,12 @@ class ProfileAssessment:
         new_data = pd.DataFrame({
             "followers": [self.get_value(int(self.user.followers))],
             "following": [self.get_value(int(self.user.following))],
-            "hireable": [self.get_value(self.user.hireable)],  
+            "hireable": [self.check_string(self.user.hireable)],  
             "repos": [self.get_value(len(self.user.repos_user))],
             "created_update": [self.get_value(self.user.month_usege)],
-            "plan": [self.get_value(self.user.plan)],
-            "blog": [self.get_value(self.user.blog)], 
-            "company": [self.get_value(self.user.company)],
+            "plan": [self.check_plan(self.user.plan)],
+            "blog": [self.check_string(self.user.blog)], 
+            "company": [self.check_string(self.user.company)],
             "org": [self.get_value(len(self.user.org))],
             "languages": [self.get_value(len(self.user.languages))],
             "forks": [0],
@@ -40,7 +40,7 @@ class ProfileAssessment:
             "avg_cont": [1],
             "avg_a_days": [7],
             "frequencyCommits": [self.get_value(self.user.frequency_commits)],
-            "inDayCommits": [self.get_value(self.user.main_repo.commits_in_day)],
+            "inDayCommits": [self.get_value(self.user.in_day_commits)],
             "countCommits": [self.get_value(self.user.count_commits)],
             "avg_views": [3],
             "forks_r": [self.get_value(self.user.main_repo.forks)],
@@ -101,12 +101,19 @@ class ProfileAssessment:
             return default
         if isinstance(value, bool) and not value:
             return default
+        if value == '-':
+            return default
         return value
     
     def check_string(self, value):
         if not value:
             return 0
         if isinstance(value, str) and not value.strip():
+            return 0
+        return 1
+    
+    def check_plan(self, plan):
+        if plan is None or plan.name == "free":
             return 0
         return 1
     

@@ -3,7 +3,7 @@ from tkinter import filedialog
 from src.app.Interface.M_GetInformation import print_assessment
 
 
-def save_user_information(user, assessment, var_kod):
+def save_user_information(user, assessment):
     root = tk.Tk()
     root.withdraw()
     root.attributes('-topmost', True)
@@ -20,15 +20,15 @@ def save_user_information(user, assessment, var_kod):
         root.destroy()
         return
     try:
-        save_to_file(file_path, user, assessment, var_kod)
+        save_to_file(file_path, user, assessment)
         print("Информация пользователя сохранена в файл:", file_path)
     except Exception as e:
         print(f"Ошибка при сохранении файла: {e}")
     finally:
         root.destroy()
 
-def save_to_file(file_path, user, assessment, var_kod):
-    tables_assessment = print_assessment(user, assessment, var_kod)
+def save_to_file(file_path, user, assessment):
+    tables_assessment = print_assessment(user, assessment)
     with open(file_path, 'w', encoding='utf-8') as file:
         for table in tables_assessment:
             file.write(str(table))

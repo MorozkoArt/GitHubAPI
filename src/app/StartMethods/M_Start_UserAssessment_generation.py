@@ -29,15 +29,14 @@ def start_assessment_generation_empty(user_git):
     save_user_information(user_git, assessment, var_kod=2)
 
 
-def start_assessment_generation(user_git, var_kod, var_kod_2):
+def start_assessment_generation(user_git, var_kod_2):
     assessment = ProfileAssessment(user_git)
     assessment_profile = assessment.assessment_profile()
     assessment_kod = 0
     assessment_main_repo = 0
 
-    if var_kod == 1:
-        assessment_main_repo = assessment.assessment_mainrepo()
-        assessment_kod = assessment.assessment_kod(var_kod_2)
+    assessment_main_repo = assessment.assessment_mainrepo()
+    assessment_kod = assessment.assessment_kod(var_kod_2)
 
     print(
         f"Profile assessment: {round(assessment_profile, 2)}, "
@@ -47,7 +46,7 @@ def start_assessment_generation(user_git, var_kod, var_kod_2):
     assessment_value = round((assessment_profile + assessment_main_repo + assessment_kod), 2)
     print(f"Total assessment: {assessment_value}")
 
-    save_user_information(user_git, assessment, var_kod)
+    save_user_information(user_git, assessment)
 
 
 def start_user_assessment_generation(user, public_or_private):
@@ -58,19 +57,12 @@ def start_user_assessment_generation(user, public_or_private):
     else:
         var_kod_2 = 2
         if user_git.main_repo_name:
-            print(
-                f"\nWould you like to assess the main repository ({user_git.main_repo_name}) in more detail? "
-                "(The repository was selected based on activity level)\n"
-                "This will assess the repository and the code files within it."
-            )
-            var_kod = int(input("Enter 1 to assess, or 2 to skip: "))
-            if var_kod == 1:
-                content_kod = start_main_repo_generation(user_git)
-                print("\nCode assessment may take a significant amount of time (from 1 to 15 minutes).")
-                print(f"Code files in the repository {user_git.main_repo.name} for assessment:\n"
-                      f"{textwrap.fill(content_kod, width=65)}\n")
-                print("If the repository contains many code files, assess all or the first five?")
-                var_kod_2 = int(input("Enter 1 to assess all, or 2 to assess the first five: "))
-            start_assessment_generation(user_git, var_kod, var_kod_2)
+            content_kod = start_main_repo_generation(user_git)
+            print("\nCode assessment may take a significant amount of time (from 1 to 15 minutes).")
+            print(f"Code files in the repository {user_git.main_repo.name} for assessment:\n"
+                    f"{textwrap.fill(content_kod, width=65)}\n")
+            print("If the repository contains many code files, assess all or the first five?")
+            var_kod_2 = int(input("Enter 1 to assess all, or 2 to assess the first five: "))
+            start_assessment_generation(user_git, var_kod_2)
         else:
             start_assessment_generation_empty(user_git)

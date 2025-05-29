@@ -1,7 +1,7 @@
 from prettytable import PrettyTable, HRuleStyle
 import textwrap
 
-def print_assessment(user, assessment, var_kod):
+def print_assessment(user, assessment):
     tables = []
     assessment_profile_dict = assessment.assessment_profile_dict
     assessment_repo_main_dict = assessment.assessment_repo_main_dict
@@ -44,7 +44,7 @@ def print_assessment(user, assessment, var_kod):
     tables.append(str3)
     tables.append("\n\n")
 
-    if var_kod == 1:
+    if user.repos.totalCount != 0 or user.main_repo_name != "" :
         str_repo_main = f"Repository selected for detailed analysis: {user.main_repo.name}\n"
         x_r_m = PrettyTable(hrules=HRuleStyle.ALL)
         x_r_m.field_names = ["Field name", "Significance", "Assessment"]
@@ -100,7 +100,7 @@ def print_assessment(user, assessment, var_kod):
 
     str3 = f"Total profile assessment: {round(assessment.score_profile, 2)}\n"
     tables.append(str3)
-    if var_kod == 1:
+    if user.repos.totalCount != 0 or user.main_repo_name != "" :
         str_main_repo = f"Main repository assessment: {round(assessment.score_main_repos, 2)}\n"
         str_kod = f"Average code files assessment: {round(assessment.score_kod, 2)}\n"
         tables.append(str_main_repo)
