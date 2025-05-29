@@ -10,7 +10,7 @@ class ProfileAssessment:
         self.field_score = load_config(config_file)
         self.max_value = load_config(config_file2)
         self.user = user
-        self.predicted_scor = self.model_assessment()
+        self.predicted_scores = self.model_assessment()
         self.field_index_map = self.create_field_index_map()
         self.assessment_kod_list = []
         self.assessment_profile_dict = {}
@@ -28,8 +28,6 @@ class ProfileAssessment:
             "followers": [self.get_value(int(self.user.followers))],
             "following": [self.get_value(int(self.user.following))],
             "hireable": [self.check_string(self.user.hireable)],  
-            "repos": [self.get_value(len(self.user.repos_user))],
-            "created_update": [self.get_value(self.user.month_usege)],
             "plan": [self.check_plan(self.user.plan)],
             "blog": [self.check_string(self.user.blog)], 
             "company": [self.check_string(self.user.company)],
@@ -43,16 +41,18 @@ class ProfileAssessment:
             "inDayCommits": [self.get_value(self.user.in_day_commits)],
             "countCommits": [self.get_value(self.user.count_commits)],
             "avg_views": [3],
+            "repos": [self.get_value(len(self.user.repos_user))],
+            "created_update": [self.get_value(self.user.month_usege)],
             "forks_r": [self.get_value(self.user.main_repo.forks)],
             "stars_r": [self.get_value(self.user.main_repo.stargazers_count)],
             "cont_count": [self.get_value(self.user.main_repo.contributors_count)],
-            "active_days_r": [self.get_value(self.user.main_repo.days_work)],
             "commits_repo": [self.get_value(self.user.main_repo.commits_count)],
             "frequency_repo": [self.get_value(self.user.main_repo.commits_frequency)],
             "inDay_repo": [self.get_value(self.user.main_repo.commits_in_day)],
             "addLine": [self.get_value(self.user.main_repo.commits_add_lines)],
             "delLine": [self.get_value(self.user.main_repo.commits_del_lines)],
-            "count_views": [self.get_value(self.user.main_repo.count_views)]
+            "count_views": [self.get_value(self.user.main_repo.count_views)],
+            "active_days_r": [self.get_value(self.user.main_repo.days_work)]
         })
 
         inputs = torch.tensor(new_data.values, dtype=torch.float32)

@@ -1,5 +1,5 @@
 import math
-from src.api.Config.M_LoadConfig import load_config
+from src.app.Config.M_LoadConfig import load_config
 
 
 class Assessment:

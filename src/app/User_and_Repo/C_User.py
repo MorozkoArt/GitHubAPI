@@ -8,7 +8,7 @@ class User_GitHub:
     def __init__(self, user, public_or_private):
         self.repos = user.get_repos()
         total = (self.repos.totalCount+1)
-        self.prbar = ProgressBar(total, "Загрузка данных о пользователе: ")
+        self.prbar = ProgressBar(total, "Loading user data: ")
         self.name = user.login
         self.followers = user.followers
         self.following = user.following

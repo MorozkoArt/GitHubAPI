@@ -21,7 +21,7 @@ class Main_repo(User_repo):
 
     def __init__(self, user_repo, repo):
         total = (repo.get_commits().totalCount + 2)
-        self.prbar = ProgressBar(total, "Загрузка данных о репозитории: ")
+        self.prbar = ProgressBar(total, "Downloading repository data: ")
         self.__dict__.update(user_repo.__dict__)
         self.prbar.update_pd()
         commits_add_lines_value, commits_del_lines_value = self.commits_line_change()
