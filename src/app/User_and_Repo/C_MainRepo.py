@@ -1,7 +1,7 @@
 import os
 import shutil
-from src.api.User_and_Repo.C_UserRepo import User_repo
-from src.api.Interface.C_ProgressBar import ProgressBar
+from src.app.User_and_Repo.C_UserRepo import User_repo
+from src.app.Interface.C_ProgressBar import ProgressBar
 
 class Main_repo(User_repo):
 

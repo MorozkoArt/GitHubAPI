@@ -1,7 +1,7 @@
 import textwrap
-from src.api.User_and_Repo.C_User import User_GitHub
-from src.api.Assessment.C_ProfileAssessment import ProfileAssessment
-from src.api.Interface.M_SaveInformation import save_user_information
+from src.app.User_and_Repo.C_User import User_GitHub
+from src.app.Assessment.C_ProfileAssessment import ProfileAssessment
+from src.app.Interface.M_SaveInformation import save_user_information
 
 def start_main_repo_generation(user_git):
     user_git.find_main_repo()
@@ -18,10 +18,8 @@ def start_assessment_generation_empty(user_git):
     elif user_git.main_repo_name == "":
         print("The user has no repositories containing code files.")
         if len(user_git.repos_user) != 0:
-            assessment_repos = assessment.assessment_repos()
             print(f"Profile assessment: {round(assessment_profile, 2)}")
-            print(f"Repositories assessment: {round(assessment_repos, 2)}")
-            assessment_value = round((assessment_profile + assessment_repos), 2)
+            assessment_value = round((assessment_profile), 2)
         else:
             print("All existing repositories are empty.")
             print(f"Profile assessment: {round(assessment_profile, 2)}")
@@ -34,7 +32,6 @@ def start_assessment_generation_empty(user_git):
 def start_assessment_generation(user_git, var_kod, var_kod_2):
     assessment = ProfileAssessment(user_git)
     assessment_profile = assessment.assessment_profile()
-    assessment_repos = assessment.assessment_repos()
     assessment_kod = 0
     assessment_main_repo = 0
 
@@ -44,11 +41,10 @@ def start_assessment_generation(user_git, var_kod, var_kod_2):
 
     print(
         f"Profile assessment: {round(assessment_profile, 2)}, "
-        f"Repositories assessment: {round(assessment_repos, 2)}, "
         f"Main repository assessment: {round(assessment_main_repo, 2)}, "
         f"Code assessment: {round(assessment_kod, 2)}"
     )
-    assessment_value = round((assessment_profile + assessment_repos + assessment_main_repo + assessment_kod), 2)
+    assessment_value = round((assessment_profile + assessment_main_repo + assessment_kod), 2)
     print(f"Total assessment: {assessment_value}")
 
     save_user_information(user_git, assessment, var_kod)

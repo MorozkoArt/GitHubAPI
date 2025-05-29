@@ -1,6 +1,6 @@
-from src.api.Interface.C_ProgressBar import ProgressBar
-from src.api.User_and_Repo.C_UserRepo import User_repo
-from src.api.User_and_Repo.C_MainRepo import Main_repo
+from src.app.Interface.C_ProgressBar import ProgressBar
+from src.app.User_and_Repo.C_UserRepo import User_repo
+from src.app.User_and_Repo.C_MainRepo import Main_repo
 from github import UnknownObjectException
 
 

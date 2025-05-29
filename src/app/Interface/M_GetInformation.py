@@ -4,7 +4,6 @@ import textwrap
 def print_assessment(user, assessment, var_kod):
     tables = []
     assessment_profile_dict = assessment.assessment_profile_dict
-    assessment_repos_list = assessment.assessment_repos_list
     assessment_repo_main_dict = assessment.assessment_repo_main_dict
     assessment_kod_list = assessment.assessment_kod_list
 
@@ -44,45 +43,6 @@ def print_assessment(user, assessment, var_kod):
     tables.append(x)
     tables.append(str3)
     tables.append("\n\n")
-
-    if user.repos.totalCount != 0:
-        str4 = f"Repositories data and their assessment: \n"
-        tables.append(str4)
-        if len(user.empty_repos) != 0:
-            str_empty = f"Empty repositories: {textwrap.fill(', '.join(map(str, user.empty_repos)), width=60)}\n"
-            tables.append(str_empty)
-        tables.append("\n")
-
-        for i in range(len(assessment_repos_list)):
-            str_repo1 = f"Repository №-{i + 1}: {user.repos_user[i].name}\n"
-            x_r = PrettyTable(hrules=HRuleStyle.ALL)
-            x_r.field_names = ["Field name", "Significance", "Assessment"]
-            x_r.add_row(["Repository name", user.repos_user[i].name, "-"])
-            x_r.add_row(["Programming language", user.repos_user[i].language, "-"])
-            x_r.add_row(["Number of forks", user.repos_user[i].forks, round(assessment_repos_list[i].get("forks"), 2)])
-            x_r.add_row(["Number of stars", user.repos_user[i].stargazers_count, round(assessment_repos_list[i].get("stargazers_count"), 2)])
-            x_r.add_row(["Number of contributors", user.repos_user[i].contributors_count, round(assessment_repos_list[i].get("contributors_count"), 2)])
-            x_r.add_row(["Repository creation date\n"
-                         "Last update date\n"
-                         "Active duration (from first to last commit)", f"{user.repos_user[i].created_at}\n"
-                                                                       f"{user.repos_user[i].last_date}\n"
-                                                                       f"{user.repos_user[i].days_usege} Day(s)", "-"])
-            x_r.add_row(["Number of active days (days with commits)", f"{user.repos_user[i].days_work} Day(s)", round(assessment_repos_list[i].get("days_work"), 2)])
-            x_r.add_row(["Number of commits", user.repos_user[i].commits_count, round(assessment_repos_list[i].get("commits_count"), 2)])
-            x_r.add_row(["Average commit frequency (days between commits)", (round(user.repos_user[i].commits_frequency, 2) if user.repos_user[i].commits_frequency != "NULL" else "NULL"), round(assessment_repos_list[i].get("frequencyCommits"), 2)])
-            x_r.add_row(["Average number of commits per day", (round(user.repos_user[i].commits_in_day, 2) if user.repos_user[i].commits_in_day != "NULL" else "NULL"), round(assessment_repos_list[i].get("inDayCommits"), 2)])
-            x_r.add_row(["Number of repository views", user.repos_user[i].count_views, round(assessment_repos_list[i].get("count_views"), 2)])
-            x_r.align["Field name"] = "l"
-            x_r.align["Significance"] = "l"
-            x_r.align["Assessment"] = "r"
-            x_r.border = True
-            x_r.header = True
-            x_r.padding_width = 1
-            str_repo2 = f"\nTotal repository assessment: {round(sum(value for value in assessment_repos_list[i].values() if isinstance(value, (int, float))), 2)}"
-            tables.append(str_repo1)
-            tables.append(x_r)
-            tables.append(str_repo2)
-            tables.append("\n\n")
 
     if var_kod == 1:
         str_repo_main = f"Repository selected for detailed analysis: {user.main_repo.name}\n"
@@ -140,15 +100,12 @@ def print_assessment(user, assessment, var_kod):
 
     str3 = f"Total profile assessment: {round(assessment.score_profile, 2)}\n"
     tables.append(str3)
-    if assessment.average_score_repos != 0:
-        str_repo = f"Average repositories assessment: {round(assessment.average_score_repos, 2)}\n"
-        tables.append(str_repo)
     if var_kod == 1:
         str_main_repo = f"Main repository assessment: {round(assessment.score_main_repos, 2)}\n"
         str_kod = f"Average code files assessment: {round(assessment.score_kod, 2)}\n"
         tables.append(str_main_repo)
         tables.append(str_kod)
 
-    str_sum = f"Final assessment: {round((assessment.score_profile + assessment.average_score_repos + assessment.score_main_repos + assessment.score_kod), 2)}\n\n\n\n"
+    str_sum = f"Final assessment: {round((assessment.score_profile + assessment.score_main_repos + assessment.score_kod), 2)}\n\n\n\n"
     tables.append(str_sum)
     return tables

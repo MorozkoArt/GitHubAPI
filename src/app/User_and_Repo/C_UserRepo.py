@@ -1,5 +1,5 @@
 import math
-from src.api.Config.M_LoadConfig import load_config
+from src.app.Config.M_LoadConfig import load_config
 
 class User_repo:
     def __init__(self, repo,  publicOrPrivate, config_file="tour_field.json"):

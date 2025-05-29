@@ -5,11 +5,11 @@ from torch.utils.data import DataLoader
 
 from pathlib import Path
 
-from GenerationUsers.M_separation_data import separation
-from GenerationUsers.С_generation_fake_users import GitHubUserGenerator
-from ForModel.C_dataset import GitHubDataset
-from ForModel.C_model import GitHubModel
-from ForModel.M_education import evaluate, train_epoch
+from src.ml.GenerationUsers.M_separation_data import separation
+from src.ml.GenerationUsers.С_generation_fake_users import GitHubUserGenerator
+from src.ml.ForModel.C_dataset import GitHubDataset
+from src.ml.ForModel.C_model import GitHubModel
+from src.ml.ForModel.M_education import evaluate, train_epoch
 
 def main():
     device = torch.device("cuda")

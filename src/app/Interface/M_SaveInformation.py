@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog
-from src.api.Interface.M_GetInformation import print_assessment
+from src.app.Interface.M_GetInformation import print_assessment
 
 
 def save_user_information(user, assessment, var_kod):

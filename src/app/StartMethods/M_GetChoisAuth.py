@@ -1,5 +1,5 @@
-from src.api.StartMethods.M_Start_UserAssessment_generation import start_user_assessment_generation
-from src.api.StartMethods.M_Authentication import login_auth, login_password, login_token
+from src.app.StartMethods.M_Start_UserAssessment_generation import start_user_assessment_generation
+from src.app.StartMethods.M_Authentication import login_auth, login_password, login_token
 
 def get_user_auth_method():
     print("How would you like to authenticate? \n"
