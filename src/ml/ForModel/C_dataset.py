@@ -1,17 +1,14 @@
 import torch
-from sklearn.preprocessing import StandardScaler
 from torch.utils.data import Dataset
 import numpy as np
 
 
 class GitHubDataset(Dataset):
     def __init__(self, features, targets, transform=None):
-        self.scaler = StandardScaler()
-        self.features = torch.tensor(
-            self.scaler.fit_transform(features.values),
-            dtype=torch.float32
-        )
-        self.targets = torch.tensor(targets.values, dtype=torch.float32)
+        self.features = torch.tensor(features.values if hasattr(features, 'values')
+                                    else features.astype(np.float32), dtype=torch.float32)
+        self.targets = torch.tensor(targets.values if hasattr(targets, 'values')
+                                    else targets.astype(np.float32), dtype=torch.float32)
         self.transform = transform
 
     def __len__(self):

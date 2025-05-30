@@ -38,7 +38,6 @@ def evaluate(model, loader, criterion, device):
     all_preds = np.concatenate(all_preds)
     all_targets = np.concatenate(all_targets)
 
-    # Расчет метрик
     mae = mean_absolute_error(all_targets, all_preds)
     r2 = r2_score(all_targets, all_preds)
 
