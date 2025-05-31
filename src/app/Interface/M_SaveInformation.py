@@ -16,14 +16,14 @@ def save_user_information(user, assessment):
         filetypes=[("Text files", "*.txt"), ("All files", "*.*")]
     )
     if not file_path:
-        print("Сохранение файла отменено.")
+        print("File saving canceled")
         root.destroy()
         return
     try:
         save_to_file(file_path, user, assessment)
-        print("Информация пользователя сохранена в файл:", file_path)
+        print("User information saved to file:", file_path)
     except Exception as e:
-        print(f"Ошибка при сохранении файла: {e}")
+        print(f"Error saving file: {e}")
     finally:
         root.destroy()
 

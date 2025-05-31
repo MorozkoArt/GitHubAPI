@@ -232,16 +232,16 @@ class GitHubUserGenerator:
         )
         return scores
 
-    def generate_users(self, count: int = 15000) -> pd.DataFrame:
+    def generate_users(self, count: int = 100000) -> pd.DataFrame:
         data = []
         for i in range(count):
             if i == 0:
                 user_type = "low_values"
-            elif 1 <= i < 5000:
+            elif 1 <= i < 25000:
                 user_type = "beginner"
-            elif 5000 <= i < 10000:
+            elif 25000 <= i < 60000:
                 user_type = "intermediate"
-            elif 10000 <= i < 14999:
+            elif 60000 <= i < 99999:
                 user_type = "advanced"
             else:
                 user_type = "maximum_values"

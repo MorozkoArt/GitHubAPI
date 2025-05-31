@@ -20,20 +20,16 @@ class Main_repo(User_repo):
     )
 
     def __init__(self, user_repo, repo):
-        total = (repo.get_commits().totalCount + 2)
-        self.prbar = ProgressBar(total, "Downloading repository data: ")
         self.__dict__.update(user_repo.__dict__)
-        self.prbar.update_pd()
         commits_add_lines_value, commits_del_lines_value = self.commits_line_change()
         self.repo = repo
         self.commits_add_lines = commits_add_lines_value
         self.commits_del_lines = commits_del_lines_value
         self.contents_kod = self.get_content_kod()
-        self.prbar.update_pd()
         self.name_files = ", ".join(content_file.name for content_file in self.contents_kod)
-        self.prbar.close_pd()
 
     def commits_line_change(self):
+        prbar = ProgressBar(self.commits.totalCount, "Loading repo data: ")
         commits_add_lines_list = []
         commits_del_lines_list = []
         for i in range (self.commits.totalCount):
@@ -43,7 +39,7 @@ class Main_repo(User_repo):
                 if added!=0 or removed!=0:
                     commits_add_lines_list.append(added)
                     commits_del_lines_list.append(removed)
-            self.prbar.update_pd()
+            prbar.update_pd()
 
         if len(commits_add_lines_list)!=0:
             commits_add_lines_value = sum(commits_add_lines_list) / len(commits_add_lines_list)
@@ -53,6 +49,8 @@ class Main_repo(User_repo):
             commits_del_lines_value = sum(commits_del_lines_list) / len(commits_del_lines_list)
         else:
             commits_del_lines_value = "NULL"
+        
+        prbar.close_pd()
         return  commits_add_lines_value, commits_del_lines_value
 
     def get_commit_lines_changed(self, commit):
@@ -91,10 +89,9 @@ class Main_repo(User_repo):
         if not os.path.exists("storage"):
             os.makedirs("storage")
         else:
-            # Проверка, пуста ли директория
             if os.listdir("storage"):
-                shutil.rmtree("storage")  # Удаляем директорию и всё её содержимое
-                os.makedirs("storage")  # Создаём директорию заново
+                shutil.rmtree("storage")
+                os.makedirs("storage")
 
         for file_content in self.contents_kod:
             path = os.path.join("storage", file_content.name)

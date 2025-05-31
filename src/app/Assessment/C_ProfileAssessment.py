@@ -1,5 +1,6 @@
 import torch
 import pandas as pd
+from pathlib import Path
 from src.app.Assessment.C_GPT import GPT
 from src.app.Config.M_LoadConfig import load_config
 from src.ml.ForModel.C_model import GitHubModel
@@ -19,10 +20,16 @@ class ProfileAssessment:
         self.score_main_repos = 0
         self.score_kod = 0
 
+
     def model_assessment(self):
         model = GitHubModel(input_size=28, output_size=28)
-        model.load_state_dict(torch.load('C:/PycharmProjects/GitHubAPI/best_model.pth'))
+        base_dir = Path(__file__).parents[3]
+        path_model = base_dir / "best_model.pth"
+        path_scaler = base_dir / "scaler.pth"
+        model.load_state_dict(torch.load(path_model))
         model.eval()
+
+        scaler = torch.load(path_scaler, weights_only=False) 
 
         new_data = pd.DataFrame({
             "followers": [self.get_value(int(self.user.followers))],
@@ -55,7 +62,7 @@ class ProfileAssessment:
             "active_days_r": [self.get_value(self.user.main_repo.days_work)]
         })
 
-        inputs = torch.tensor(new_data.values, dtype=torch.float32)
+        inputs = torch.tensor(scaler.transform(new_data.values), dtype=torch.float32)
 
         with torch.no_grad():
             predictions = model(inputs)

@@ -7,8 +7,6 @@ from github import UnknownObjectException
 class User_GitHub:
     def __init__(self, user, public_or_private):
         self.repos = user.get_repos()
-        total = (self.repos.totalCount+1)
-        self.prbar = ProgressBar(total, "Loading user data: ")
         self.name = user.login
         self.followers = user.followers
         self.following = user.following
@@ -23,11 +21,8 @@ class User_GitHub:
         self.public_or_private = public_or_private
         self.org = [org_.login for org_ in user.get_orgs()]
         self.month_usege = self.month_usege()
-        self.prbar.update_pd()
         self.main_repo = None
         self.generate_data()
-        self.prbar.close_pd()
-
     
     def get_last_activity(self, user):
         try:
@@ -73,6 +68,7 @@ class User_GitHub:
 
 
     def process_repositories(self):
+        prbar = ProgressBar(self.repos.totalCount, "Loading user data: ")
         commits_frequency = []
         commits_in_day = []
         commits_count = []
@@ -108,8 +104,9 @@ class User_GitHub:
             except Exception as e:
                 empty_repos.append(repo.name)
             finally:
-                self.prbar.update_pd()
+                prbar.update_pd()
 
+        prbar.close_pd()
         return commits_frequency, commits_in_day, commits_count, languages, repos_user, main_repo_name, empty_repos, stars, forks, avg_a_days, avg_cont, avg_views
 
 
