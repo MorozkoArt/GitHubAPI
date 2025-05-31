@@ -22,7 +22,7 @@ class GitHubUserGenerator:
             "count_commits_s", "avg_views_s", "repos_s", "created_update_s",
 
             "forks_r_s", "stars_r_s", "contributors_s", "commits_repo_s",
-            "in_day_repo_s", "frequency_repo_s", "add_line_s", "del_line_s",
+            "frequency_repo_s", "in_day_repo_s", "add_line_s", "del_line_s",
             "count_views_s", "active_days_r_s"
         ]
 

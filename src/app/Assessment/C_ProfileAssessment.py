@@ -33,14 +33,14 @@ class ProfileAssessment:
             "company": [self.check_string(self.user.company)],
             "org": [self.get_value(len(self.user.org))],
             "languages": [self.get_value(len(self.user.languages))],
-            "forks": [0],
-            "stars": [1],
-            "avg_cont": [1],
-            "avg_a_days": [7],
+            "forks": [self.get_value(self.user.forks)],
+            "stars": [self.get_value(self.user.stars)],
+            "avg_cont": [self.get_value(self.user.avg_cont)],
+            "avg_a_days": [self.get_value(self.user.avg_a_days)],
             "frequencyCommits": [self.get_value(self.user.frequency_commits)],
             "inDayCommits": [self.get_value(self.user.in_day_commits)],
             "countCommits": [self.get_value(self.user.count_commits)],
-            "avg_views": [3],
+            "avg_views": [self.get_value(self.user.avg_views)],
             "repos": [self.get_value(len(self.user.repos_user))],
             "created_update": [self.get_value(self.user.month_usege)],
             "forks_r": [self.get_value(self.user.main_repo.forks)],
@@ -130,9 +130,14 @@ class ProfileAssessment:
         self.assessment_profile_dict["company"] = self.get_predicted_value("company")
         self.assessment_profile_dict["org"] = self.get_predicted_value("org")
         self.assessment_profile_dict["language"] = self.get_predicted_value("languages")
+        self.assessment_profile_dict["forks"] = self.get_predicted_value("forks")
+        self.assessment_profile_dict["stars"] = self.get_predicted_value("stars")
+        self.assessment_profile_dict["avg_cont"] = self.get_predicted_value("avg_cont")
+        self.assessment_profile_dict["avg_a_days"] = self.get_predicted_value("avg_a_days")
         self.assessment_profile_dict["countCommits"] = self.get_predicted_value("countCommits")
         self.assessment_profile_dict["inDayCommits"] = self.get_predicted_value("inDayCommits")
         self.assessment_profile_dict["frequencyCommits"] = self.get_predicted_value("frequencyCommits")
+        self.assessment_profile_dict["avg_views"] = self.get_predicted_value("avg_views")
         self.assessment_profile_dict["repositories"] = self.get_predicted_value("repos")
         self.assessment_profile_dict["month_usege"] = self.get_predicted_value("created_update")
         self.score_profile = sum(value for value in self.assessment_profile_dict.values() if isinstance(value, (int, float)))

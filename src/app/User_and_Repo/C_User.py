@@ -15,7 +15,7 @@ class User_GitHub:
         self.hireable = user.hireable
         self.private_repos = user.owned_private_repos
         self.public_repos = user.public_repos
-        self.updated_at = user.updated_at
+        self.updated_at = self.get_last_activity(user) or user.updated_at
         self.created_at = user.created_at
         self.plan = user.plan
         self.blog = user.blog
@@ -28,6 +28,17 @@ class User_GitHub:
         self.generate_data()
         self.prbar.close_pd()
 
+    
+    def get_last_activity(self, user):
+        try:
+            events = user.get_public_events()
+            if events.totalCount > 0:
+                last_event = list(events)[0]
+                return last_event.created_at
+        except Exception as e:
+            print(f"Error getting user events: {e}")
+        return None
+
     def generate_data(self):
         repo_data = self.process_repositories()
 
@@ -39,12 +50,22 @@ class User_GitHub:
             self.repos_user = []
             self.main_repo_name = ""
             self.empty_repos = []
+            self.forks = 0
+            self.stars = 0
+            self.avg_a_days = 0
+            self.avg_cont = 0
+            self.avg_views = 0
             return
 
-        frequencies, daily_commits, counts, languages, repos, main_repo_name, empty_repos = repo_data
+        frequencies, daily_commits, counts, languages, repos, main_repo_name, empty_repos, stars, forks, avg_a_days, avg_cont, avg_views = repo_data
         self.frequency_commits = self.calculate_average(frequencies)
         self.in_day_commits = self.calculate_average(daily_commits)
         self.count_commits = self.calculate_average(counts)
+        self.avg_a_days = self.calculate_average(avg_a_days)
+        self.avg_cont = self.calculate_average(avg_cont)
+        self.avg_views = self.calculate_average(avg_views)
+        self.forks = forks
+        self.stars = stars
         self.languages = languages
         self.repos_user = repos
         self.main_repo_name =  main_repo_name
@@ -60,6 +81,11 @@ class User_GitHub:
         empty_repos = []
         main_repo_name = ""
         max_judgement = 0
+        stars = 0
+        forks = 0
+        avg_a_days = []
+        avg_cont = []
+        avg_views = []
 
         for repo in self.repos:
             try:
@@ -67,6 +93,11 @@ class User_GitHub:
                 commits_frequency.append(repo_user.commits_frequency if repo_user.commits_frequency != "NULL" else 0)
                 commits_in_day.append(repo_user.commits_in_day if repo_user.commits_in_day != "NULL" else 0)
                 commits_count.append(repo_user.commits_count)
+                avg_a_days.append(repo_user.days_work)
+                avg_cont.append(repo_user.contributors_count)
+                avg_views.append(repo_user.count_views if repo_user.count_views != '-' else 0)
+                stars += repo_user.stargazers_count
+                forks += repo_user.forks
                 repos_user.append(repo_user)
                 max_judgement, main_repo_name = self.find_main_repo_helper(repo_user, max_judgement, main_repo_name)
                 if repo_user.language and repo_user.language not in languages:
@@ -79,11 +110,11 @@ class User_GitHub:
             finally:
                 self.prbar.update_pd()
 
-        return commits_frequency, commits_in_day, commits_count, languages, repos_user, main_repo_name, empty_repos
+        return commits_frequency, commits_in_day, commits_count, languages, repos_user, main_repo_name, empty_repos, stars, forks, avg_a_days, avg_cont, avg_views
 
 
     def find_main_repo_helper(self, repo_user, max_judgement, main_repo_name):
-        if repo_user.language is not None and repo_user.name != self.name:  # Simplified condition
+        if repo_user.language is not None and repo_user.name != self.name:  
             judgement = repo_user.tournament()
             if judgement > max_judgement:
                 max_judgement = judgement
