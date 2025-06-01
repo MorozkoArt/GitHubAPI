@@ -20,6 +20,54 @@ class ProfileAssessment:
         self.score_main_repos = 0
         self.score_kod = 0
 
+    def assessment_profile(self):
+        self.assessment_profile_dict["followers"] = self.get_predicted_value("followers")
+        self.assessment_profile_dict["following"] = self.get_predicted_value("following")
+        self.assessment_profile_dict["hireable"] = self.get_predicted_value("hireable")
+        self.assessment_profile_dict["plan"] = self.get_predicted_value("plan")
+        self.assessment_profile_dict["blog"] = self.get_predicted_value("blog")
+        self.assessment_profile_dict["company"] = self.get_predicted_value("company")
+        self.assessment_profile_dict["org"] = self.get_predicted_value("org")
+        self.assessment_profile_dict["language"] = self.get_predicted_value("languages")
+        self.assessment_profile_dict["forks"] = self.get_predicted_value("forks")
+        self.assessment_profile_dict["stars"] = self.get_predicted_value("stars")
+        self.assessment_profile_dict["avg_cont"] = self.get_predicted_value("avg_cont")
+        self.assessment_profile_dict["avg_a_days"] = self.get_predicted_value("avg_a_days")
+        self.assessment_profile_dict["countCommits"] = self.get_predicted_value("countCommits")
+        self.assessment_profile_dict["inDayCommits"] = self.get_predicted_value("inDayCommits")
+        self.assessment_profile_dict["frequencyCommits"] = self.get_predicted_value("frequencyCommits")
+        self.assessment_profile_dict["avg_views"] = self.get_predicted_value("avg_views")
+        self.assessment_profile_dict["repositories"] = self.get_predicted_value("repos")
+        self.assessment_profile_dict["month_usege"] = self.get_predicted_value("created_update")
+        self.score_profile = sum(value for value in self.assessment_profile_dict.values() if isinstance(value, (int, float)))
+        return self.score_profile
+
+
+    def assessment_mainrepo(self):
+        self.assessment_repo_main_dict["forks"] = self.get_predicted_value("forks_r")
+        self.assessment_repo_main_dict["stargazers_count"] = self.get_predicted_value("stars_r")
+        self.assessment_repo_main_dict["contributors_count"] = self.get_predicted_value("cont_count")
+        self.assessment_repo_main_dict["commits_count"] = self.get_predicted_value("commits_repo")
+        self.assessment_repo_main_dict["inDayCommits"] = self.get_predicted_value("inDay_repo")
+        self.assessment_repo_main_dict["frequencyCommits"] = self.get_predicted_value("frequency_repo")
+        self.assessment_repo_main_dict["addLine"] = self.get_predicted_value("addLine")
+        self.assessment_repo_main_dict["delLine"] = self.get_predicted_value("delLine")
+        self.assessment_repo_main_dict["days_work"] = self.get_predicted_value("active_days_r")
+        self.assessment_repo_main_dict["count_views"] = self.get_predicted_value("count_views")
+        self.score_main_repos = sum(value for value in self.assessment_repo_main_dict.values() if isinstance(value, (int, float)))
+        return self.score_main_repos
+
+
+    def assessment_kod(self, full_or_three):
+        list_of_path = self.user.main_repo.dounloud_mainRepo()
+        chat_gpt = GPT(list_of_path)
+        self.assessment_kod_list = chat_gpt.evaluate_codeS(full_or_three)
+        for i in range (len(self.assessment_kod_list)):
+            text, marks, file_name = self.assessment_kod_list[i]
+            self.score_kod+=marks
+        self.score_kod = (self.score_kod/len(self.assessment_kod_list))*5
+        return self.score_kod
+    
 
     def model_assessment(self):
         model = GitHubModel(input_size=28, output_size=28)
@@ -104,77 +152,33 @@ class ProfileAssessment:
     def get_value(self, value, default=0):
         if value is None:
             return default
-        if isinstance(value, str) and not value.strip():
+        elif isinstance(value, str) and not value.strip():
             return default
-        if isinstance(value, bool) and not value:
+        elif isinstance(value, bool) and not value:
             return default
-        if value == '-':
+        elif value == "-":
+            return default
+        elif value == "None":
             return default
         return value
     
     def check_string(self, value):
         if not value:
             return 0
-        if isinstance(value, str) and not value.strip():
+        elif isinstance(value, str) and not value.strip():
+            return 0
+        elif value == "None":
             return 0
         return 1
     
     def check_plan(self, plan):
-        if plan is None or plan.name == "free":
+        if plan is None or plan.name == "free" or plan == "None" :
             return 0
         return 1
     
     def get_predicted_value(self, field_name):
         index = self.field_index_map[field_name]
         return float(self.predicted_scores[0][index])
-
-    def assessment_profile(self):
-        self.assessment_profile_dict["followers"] = self.get_predicted_value("followers")
-        self.assessment_profile_dict["following"] = self.get_predicted_value("following")
-        self.assessment_profile_dict["hireable"] = self.get_predicted_value("hireable")
-        self.assessment_profile_dict["plan"] = self.get_predicted_value("plan")
-        self.assessment_profile_dict["blog"] = self.get_predicted_value("blog")
-        self.assessment_profile_dict["company"] = self.get_predicted_value("company")
-        self.assessment_profile_dict["org"] = self.get_predicted_value("org")
-        self.assessment_profile_dict["language"] = self.get_predicted_value("languages")
-        self.assessment_profile_dict["forks"] = self.get_predicted_value("forks")
-        self.assessment_profile_dict["stars"] = self.get_predicted_value("stars")
-        self.assessment_profile_dict["avg_cont"] = self.get_predicted_value("avg_cont")
-        self.assessment_profile_dict["avg_a_days"] = self.get_predicted_value("avg_a_days")
-        self.assessment_profile_dict["countCommits"] = self.get_predicted_value("countCommits")
-        self.assessment_profile_dict["inDayCommits"] = self.get_predicted_value("inDayCommits")
-        self.assessment_profile_dict["frequencyCommits"] = self.get_predicted_value("frequencyCommits")
-        self.assessment_profile_dict["avg_views"] = self.get_predicted_value("avg_views")
-        self.assessment_profile_dict["repositories"] = self.get_predicted_value("repos")
-        self.assessment_profile_dict["month_usege"] = self.get_predicted_value("created_update")
-        self.score_profile = sum(value for value in self.assessment_profile_dict.values() if isinstance(value, (int, float)))
-        return self.score_profile
-
-
-    def assessment_mainrepo(self):
-        self.assessment_repo_main_dict["forks"] = self.get_predicted_value("forks_r")
-        self.assessment_repo_main_dict["stargazers_count"] = self.get_predicted_value("stars_r")
-        self.assessment_repo_main_dict["contributors_count"] = self.get_predicted_value("cont_count")
-        self.assessment_repo_main_dict["commits_count"] = self.get_predicted_value("commits_repo")
-        self.assessment_repo_main_dict["inDayCommits"] = self.get_predicted_value("inDay_repo")
-        self.assessment_repo_main_dict["frequencyCommits"] = self.get_predicted_value("frequency_repo")
-        self.assessment_repo_main_dict["addLine"] = self.get_predicted_value("addLine")
-        self.assessment_repo_main_dict["delLine"] = self.get_predicted_value("delLine")
-        self.assessment_repo_main_dict["days_work"] = self.get_predicted_value("active_days_r")
-        self.assessment_repo_main_dict["count_views"] = self.get_predicted_value("count_views")
-        self.score_main_repos = sum(value for value in self.assessment_repo_main_dict.values() if isinstance(value, (int, float)))
-        return self.score_main_repos
-
-
-    def assessment_kod(self, full_or_three):
-        list_of_path = self.user.main_repo.dounloud_mainRepo()
-        chat_gpt = GPT(list_of_path)
-        self.assessment_kod_list = chat_gpt.evaluate_codeS(full_or_three)
-        for i in range (len(self.assessment_kod_list)):
-            text, marks, file_name = self.assessment_kod_list[i]
-            self.score_kod+=marks
-        self.score_kod = (self.score_kod/len(self.assessment_kod_list))*5
-        return self.score_kod
 
 
 

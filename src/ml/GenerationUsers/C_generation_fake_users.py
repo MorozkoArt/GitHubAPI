@@ -26,40 +26,42 @@ class GitHubUserGenerator:
             "count_views_s", "active_days_r_s"
         ]
 
-    def _generate_user_data(self, user_type: str) -> dict[str | Any, int | Any] | None:
+    def _generate_user_data(self, user_type: str) -> dict[str, Any] | None:
+        user_data = {}
+        
         if user_type == "low_values":
-            return {
-                "followers": 0,
-                "following": 0,
+            user_data = {
+                "followers": random.randint(0, 5),
+                "following": random.randint(0, 3),
                 "hireable": 0,
                 "plan": 0,
                 "blog": 0,
                 "company": 0,
-                "org": 0,
-                "languages": 0,
+                "org": random.randint(0, 1),
+                "languages": random.randint(0, 1),
                 "forks": 0,
                 "stars": 0,
                 "avg_cont": 0,
-                "avg_a_days": 0,
-                "frequencyCommits": 0,
-                "inDayCommits": 0,
-                "countCommits": 0,
+                "avg_a_days": random.randint(0, 1),
+                "frequencyCommits": round(random.uniform(30.0, 60.0), 2),
+                "inDayCommits": round(random.uniform(0, 2), 2),
+                "countCommits": round(random.uniform(0, 3), 2),
                 "avg_views": 0,
-                "repos": 0,
-                "created_update": 0,
+                "repos": random.randint(0, 2),
+                "created_update": random.randint(0, 2),
                 "forks_r": 0,
                 "stars_r": 0,
                 "cont_count": 0,
-                "commits_repo": 0,
-                "frequency_repo": 666,
-                "inDay_repo": 0,
-                "addLine": 0,
-                "delLine": 0,
+                "commits_repo": random.randint(0, 2),
+                "frequency_repo": round(random.uniform(10.0, 666.0), 2),
+                "inDay_repo": round(random.uniform(0, 1.0), 2),
+                "addLine": random.randint(0, 7),
+                "delLine": random.randint(0, 4),
                 "count_views": 0,
-                "active_days_r": 0
+                "active_days_r": random.randint(0, 2)
             }
         elif user_type == "beginner":
-            return {
+            user_data = {
                 "followers": random.randint(0, 30),
                 "following": random.randint(0, 10),
                 "hireable": random.randint(0, 1),
@@ -71,8 +73,8 @@ class GitHubUserGenerator:
                 "forks": random.randint(0, 5),
                 "stars": random.randint(0, 5),
                 "avg_cont": random.randint(0, 2),
-                "avg_a_days": random.randint(0,3),
-                "frequencyCommits": round(random.uniform(5.0, 20), 2),
+                "avg_a_days": random.randint(0, 3),
+                "frequencyCommits": round(random.uniform(5.0, 30.0), 2),
                 "inDayCommits": round(random.uniform(1, 2), 2),
                 "countCommits": round(random.uniform(1, 10), 2),
                 "avg_views": random.randint(0, 5),
@@ -86,11 +88,11 @@ class GitHubUserGenerator:
                 "inDay_repo": round(random.uniform(1.0, 2), 2),
                 "addLine": random.randint(0, 15),
                 "delLine": random.randint(0, 8),
-                "count_views": random.randint(0, 50),
+                "count_views": random.randint(0, 10),
                 "active_days_r": random.randint(1, 5)
             }
         elif user_type == "intermediate":
-            return {
+            user_data = {
                 "followers": random.randint(5, 1000),
                 "following": random.randint(10, 60),
                 "hireable": random.randint(0, 1),
@@ -117,11 +119,11 @@ class GitHubUserGenerator:
                 "inDay_repo": round(random.uniform(2.0, 3.0), 2),
                 "addLine": random.randint(15, 65),
                 "delLine": random.randint(8, 18),
-                "count_views": random.randint(0, 550),
+                "count_views": random.randint(0, 50),
                 "active_days_r": random.randint(3, 8)
             }
         elif user_type == "advanced":
-            return {
+            user_data = {
                 "followers": random.randint(1000, 5000),
                 "following": random.randint(60, 200),
                 "hireable": random.randint(0, 1),
@@ -148,40 +150,103 @@ class GitHubUserGenerator:
                 "inDay_repo": round(random.uniform(3.0, 5), 2),
                 "addLine": random.randint(65, 150),
                 "delLine": random.randint(18, 50),
-                "count_views": random.randint(550, 3000),
+                "count_views": random.randint(50, 1000),
                 "active_days_r": random.randint(8, 25)
             }
         elif user_type == "maximum_values":
-            return {
-                "followers": self.assessment.max_value["followers"],
-                "following": self.assessment.max_value["following"],
+            scale = 10
+            user_data = {
+                "followers": random.randint(self.assessment.max_value["followers"], scale*self.assessment.max_value["followers"]),
+                "following": random.randint(self.assessment.max_value["following"], scale*self.assessment.max_value["following"]),
                 "hireable": 1,
                 "plan": 1,
                 "blog": 1,
                 "company": 1,
-                "org": self.assessment.max_value["org"],
-                "languages": self.assessment.max_value["languages"],
-                "forks": self.assessment.max_value["forks"],
-                "stars": self.assessment.max_value["stars"],
-                "avg_cont": self.assessment.max_value["avg_cont"],
-                "avg_a_days": self.assessment.max_value["avg_a_days"],
+                "org": random.randint(self.assessment.max_value["org"], scale*self.assessment.max_value["org"]),
+                "languages": random.randint(self.assessment.max_value["languages"], scale*self.assessment.max_value["languages"]),
+                "forks": random.randint(self.assessment.max_value["forks"], (scale**3)*self.assessment.max_value["forks"]),
+                "stars": random.randint(self.assessment.max_value["stars"], (scale**3)*self.assessment.max_value["stars"]),
+                "avg_cont": random.randint(self.assessment.max_value["avg_cont"], scale*self.assessment.max_value["avg_cont"]),
+                "avg_a_days": random.randint(self.assessment.max_value["avg_a_days"], scale*self.assessment.max_value["avg_a_days"]),
                 "frequencyCommits": 0,
-                "inDayCommits": self.assessment.max_value["inDayCommits"],
-                "countCommits": self.assessment.max_value["countCommits"],
-                "avg_views": self.assessment.max_value["avg_views"],
-                "repos": self.assessment.max_value["repos"],
-                "created_update": self.assessment.max_value["created_update"],
-                "forks_r": self.assessment.max_value["forks_r"],
-                "stars_r": self.assessment.max_value["stars_r"],
-                "cont_count": self.assessment.max_value["cont_count"],
-                "commits_repo": self.assessment.max_value["commits_repo"],
+                "inDayCommits": round(random.uniform(self.assessment.max_value["inDayCommits"], scale*self.assessment.max_value["inDayCommits"]), 2),
+                "countCommits": round(random.uniform(self.assessment.max_value["countCommits"], scale*self.assessment.max_value["countCommits"]), 2),
+                "avg_views": random.randint(self.assessment.max_value["avg_views"], scale*self.assessment.max_value["avg_views"]),
+                "repos": random.randint(self.assessment.max_value["repos"], scale*self.assessment.max_value["repos"]),
+                "created_update": random.randint(self.assessment.max_value["created_update"], scale*self.assessment.max_value["created_update"]),
+                "forks_r": random.randint(self.assessment.max_value["forks_r"], (scale**3)*self.assessment.max_value["forks_r"]),
+                "stars_r": random.randint(self.assessment.max_value["stars_r"], (scale**3)*self.assessment.max_value["stars_r"]),
+                "cont_count": random.randint(self.assessment.max_value["cont_count"], scale*self.assessment.max_value["cont_count"]),
+                "commits_repo": random.randint(self.assessment.max_value["commits_repo"], scale*self.assessment.max_value["commits_repo"]),
                 "frequency_repo": 0,
-                "inDay_repo": self.assessment.max_value["inDay_repo"],
-                "addLine": self.assessment.max_value["addLine"],
-                "delLine": self.assessment.max_value["delLine"],
-                "count_views": self.assessment.max_value["count_views"],
-                "active_days_r": self.assessment.max_value["active_days_r"]
+                "inDay_repo": round(random.uniform(self.assessment.max_value["inDay_repo"], scale*self.assessment.max_value["inDay_repo"]), 2),
+                "addLine": random.randint(self.assessment.max_value["addLine"], scale*self.assessment.max_value["addLine"]),
+                "delLine": random.randint(self.assessment.max_value["delLine"], scale*self.assessment.max_value["delLine"]),
+                "count_views": random.randint(self.assessment.max_value["count_views"], scale*self.assessment.max_value["count_views"]),
+                "active_days_r": random.randint(self.assessment.max_value["active_days_r"], scale*self.assessment.max_value["active_days_r"])
             }
+        else:
+            return None
+        
+        return self._validate_and_fix_user_data(user_data)
+
+    def _validate_and_fix_user_data(self, user_data: dict[str, Any]) -> dict[str, Any]:
+        valid_user_data = user_data.copy()
+
+        if valid_user_data["repos"] == 0:
+            valid_user_data["languages"] = 0
+            valid_user_data["forks"] = 0
+            valid_user_data["stars"] = 0
+            valid_user_data["avg_cont"] = 0
+            valid_user_data["avg_a_days"] = 0
+            valid_user_data["frequencyCommits"] = 666
+            valid_user_data["inDayCommits"] = 0
+            valid_user_data["countCommits"] = 0
+            valid_user_data["avg_views"] = 0
+            valid_user_data["forks_r"] = 0
+            valid_user_data["stars_r"] = 0
+            valid_user_data["cont_count"] = 0
+            valid_user_data["commits_repo"] = 0
+            valid_user_data["frequency_repo"] = 666
+            valid_user_data["inDay_repo"] = 0
+            valid_user_data["addLine"] = 0
+            valid_user_data["delLine"] = 0
+            valid_user_data["count_views"] = 0
+            valid_user_data["active_days_r"] = 0
+
+        if valid_user_data["countCommits"] == 0:
+            valid_user_data["inDayCommits"] = 0
+            valid_user_data["frequencyCommits"] = 666
+            valid_user_data["commits_repo"] = 0
+            valid_user_data["frequency_repo"] = 666
+            valid_user_data["inDay_repo"] = 0
+            valid_user_data["addLine"] = 0
+            valid_user_data["delLine"] = 0
+
+        if valid_user_data["countCommits"] <= valid_user_data["inDayCommits"]:
+
+            if valid_user_data["countCommits"] == valid_user_data["inDayCommits"]:
+                valid_user_data["avg_a_days"] = 1
+
+            elif valid_user_data["countCommits"] < valid_user_data["inDayCommits"]:
+                count_commits = valid_user_data["countCommits"]
+                valid_user_data["countCommits"] =  valid_user_data["inDayCommits"]
+                valid_user_data["inDayCommits"] = count_commits
+
+        if valid_user_data["commits_repo"] <= valid_user_data["inDay_repo"]:
+
+            if valid_user_data["commits_repo"] == valid_user_data["inDay_repo"]:
+                valid_user_data["active_days_r"] = 1
+
+            elif valid_user_data["commits_repo"] < valid_user_data["inDay_repo"]:
+                count_commits = valid_user_data["commits_repo"]
+                valid_user_data["commits_repo"] = valid_user_data["inDay_repo"]
+                valid_user_data["inDay_repo"] = count_commits
+
+        return valid_user_data
+
+
+
 
     def _calculate_scores(self, user_data: Dict[str, Any]) -> Dict[str, float]:
         scores = {}
@@ -235,13 +300,13 @@ class GitHubUserGenerator:
     def generate_users(self, count: int = 100000) -> pd.DataFrame:
         data = []
         for i in range(count):
-            if i == 0:
+            if 0 <= i < 7000:
                 user_type = "low_values"
-            elif 1 <= i < 25000:
+            elif 7000 <= i < 27000:
                 user_type = "beginner"
-            elif 25000 <= i < 60000:
+            elif 27000 <= i < 57000:
                 user_type = "intermediate"
-            elif 60000 <= i < 99999:
+            elif 57000 <= i < 87000:
                 user_type = "advanced"
             else:
                 user_type = "maximum_values"

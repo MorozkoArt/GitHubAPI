@@ -1,23 +1,18 @@
 import torch
 from sklearn.metrics import mean_absolute_error, r2_score
 import numpy as np
-
-from tqdm import tqdm 
+from src.app.Interface.C_ProgressBar import ProgressBar
 
 def train_epoch(model, loader, optimizer, criterion, device):
     model.train()
     total_loss = 0.0
     
-    progress_bar = tqdm(
-        enumerate(loader),
+    progress_bar = ProgressBar(
         total=len(loader),
-        desc="Training",
-        leave=True,
-        ncols=80,                
-        colour="green",          
+        text="Training",
     )
     
-    for batch_idx, (features, targets) in progress_bar:
+    for batch_idx, (features, targets) in enumerate(loader):
         features, targets = features.to(device), targets.to(device)
 
         optimizer.zero_grad()
@@ -27,6 +22,9 @@ def train_epoch(model, loader, optimizer, criterion, device):
         optimizer.step()
         total_loss += loss.item()
         
+        progress_bar.update_pd()
+        
+    progress_bar.close_pd()
     return total_loss / len(loader)
 
 

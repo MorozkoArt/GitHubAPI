@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 
 class GitHubModel(nn.Module):
@@ -18,7 +19,9 @@ class GitHubModel(nn.Module):
             nn.BatchNorm1d(64),
             nn.ReLU(),
 
-            nn.Linear(64, output_size))
+            nn.Linear(64, output_size),
+            nn.ReLU()
+        )
 
     def forward(self, x):
-        return self.net(x)
+        return torch.clamp(self.net(x), max=24)
