@@ -9,7 +9,7 @@
   "stars": 1000,
   "avg_cont": 8,
   "avg_a_days": 15,
-  "inDayCommits": 6,
+  "inDayCommits": 8,
   "countCommits": 100,
   "avg_views": 100,
 
@@ -18,7 +18,7 @@
   "cont_count": 10,
   "active_days_r": 20,
   "commits_repo": 150,
-  "inDay_repo": 4,
+  "inDay_repo": 10,
   "count_views": 500,
 
   "addLine": 100,

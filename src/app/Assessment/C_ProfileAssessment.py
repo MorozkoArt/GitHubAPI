@@ -7,8 +7,7 @@ from src.ml.ForModel.C_model import GitHubModel
 
 class ProfileAssessment:
 
-    def __init__(self, user, config_file="field_score.json", config_file2 = "max_value.json"):
-        self.field_score = load_config(config_file)
+    def __init__(self, user, config_file2 = "max_value.json"):
         self.max_value = load_config(config_file2)
         self.user = user
         self.predicted_scores = self.model_assessment()
@@ -79,35 +78,37 @@ class ProfileAssessment:
 
         scaler = torch.load(path_scaler, weights_only=False) 
 
+        scale = 5
+
         new_data = pd.DataFrame({
-            "followers": [self.get_value(int(self.user.followers))],
-            "following": [self.get_value(int(self.user.following))],
+            "followers": [min(self.get_value(int(self.user.followers)), scale * self.max_value["followers"])],
+            "following": [min(self.get_value(int(self.user.following)), scale * self.max_value["following"])],
             "hireable": [self.check_string(self.user.hireable)],  
             "plan": [self.check_plan(self.user.plan)],
             "blog": [self.check_string(self.user.blog)], 
             "company": [self.check_string(self.user.company)],
-            "org": [self.get_value(len(self.user.org))],
-            "languages": [self.get_value(len(self.user.languages))],
-            "forks": [self.get_value(self.user.forks)],
-            "stars": [self.get_value(self.user.stars)],
-            "avg_cont": [self.get_value(self.user.avg_cont)],
-            "avg_a_days": [self.get_value(self.user.avg_a_days)],
+            "org": [min(self.get_value(len(self.user.org)), scale * self.max_value["org"])],
+            "languages": [min(self.get_value(len(self.user.languages)), scale * self.max_value["languages"])],
+            "forks": [min(self.get_value(self.user.forks), scale * self.max_value["forks"])],
+            "stars": [min(self.get_value(self.user.stars), scale * self.max_value["stars"])],
+            "avg_cont": [min(self.get_value(self.user.avg_cont), scale * self.max_value["avg_cont"])],
+            "avg_a_days": [min(self.get_value(self.user.avg_a_days), scale * self.max_value["avg_a_days"])],
             "frequencyCommits": [self.get_value(self.user.frequency_commits)],
-            "inDayCommits": [self.get_value(self.user.in_day_commits)],
-            "countCommits": [self.get_value(self.user.count_commits)],
-            "avg_views": [self.get_value(self.user.avg_views)],
-            "repos": [self.get_value(len(self.user.repos_user))],
-            "created_update": [self.get_value(self.user.month_usege)],
-            "forks_r": [self.get_value(self.user.main_repo.forks)],
-            "stars_r": [self.get_value(self.user.main_repo.stargazers_count)],
-            "cont_count": [self.get_value(self.user.main_repo.contributors_count)],
-            "commits_repo": [self.get_value(self.user.main_repo.commits_count)],
+            "inDayCommits": [min(self.get_value(self.user.in_day_commits), scale * self.max_value["inDayCommits"])],
+            "countCommits": [min(self.get_value(self.user.count_commits), scale * self.max_value["countCommits"])],
+            "avg_views": [min(self.get_value(self.user.avg_views), scale * self.max_value["avg_views"])],
+            "repos": [min(self.get_value(len(self.user.repos_user)), scale * self.max_value["repos"])],
+            "created_update": [min(self.get_value(self.user.month_usege), scale * self.max_value["created_update"])],
+            "forks_r": [min(self.get_value(self.user.main_repo.forks), scale * self.max_value["forks_r"])],
+            "stars_r": [min(self.get_value(self.user.main_repo.stargazers_count), scale * self.max_value["stars_r"])],
+            "cont_count": [min(self.get_value(self.user.main_repo.contributors_count), scale * self.max_value["cont_count"])],
+            "commits_repo": [min(self.get_value(self.user.main_repo.commits_count), scale * self.max_value["commits_repo"])],
             "frequency_repo": [self.get_value(self.user.main_repo.commits_frequency)],
-            "inDay_repo": [self.get_value(self.user.main_repo.commits_in_day)],
-            "addLine": [self.get_value(self.user.main_repo.commits_add_lines)],
-            "delLine": [self.get_value(self.user.main_repo.commits_del_lines)],
-            "count_views": [self.get_value(self.user.main_repo.count_views)],
-            "active_days_r": [self.get_value(self.user.main_repo.days_work)]
+            "inDay_repo": [min(self.get_value(self.user.main_repo.commits_in_day), scale * self.max_value["inDay_repo"])],
+            "addLine": [min(self.get_value(self.user.main_repo.commits_add_lines), scale * self.max_value["addLine"])],
+            "delLine": [min(self.get_value(self.user.main_repo.commits_del_lines), scale * self.max_value["delLine"])],
+            "count_views": [min(self.get_value(self.user.main_repo.count_views), scale * self.max_value["count_views"])],
+            "active_days_r": [min(self.get_value(self.user.main_repo.days_work), scale * self.max_value["active_days_r"])]
         })
 
         inputs = torch.tensor(scaler.transform(new_data.values), dtype=torch.float32)
@@ -179,6 +180,8 @@ class ProfileAssessment:
     def get_predicted_value(self, field_name):
         index = self.field_index_map[field_name]
         return float(self.predicted_scores[0][index])
+    
+
 
 
 

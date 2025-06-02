@@ -2,22 +2,9 @@ import os
 import shutil
 from src.app.User_and_Repo.C_UserRepo import User_repo
 from src.app.Interface.C_ProgressBar import ProgressBar
+from src.app.Config.file_extensions import is_code_file
 
 class Main_repo(User_repo):
-
-    code_extensions = code_extensions = (
-        '.py', '.java', '.js', '.cpp', '.c', '.rb', '.go', '.php',
-        '.html', '.css', '.swift', '.ts', '.sh', '.pl', '.r',
-        '.cs', '.bat', '.scala', '.lua', '.rust', '.kotlin', '.vb',
-        '.sql', '.yaml', '.dockerfile', '.m', '.swift',
-        '.d', '.user', '.clj', '.coffee', '.groovy', '.f90', '.asm',
-        '.hs', '.erl', '.ex', '.elm', '.fs', '.fsx', '.ml', '.mli',
-        '.jl', '.nim', '.pas', '.purs', '.re', '.v', '.vhd', '.vhdl',
-        '.zig', '.odin', '.dart', '.tcl', '.awk', '.sed', '.ps1',
-        '.jsx', '.tsx', '.vue', '.svelte', '.pug', '.jade', '.ejs',
-        '.hbs', '.handlebars', '.mustache', '.twig', '.haml', '.scss',
-        '.less', '.styl', '.sass', '.stylus',
-    )
 
     def __init__(self, user_repo, repo):
         self.__dict__.update(user_repo.__dict__)
@@ -59,7 +46,7 @@ class Main_repo(User_repo):
             lines_removed = 0
             if hasattr(commit, 'files'):
                 for file_data in commit.files:
-                    if file_data.filename.lower().endswith(tuple(self.code_extensions)):
+                    if is_code_file(file_data.filename):
                         lines_added += file_data.additions
                         lines_removed += file_data.deletions
             return (lines_added, lines_removed)
@@ -78,14 +65,14 @@ class Main_repo(User_repo):
             if file_content.type == "dir":
                 contents.extend(self.repo.get_contents(file_content.path))
             elif file_content.type == "file":
-                if file_content.name.lower().endswith(self.code_extensions):
+                if is_code_file(file_content.name):
                     contents_kod.append(file_content)
         return contents_kod
 
 
     def dounloud_mainRepo(self):
         list_of_paths = []
-        print(f"Загрузка файлов из репозитория: {self.repo.name}")
+        print(f"Downloading files from the repository: {self.repo.name}")
         if not os.path.exists("storage"):
             os.makedirs("storage")
         else:

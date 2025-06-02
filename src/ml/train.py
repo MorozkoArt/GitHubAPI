@@ -33,18 +33,18 @@ def main():
     val_loader = DataLoader(val_dataset, batch_size=64)
     test_loader = DataLoader(test_dataset, batch_size=64)
 
-    model = GitHubModel(input_size=X_train.shape[1],output_size=y_train.shape[1]).to(device)
+    model_3 = GitHubModel(input_size=X_train.shape[1],output_size=y_train.shape[1]).to(device)
 
     criterion = nn.SmoothL1Loss()
-    optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-5)
+    optimizer = optim.Adam(model_3.parameters(), lr=0.001, weight_decay=1e-5)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=3)
     best_loss = float('inf')
 
     for epoch in range(100):
         print(f"Epoch {epoch + 1}:")
         
-        train_loss = train_epoch(model, train_loader, optimizer, criterion, device)
-        val_loss, val_mae, val_r2 = evaluate(model, val_loader, criterion, device)
+        train_loss = train_epoch(model_3, train_loader, optimizer, criterion, device)
+        val_loss, val_mae, val_r2 = evaluate(model_3, val_loader, criterion, device)
         scheduler.step(val_loss)
 
         print(f"  Train Loss: {train_loss:.4f}")
@@ -52,12 +52,12 @@ def main():
 
         if val_loss < best_loss:
             best_loss = val_loss
-            torch.save(model.state_dict(), "best_model.pth")
+            torch.save(model_3.state_dict(), "best_model.pth")
             print("  Saved best model!")
 
     print("\nTesting best model...")
-    model.load_state_dict(torch.load("best_model.pth"))
-    test_loss, test_mae, test_r2 = evaluate(model, test_loader, criterion, device)
+    model_3.load_state_dict(torch.load("best_model.pth"))
+    test_loss, test_mae, test_r2 = evaluate(model_3, test_loader, criterion, device)
     print(f"Test Loss: {test_loss:.4f}, MAE: {test_mae:.4f}, R2: {test_r2:.4f}")
 
     torch.save(train_dataset.get_scaler(), 'scaler.pth')

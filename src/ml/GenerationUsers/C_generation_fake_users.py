@@ -30,7 +30,7 @@ class GitHubUserGenerator:
         user_data = {}
         
         if user_type == "low_values":
-            user_data = {
+            user_data =  {
                 "followers": random.randint(0, 5),
                 "following": random.randint(0, 3),
                 "hireable": 0,
@@ -44,7 +44,7 @@ class GitHubUserGenerator:
                 "avg_cont": 0,
                 "avg_a_days": random.randint(0, 1),
                 "frequencyCommits": round(random.uniform(30.0, 60.0), 2),
-                "inDayCommits": round(random.uniform(0, 2), 2),
+                "inDayCommits": round(random.uniform(0, 1), 2),
                 "countCommits": round(random.uniform(0, 3), 2),
                 "avg_views": 0,
                 "repos": random.randint(0, 2),
@@ -75,7 +75,7 @@ class GitHubUserGenerator:
                 "avg_cont": random.randint(0, 2),
                 "avg_a_days": random.randint(0, 3),
                 "frequencyCommits": round(random.uniform(5.0, 30.0), 2),
-                "inDayCommits": round(random.uniform(1, 2), 2),
+                "inDayCommits": round(random.uniform(1, 3), 2),
                 "countCommits": round(random.uniform(1, 10), 2),
                 "avg_views": random.randint(0, 5),
                 "repos": random.randint(1, 5),
@@ -85,7 +85,7 @@ class GitHubUserGenerator:
                 "cont_count": random.randint(1, 2),
                 "commits_repo": random.randint(1, 10),
                 "frequency_repo": round(random.uniform(4, 10), 2),
-                "inDay_repo": round(random.uniform(1.0, 2), 2),
+                "inDay_repo": round(random.uniform(1.0, 3), 2),
                 "addLine": random.randint(0, 15),
                 "delLine": random.randint(0, 8),
                 "count_views": random.randint(0, 10),
@@ -93,8 +93,8 @@ class GitHubUserGenerator:
             }
         elif user_type == "intermediate":
             user_data = {
-                "followers": random.randint(5, 1000),
-                "following": random.randint(10, 60),
+                "followers": random.randint(0, 1000),
+                "following": random.randint(0, 60),
                 "hireable": random.randint(0, 1),
                 "plan": random.randint(0, 1),
                 "blog": random.randint(0, 1),
@@ -106,17 +106,17 @@ class GitHubUserGenerator:
                 "avg_cont": random.randint(0, 4),
                 "avg_a_days": random.randint(0, 5),
                 "frequencyCommits": round(random.uniform(2.4, 5), 2),
-                "inDayCommits": round(random.uniform(2, 3.5), 2),
+                "inDayCommits": round(random.uniform(1, 4), 2),
                 "countCommits": round(random.uniform(10, 38), 2),
                 "avg_views": random.randint(0, 20),
                 "repos": random.randint(0, 15),
                 "created_update": random.randint(4, 20),
                 "forks_r": random.randint(0, 6),
-                "stars_r": random.randint(5, 200),
+                "stars_r": random.randint(0, 50),
                 "cont_count": random.randint(0, 6),
                 "commits_repo": random.randint(10, 30),
                 "frequency_repo": round(random.uniform(1.8, 4), 2),
-                "inDay_repo": round(random.uniform(2.0, 3.0), 2),
+                "inDay_repo": round(random.uniform(1.0, 5.0), 2),
                 "addLine": random.randint(15, 65),
                 "delLine": random.randint(8, 18),
                 "count_views": random.randint(0, 50),
@@ -137,8 +137,8 @@ class GitHubUserGenerator:
                 "avg_cont": random.randint(4, 10),
                 "avg_a_days": random.randint(5, 20),
                 "frequencyCommits": round(random.uniform(0.0, 2.4), 2),
-                "inDayCommits": round(random.uniform(3.5, 7), 2),
-                "countCommits": round(random.uniform(38, 150), 2),
+                "inDayCommits": round(random.uniform(3, 10), 2),
+                "countCommits": round(random.uniform(38, 200), 2),
                 "avg_views": random.randint(20, 400),
                 "repos": random.randint(15, 30),
                 "created_update": random.randint(20, 36),
@@ -147,7 +147,7 @@ class GitHubUserGenerator:
                 "cont_count": random.randint(6, 12),
                 "commits_repo": random.randint(30, 170),
                 "frequency_repo": round(random.uniform(0.0, 1.8), 2),
-                "inDay_repo": round(random.uniform(3.0, 5), 2),
+                "inDay_repo": round(random.uniform(3.0, 12), 2),
                 "addLine": random.randint(65, 150),
                 "delLine": random.randint(18, 50),
                 "count_views": random.randint(50, 1000),
@@ -164,8 +164,8 @@ class GitHubUserGenerator:
                 "company": 1,
                 "org": random.randint(self.assessment.max_value["org"], scale*self.assessment.max_value["org"]),
                 "languages": random.randint(self.assessment.max_value["languages"], scale*self.assessment.max_value["languages"]),
-                "forks": random.randint(self.assessment.max_value["forks"], (scale**3)*self.assessment.max_value["forks"]),
-                "stars": random.randint(self.assessment.max_value["stars"], (scale**3)*self.assessment.max_value["stars"]),
+                "forks": random.randint(self.assessment.max_value["forks"], scale*self.assessment.max_value["forks"]),
+                "stars": random.randint(self.assessment.max_value["stars"], scale*self.assessment.max_value["stars"]),
                 "avg_cont": random.randint(self.assessment.max_value["avg_cont"], scale*self.assessment.max_value["avg_cont"]),
                 "avg_a_days": random.randint(self.assessment.max_value["avg_a_days"], scale*self.assessment.max_value["avg_a_days"]),
                 "frequencyCommits": 0,
@@ -174,8 +174,8 @@ class GitHubUserGenerator:
                 "avg_views": random.randint(self.assessment.max_value["avg_views"], scale*self.assessment.max_value["avg_views"]),
                 "repos": random.randint(self.assessment.max_value["repos"], scale*self.assessment.max_value["repos"]),
                 "created_update": random.randint(self.assessment.max_value["created_update"], scale*self.assessment.max_value["created_update"]),
-                "forks_r": random.randint(self.assessment.max_value["forks_r"], (scale**3)*self.assessment.max_value["forks_r"]),
-                "stars_r": random.randint(self.assessment.max_value["stars_r"], (scale**3)*self.assessment.max_value["stars_r"]),
+                "forks_r": random.randint(self.assessment.max_value["forks_r"], scale*self.assessment.max_value["forks_r"]),
+                "stars_r": random.randint(self.assessment.max_value["stars_r"], scale*self.assessment.max_value["stars_r"]),
                 "cont_count": random.randint(self.assessment.max_value["cont_count"], scale*self.assessment.max_value["cont_count"]),
                 "commits_repo": random.randint(self.assessment.max_value["commits_repo"], scale*self.assessment.max_value["commits_repo"]),
                 "frequency_repo": 0,
@@ -189,6 +189,7 @@ class GitHubUserGenerator:
             return None
         
         return self._validate_and_fix_user_data(user_data)
+        
 
     def _validate_and_fix_user_data(self, user_data: dict[str, Any]) -> dict[str, Any]:
         valid_user_data = user_data.copy()
@@ -302,11 +303,11 @@ class GitHubUserGenerator:
         for i in range(count):
             if 0 <= i < 7000:
                 user_type = "low_values"
-            elif 7000 <= i < 27000:
+            elif 7000 <= i < 24000:
                 user_type = "beginner"
-            elif 27000 <= i < 57000:
+            elif 24000 <= i < 54000:
                 user_type = "intermediate"
-            elif 57000 <= i < 87000:
+            elif 54000 <= i < 84000:
                 user_type = "advanced"
             else:
                 user_type = "maximum_values"
