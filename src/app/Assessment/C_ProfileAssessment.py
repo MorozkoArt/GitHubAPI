@@ -99,16 +99,16 @@ class ProfileAssessment:
             "avg_views": [min(self.get_value(self.user.avg_views), scale * self.max_value["avg_views"])],
             "repos": [min(self.get_value(len(self.user.repos_user)), scale * self.max_value["repos"])],
             "created_update": [min(self.get_value(self.user.month_usege), scale * self.max_value["created_update"])],
-            "forks_r": [min(self.get_value(self.user.main_repo.forks), scale * self.max_value["forks_r"])],
-            "stars_r": [min(self.get_value(self.user.main_repo.stargazers_count), scale * self.max_value["stars_r"])],
-            "cont_count": [min(self.get_value(self.user.main_repo.contributors_count), scale * self.max_value["cont_count"])],
-            "commits_repo": [min(self.get_value(self.user.main_repo.commits_count), scale * self.max_value["commits_repo"])],
-            "frequency_repo": [self.get_value(self.user.main_repo.commits_frequency)],
-            "inDay_repo": [min(self.get_value(self.user.main_repo.commits_in_day), scale * self.max_value["inDay_repo"])],
-            "addLine": [min(self.get_value(self.user.main_repo.commits_add_lines), scale * self.max_value["addLine"])],
-            "delLine": [min(self.get_value(self.user.main_repo.commits_del_lines), scale * self.max_value["delLine"])],
-            "count_views": [min(self.get_value(self.user.main_repo.count_views), scale * self.max_value["count_views"])],
-            "active_days_r": [min(self.get_value(self.user.main_repo.days_work), scale * self.max_value["active_days_r"])]
+            "forks_r": [min(self.get_value(self.user.main_repo.forks), scale * self.max_value["forks_r"]) if self.user.main_repo_name else 0],
+            "stars_r": [min(self.get_value(self.user.main_repo.stargazers_count), scale * self.max_value["stars_r"]) if self.user.main_repo_name else 0],
+            "cont_count": [min(self.get_value(self.user.main_repo.contributors_count), scale * self.max_value["cont_count"]) if self.user.main_repo_name else 0],
+            "commits_repo": [min(self.get_value(self.user.main_repo.commits_count), scale * self.max_value["commits_repo"]) if self.user.main_repo_name else 0],
+            "frequency_repo": [self.get_value(self.user.main_repo.commits_frequency) if self.user.main_repo_name else 666],
+            "inDay_repo": [min(self.get_value(self.user.main_repo.commits_in_day), scale * self.max_value["inDay_repo"]) if self.user.main_repo_name else 0],
+            "addLine": [min(self.get_value(self.user.main_repo.commits_add_lines), scale * self.max_value["addLine"]) if self.user.main_repo_name else 0],
+            "delLine": [min(self.get_value(self.user.main_repo.commits_del_lines), scale * self.max_value["delLine"]) if self.user.main_repo_name else 0],
+            "count_views": [min(self.get_value(self.user.main_repo.count_views), scale * self.max_value["count_views"]) if self.user.main_repo_name else 0],
+            "active_days_r": [min(self.get_value(self.user.main_repo.days_work), scale * self.max_value["active_days_r"]) if self.user.main_repo_name else 0]
         })
 
         inputs = torch.tensor(scaler.transform(new_data.values), dtype=torch.float32)

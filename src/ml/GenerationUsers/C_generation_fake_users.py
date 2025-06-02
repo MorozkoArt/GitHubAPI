@@ -31,13 +31,13 @@ class GitHubUserGenerator:
         
         if user_type == "low_values":
             user_data =  {
-                "followers": random.randint(0, 5),
-                "following": random.randint(0, 3),
+                "followers": 0,
+                "following": 0,
                 "hireable": 0,
                 "plan": 0,
                 "blog": 0,
                 "company": 0,
-                "org": random.randint(0, 1),
+                "org": 0,
                 "languages": random.randint(0, 1),
                 "forks": 0,
                 "stars": 0,
@@ -301,13 +301,13 @@ class GitHubUserGenerator:
     def generate_users(self, count: int = 100000) -> pd.DataFrame:
         data = []
         for i in range(count):
-            if 0 <= i < 7000:
+            if 0 <= i < 15000:
                 user_type = "low_values"
-            elif 7000 <= i < 24000:
+            elif 15000 <= i < 35000:
                 user_type = "beginner"
-            elif 24000 <= i < 54000:
+            elif 35000 <= i < 60000:
                 user_type = "intermediate"
-            elif 54000 <= i < 84000:
+            elif 60000 <= i < 85000:
                 user_type = "advanced"
             else:
                 user_type = "maximum_values"

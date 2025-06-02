@@ -127,7 +127,7 @@ def print_assessment(user, assessment):
     tables.append("Profile data and their assessment:\n")
     tables.append(_create_profile_table(user, assessment))
     tables.append(f"\nProfile assessment: {round(assessment.score_profile, 2)}\n\n")
-    if user.repos.totalCount != 0 or user.main_repo_name != "":
+    if user.repos.totalCount != 0 and user.main_repo_name != "":
         tables.append(f"Repository selected for detailed analysis: {user.main_repo.name}\n")
         tables.append(_create_main_repo_table(user, assessment))
         tables.append(f"\nTotal repository assessment: {round(assessment.score_main_repos, 2)}\n\n")
@@ -137,7 +137,7 @@ def print_assessment(user, assessment):
         tables.append(_create_code_files_table(assessment))
         tables.append(f"\nTotal code files assessment: {round(assessment.score_kod, 2)}\n\n")
     tables.append(f"Total profile assessment: {round(assessment.score_profile, 2)}\n")
-    if user.repos.totalCount != 0 or user.main_repo_name != "":
+    if user.repos.totalCount != 0 and user.main_repo_name != "":
         tables.append(f"Main repository assessment: {round(assessment.score_main_repos, 2)}\n")
         tables.append(f"Average code files assessment: {round(assessment.score_kod, 2)}\n")
     

@@ -26,7 +26,7 @@ def start_assessment_generation_empty(user_git):
             assessment_value = round(assessment_profile, 2)
         print(f"Total assessment: {assessment_value}")
 
-    save_user_information(user_git, assessment, var_kod=2)
+    save_user_information(user_git, assessment)
 
 
 def start_assessment_generation(user_git, var_kod_2):

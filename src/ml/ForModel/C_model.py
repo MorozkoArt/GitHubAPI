@@ -20,8 +20,7 @@ class GitHubModel(nn.Module):
             nn.ReLU(),
 
             nn.Linear(64, output_size),
-            nn.ReLU()
         )
 
     def forward(self, x):
-        return torch.clamp(self.net(x), max=24)
+        return torch.clamp(self.net(x), min=0, max=24)
