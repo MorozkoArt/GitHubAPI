@@ -1,5 +1,5 @@
 import math
-from src.api.Config.M_LoadConfig import load_config
+from src.app.Config.M_LoadConfig import load_config
 
 
 class Assessment:
@@ -8,7 +8,7 @@ class Assessment:
         self.max_value = load_config(config_file2)
 
     def _log_score(self, value, max_value, field_score, power=1.0, one_divider=2.0):
-        if value not in (0, 1):
+        if value > 1:
             score = min(field_score * (math.log(value) / math.log(max_value)) ** power, field_score)
         elif value == 1:
             score = (min(field_score * (math.log(value + 1) / math.log(max_value)) ** power, field_score)) / one_divider
