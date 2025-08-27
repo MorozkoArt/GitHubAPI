@@ -6,7 +6,46 @@ tests/storage/
 .pytest_cache/
 __pycache__/
 for_pr_readme.md
-# Игнорировать временные файлы
+
+# Ignore temporary files
 *~
 *.py[cod]
 har_and_cookies/
+
+# Data and Caches
+*.pkl
+*.pickle
+*.npy
+*.npz
+*.csv
+*.json
+dataset/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Environment variables
+.env
+.env.local
+
+# GitHub API tokens and keys
+*.token
+*.key
+*.secret
+credentials.json
+
+# Logs
+*.log
+logs/
+
+# Package management
+Pipfile.lock
+poetry.lock
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Testing coverage
+.coverage
+htmlcov/
