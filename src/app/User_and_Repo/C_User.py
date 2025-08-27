@@ -39,7 +39,6 @@ class User_GitHub:
         self.languages = []
         self.repos_user = []
         self.main_repo = None
-        self.empty_repos = []
         self.forks = 0
         self.stars = 0
         self.avg_a_days = 0
@@ -48,7 +47,7 @@ class User_GitHub:
 
     def _process_repo_data(self, repo_data):
         (frequencies, daily_commits, counts, languages, repos,
-        main_repo, empty_repos, stars, forks, 
+        main_repo, stars, forks, 
         avg_a_days, avg_cont, avg_views) = repo_data
 
         self.frequency_commits = self.calculate_average(frequencies)
@@ -62,7 +61,6 @@ class User_GitHub:
         self.languages = languages
         self.repos_user = repos
         self.main_repo = Main_repo(main_repo, User_repo.search_repo(self.repos, main_repo.name))
-        self.empty_repos = empty_repos
 
     def process_repositories(self):
         repos_list = list(self.repos)
@@ -90,7 +88,6 @@ class User_GitHub:
             try:
                 return User_repo(repo, self.public_or_private)
             except Exception as e:
-                print(f"Error processing repository {repo.name}: {e}")
                 return None
             finally:
                 update_progress()
@@ -118,7 +115,6 @@ class User_GitHub:
         commits_in_day = []
         commits_count = []
         languages = []
-        empty_repos = []
         main_repo = repos_user[0]
         max_judgement = 0
         stars = 0
@@ -136,7 +132,7 @@ class User_GitHub:
         
         return (
             commits_frequency, commits_in_day, commits_count, languages, 
-            repos_user, main_repo, empty_repos, stars, forks, 
+            repos_user, main_repo, stars, forks, 
             avg_a_days, avg_cont, avg_views
         )
 
