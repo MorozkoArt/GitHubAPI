@@ -15,7 +15,7 @@ class Main_repo(User_repo):
         self.commits_add_lines = commits_add_lines_value
         self.commits_del_lines = commits_del_lines_value
         self.contents_kod = self.get_content_kod_parallel()
-        self.name_files = ", ".join(content_file.name for content_file in self.contents_kod)
+        self.name_files = ", ".join(f"{content_file.path}" for content_file in self.contents_kod)
 
     def commits_line_change_parallel(self):
         if self.commits.totalCount == 0:
@@ -74,50 +74,6 @@ class Main_repo(User_repo):
                 print(f"Error processing directory {path}: {e}")
 
         process_directory("")
-
-        return contents_kod
-
-    def get_content_kod_optimized(self):
-        contents_kod = []
-        directories_to_process = [""]
-        lock = threading.Lock()
-        
-        def process_single_directory(path):
-            try:
-                contents = self.repo.get_contents(path)
-                files = []
-                new_directories = []
-                
-                for content in contents:
-                    if content.type == "dir":
-                        new_directories.append(content.path)
-                    elif content.type == "file" and is_code_file(content.name):
-                        files.append(content)
-                
-                with lock:
-                    contents_kod.extend(files)
-                
-                return new_directories
-            except Exception as e:
-                print(f"Error processing directory {path}: {e}")
-                return []
-        
-        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-            while directories_to_process:
-                futures = []
-                current_batch = directories_to_process[:10]
-                directories_to_process = directories_to_process[10:]
-                
-                for directory in current_batch:
-                    futures.append(executor.submit(process_single_directory, directory))
-                
-                for future in concurrent.futures.as_completed(futures):
-                    try:
-                        new_dirs = future.result()
-                        directories_to_process.extend(new_dirs)
-                    except Exception as e:
-                        print(f"Error in directory processing: {e}")
-        
         return contents_kod
 
     def get_commit_lines_changed(self, commit):
@@ -149,17 +105,18 @@ class Main_repo(User_repo):
         
         def download_file(file_content):
             try:
-                path = os.path.join("storage", file_content.name)
-                with open(path, 'wb') as f:
+                full_path = os.path.join("storage", file_content.path)
+                os.makedirs(os.path.dirname(full_path), exist_ok=True)
+                with open(full_path, 'wb') as f:
                     f.write(file_content.decoded_content)
-                return path
+                return full_path
             except Exception as e:
-                print(f"Error downloading {file_content.name}: {e}")
+                print(f"Error downloading {file_content.path}: {e}")
                 return None
         
         with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
             futures = [executor.submit(download_file, file_content) 
-                    for file_content in self.contents_kod]
+                        for file_content in self.contents_kod]
             
             for future in concurrent.futures.as_completed(futures):
                 try:

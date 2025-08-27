@@ -6,19 +6,26 @@ class GPT:
     def __init__(self, listOfPaths):
         self.listOfPaths = listOfPaths
         self.MinNumfiles = 5
+        self.max_iterations = 5
 
     def evaluate_codeS(self, full_or_three):
         list_evaluate_codeS = []
         range_gpt = self.get_range_gpt(full_or_three)
 
-        for i in range(range_gpt):
+        i = 0
+        while i < len(self.listOfPaths) and i < range_gpt:
             result = self.evaluate_code(self.listOfPaths[i])
             if result:
                 list_evaluate_codeS.append(result)
-
+            else:
+                range_gpt += 1
+            i += 1
         return list_evaluate_codeS
 
     def evaluate_code(self, file_path):
+
+        iterations = 0
+
         try:
             file_name = os.path.basename(file_path)
             code = self.read_file(file_path)
@@ -28,7 +35,7 @@ class GPT:
 
         text = self.generate_prompt(code)
 
-        while True:
+        while iterations < self.max_iterations:
             try:
                 response = self.get_gpt_response(text)
                 if self.is_valid_response(response):
@@ -38,6 +45,12 @@ class GPT:
                         return response, marks, file_name
             except Exception as e:
                 continue
+            finally:
+                iterations+=1
+        else:
+            return None
+        
+
 
     def get_range_gpt(self, full_or_three):
         if full_or_three == 1:
