@@ -21,7 +21,7 @@ def test_full_data(my_token, login, var_kod, var_kod_2):
     if user_git.repos.totalCount == 0:
         start_assessment_generation_empty(user_git)
     else:
-        if user_git.main_repo_name:
+        if user_git.main_repo:
             start_main_repo_generation(user_git)
             start_assessment_generation(user_git, var_kod)
         else:

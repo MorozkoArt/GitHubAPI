@@ -3,11 +3,6 @@ from src.app.User_and_Repo.C_User import User_GitHub
 from src.app.Assessment.C_ProfileAssessment import ProfileAssessment
 from src.app.Interface.M_SaveInformation import save_user_information
 
-def start_main_repo_generation(user_git):
-    user_git.find_main_repo()
-    return user_git.main_repo.name_files
-
-
 def start_assessment_generation_empty(user_git):
     assessment = ProfileAssessment(user_git)
     assessment_profile = assessment.assessment_profile()
@@ -15,7 +10,7 @@ def start_assessment_generation_empty(user_git):
     if user_git.repos.totalCount == 0:
         print("The user has no repositories.")
         print(f"Profile assessment: {round(assessment_profile, 2)}")
-    elif user_git.main_repo_name == "":
+    elif user_git.main_repo:
         print("The user has no repositories containing code files.")
         if len(user_git.repos_user) != 0:
             print(f"Profile assessment: {round(assessment_profile, 2)}")
@@ -56,8 +51,8 @@ def start_user_assessment_generation(user, public_or_private):
         start_assessment_generation_empty(user_git)
     else:
         var_kod_2 = 2
-        if user_git.main_repo_name:
-            content_kod = start_main_repo_generation(user_git)
+        if user_git.main_repo:
+            content_kod = user_git.main_repo.name_files
             print("\nCode assessment may take a significant amount of time (from 1 to 15 minutes).")
             print(f"Code files in the repository {user_git.main_repo.name} for assessment:\n"
                     f"{textwrap.fill(content_kod, width=65)}\n")
