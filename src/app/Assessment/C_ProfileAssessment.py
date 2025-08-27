@@ -58,13 +58,14 @@ class ProfileAssessment:
 
 
     def assessment_kod(self, full_or_three):
+        scale_mark = 5
         list_of_path = self.user.main_repo.dounloud_mainRepo()
         chat_gpt = GPT(list_of_path)
         self.assessment_kod_list = chat_gpt.evaluate_codeS(full_or_three)
         for i in range (len(self.assessment_kod_list)):
             text, marks, file_name = self.assessment_kod_list[i]
             self.score_kod+=marks
-        self.score_kod = (self.score_kod/len(self.assessment_kod_list))*5
+        self.score_kod = (self.score_kod/len(self.assessment_kod_list))*scale_mark
         return self.score_kod
     
 
@@ -77,7 +78,6 @@ class ProfileAssessment:
         model.eval()
 
         scaler = torch.load(path_scaler, weights_only=False) 
-
         scale = 5
 
         new_data = pd.DataFrame({
@@ -103,7 +103,7 @@ class ProfileAssessment:
             "stars_r": [min(self.get_value(self.user.main_repo.stargazers_count), scale * self.max_value["stars_r"]) if self.user.main_repo_name else 0],
             "cont_count": [min(self.get_value(self.user.main_repo.contributors_count), scale * self.max_value["cont_count"]) if self.user.main_repo_name else 0],
             "commits_repo": [min(self.get_value(self.user.main_repo.commits_count), scale * self.max_value["commits_repo"]) if self.user.main_repo_name else 0],
-            "frequency_repo": [self.get_value(self.user.main_repo.commits_frequency) if self.user.main_repo_name else 666],
+            "frequency_repo": [self.get_value(self.user.main_repo.commits_frequency) if self.user.main_repo_name else 30],
             "inDay_repo": [min(self.get_value(self.user.main_repo.commits_in_day), scale * self.max_value["inDay_repo"]) if self.user.main_repo_name else 0],
             "addLine": [min(self.get_value(self.user.main_repo.commits_add_lines), scale * self.max_value["addLine"]) if self.user.main_repo_name else 0],
             "delLine": [min(self.get_value(self.user.main_repo.commits_del_lines), scale * self.max_value["delLine"]) if self.user.main_repo_name else 0],
@@ -160,6 +160,8 @@ class ProfileAssessment:
         elif value == "-":
             return default
         elif value == "None":
+            return default
+        elif value == "NULL":
             return default
         return value
     

@@ -53,7 +53,7 @@ class GitHubUserGenerator:
                 "stars_r": 0,
                 "cont_count": 0,
                 "commits_repo": random.randint(0, 2),
-                "frequency_repo": round(random.uniform(10.0, 666.0), 2),
+                "frequency_repo": round(random.uniform(10.0, 50.0), 2),
                 "inDay_repo": round(random.uniform(0, 1.0), 2),
                 "addLine": random.randint(0, 7),
                 "delLine": random.randint(0, 4),
@@ -156,34 +156,34 @@ class GitHubUserGenerator:
         elif user_type == "maximum_values":
             scale = 10
             user_data = {
-                "followers": random.randint(self.assessment.max_value["followers"], scale*self.assessment.max_value["followers"]),
-                "following": random.randint(self.assessment.max_value["following"], scale*self.assessment.max_value["following"]),
-                "hireable": 1,
-                "plan": 1,
-                "blog": 1,
-                "company": 1,
-                "org": random.randint(self.assessment.max_value["org"], scale*self.assessment.max_value["org"]),
-                "languages": random.randint(self.assessment.max_value["languages"], scale*self.assessment.max_value["languages"]),
-                "forks": random.randint(self.assessment.max_value["forks"], scale*self.assessment.max_value["forks"]),
-                "stars": random.randint(self.assessment.max_value["stars"], scale*self.assessment.max_value["stars"]),
-                "avg_cont": random.randint(self.assessment.max_value["avg_cont"], scale*self.assessment.max_value["avg_cont"]),
-                "avg_a_days": random.randint(self.assessment.max_value["avg_a_days"], scale*self.assessment.max_value["avg_a_days"]),
-                "frequencyCommits": 0,
-                "inDayCommits": round(random.uniform(self.assessment.max_value["inDayCommits"], scale*self.assessment.max_value["inDayCommits"]), 2),
-                "countCommits": round(random.uniform(self.assessment.max_value["countCommits"], scale*self.assessment.max_value["countCommits"]), 2),
-                "avg_views": random.randint(self.assessment.max_value["avg_views"], scale*self.assessment.max_value["avg_views"]),
-                "repos": random.randint(self.assessment.max_value["repos"], scale*self.assessment.max_value["repos"]),
-                "created_update": random.randint(self.assessment.max_value["created_update"], scale*self.assessment.max_value["created_update"]),
-                "forks_r": random.randint(self.assessment.max_value["forks_r"], scale*self.assessment.max_value["forks_r"]),
-                "stars_r": random.randint(self.assessment.max_value["stars_r"], scale*self.assessment.max_value["stars_r"]),
-                "cont_count": random.randint(self.assessment.max_value["cont_count"], scale*self.assessment.max_value["cont_count"]),
-                "commits_repo": random.randint(self.assessment.max_value["commits_repo"], scale*self.assessment.max_value["commits_repo"]),
-                "frequency_repo": 0,
-                "inDay_repo": round(random.uniform(self.assessment.max_value["inDay_repo"], scale*self.assessment.max_value["inDay_repo"]), 2),
-                "addLine": random.randint(self.assessment.max_value["addLine"], scale*self.assessment.max_value["addLine"]),
-                "delLine": random.randint(self.assessment.max_value["delLine"], scale*self.assessment.max_value["delLine"]),
-                "count_views": random.randint(self.assessment.max_value["count_views"], scale*self.assessment.max_value["count_views"]),
-                "active_days_r": random.randint(self.assessment.max_value["active_days_r"], scale*self.assessment.max_value["active_days_r"])
+                "followers": random.randint(0, scale*self.assessment.max_value["followers"]),
+                "following": random.randint(0, scale*self.assessment.max_value["following"]),
+                "hireable": random.randint(0, 1),
+                "plan": random.randint(0, 1),
+                "blog": random.randint(0, 1),
+                "company": random.randint(0, 1),
+                "org": random.randint(0, scale*self.assessment.max_value["org"]),
+                "languages": random.randint(0, scale*self.assessment.max_value["languages"]),
+                "forks": random.randint(0, scale*self.assessment.max_value["forks"]),
+                "stars": random.randint(0, scale*self.assessment.max_value["stars"]),
+                "avg_cont": random.randint(0, scale*self.assessment.max_value["avg_cont"]),
+                "avg_a_days": random.randint(0, scale*self.assessment.max_value["avg_a_days"]),
+                "frequencyCommits": round(random.uniform(0.0, 10.0), 2),
+                "inDayCommits": round(random.uniform(0, scale*self.assessment.max_value["inDayCommits"]), 2),
+                "countCommits": round(random.uniform(0, scale*self.assessment.max_value["countCommits"]), 2),
+                "avg_views": random.randint(0, scale*self.assessment.max_value["avg_views"]),
+                "repos": random.randint(0, scale*self.assessment.max_value["repos"]),
+                "created_update": random.randint(0, scale*self.assessment.max_value["created_update"]),
+                "forks_r": random.randint(0, scale*self.assessment.max_value["forks_r"]),
+                "stars_r": random.randint(0, scale*self.assessment.max_value["stars_r"]),
+                "cont_count": random.randint(0, scale*self.assessment.max_value["cont_count"]),
+                "commits_repo": random.randint(0, scale*self.assessment.max_value["commits_repo"]),
+                "frequency_repo": round(random.uniform(0.0, 5.0), 2),
+                "inDay_repo": round(random.uniform(0, scale*self.assessment.max_value["inDay_repo"]), 2),
+                "addLine": random.randint(0, scale*self.assessment.max_value["addLine"]),
+                "delLine": random.randint(0, scale*self.assessment.max_value["delLine"]),
+                "count_views": random.randint(0, scale*self.assessment.max_value["count_views"]),
+                "active_days_r": random.randint(0, scale*self.assessment.max_value["active_days_r"])
             }
         else:
             return None
@@ -298,16 +298,16 @@ class GitHubUserGenerator:
         )
         return scores
 
-    def generate_users(self, count: int = 100000) -> pd.DataFrame:
+    def generate_users(self, count: int = 150000) -> pd.DataFrame:
         data = []
         for i in range(count):
-            if 0 <= i < 15000:
+            if 0 <= i < 20000:
                 user_type = "low_values"
-            elif 15000 <= i < 35000:
+            elif 20000 <= i < 50000:
                 user_type = "beginner"
-            elif 35000 <= i < 60000:
+            elif 50000 <= i < 85000:
                 user_type = "intermediate"
-            elif 60000 <= i < 85000:
+            elif 85000 <= i < 120000:
                 user_type = "advanced"
             else:
                 user_type = "maximum_values"

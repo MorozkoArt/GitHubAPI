@@ -1,9 +1,9 @@
 import pytest
 import os
-from src.api.Assessment.C_ProfileAssessment import ProfileAssessment
-from src.api.User_and_Repo.C_UserRepo import User_repo
-from src.api.User_and_Repo.C_User import User_GitHub
-from src.api.StartMethods.M_Authentication import login_auth
+from src.app.Assessment.C_ProfileAssessment import ProfileAssessment
+from src.app.User_and_Repo.C_UserRepo import User_repo
+from src.app.User_and_Repo.C_User import User_GitHub
+from src.app.StartMethods.M_Authentication import login_auth
 
 my_token = os.environ.get("GITHUB_TOKEN")
 user = login_auth(my_token, "Lucik19")
@@ -12,8 +12,8 @@ user_git.repos_user.append("repo")
 assessment = ProfileAssessment(user_git)
 
 @pytest.mark.parametrize("frequency_commits, expected_score", [(1 , 3.03), (0.5, 3.89), (2, 1.84),
-                                                               (23 , 0), (0.01, 4.98),
-                                                               (0, 5.0), ("NULL", 0)])
+                                                                (23 , 0), (0.01, 4.98),
+                                                                (0, 5.0), ("NULL", 0)])
 def test_frequency_commits_to_score_exp(frequency_commits, expected_score):
     coefficient_frequency_commits = 5
     actual_score =  round(assessment.frequency_commits_to_score_exp(frequency_commits, coefficient_frequency_commits), 2)
