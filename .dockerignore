@@ -1,0 +1,11 @@
+.idea/
+.venv/
+.vscode/
+.git/
+.gitignore
+storage/
+for_pr_readme.md
+output/
+data/
+__pycache__/
+.pytest_cache/

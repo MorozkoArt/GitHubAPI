@@ -16,6 +16,5 @@ def save_to_file(file_path, user, assessment):
     with open(file_path, "w", encoding="utf-8") as f:
         for table in tables:
             f.write(str(table))
-            f.write("\n\n")
 
 

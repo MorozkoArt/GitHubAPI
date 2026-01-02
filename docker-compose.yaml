@@ -9,14 +9,6 @@ services:
       - .:/app
       - data:/app/data
       - output:/app/output
-    command: >
-      sh -c "
-      if [ \"$RUN_MODE\" = \"train\" ]; then
-        python -m train;
-      else
-        python -m main;
-      fi
-      "
 
 volumes:
   data:

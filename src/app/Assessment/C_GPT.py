@@ -1,4 +1,5 @@
 from g4f.client import Client
+from utils.M_Clear_text import sanitize_response
 import os
 import re
 
@@ -37,7 +38,8 @@ class GPT:
 
         while iterations < self.max_iterations:
             try:
-                response = self.get_gpt_response(text)
+                raw_response = self.get_gpt_response(text)
+                response = sanitize_response(raw_response)
                 if self.is_valid_response(response):
                     marks = self.extract_grade(response)
                     if marks >= 0:
