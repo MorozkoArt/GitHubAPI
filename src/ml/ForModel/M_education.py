@@ -1,7 +1,7 @@
 import torch
 from sklearn.metrics import mean_absolute_error, r2_score
 import numpy as np
-from src.app.Interface.C_ProgressBar import ProgressBar
+from app.Interface.C_ProgressBar import ProgressBar
 
 def train_epoch(model, loader, optimizer, criterion, device):
     model.train()

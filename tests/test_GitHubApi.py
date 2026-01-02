@@ -26,5 +26,3 @@ def test_full_data(my_token, login, var_kod, var_kod_2):
             start_assessment_generation(user_git, var_kod)
         else:
             start_assessment_generation_empty(user_git)
-
-

@@ -1,9 +1,10 @@
+import os
 import torch
 import pandas as pd
 from pathlib import Path
-from src.app.Assessment.C_GPT import GPT
-from src.app.Config.M_LoadConfig import load_config
-from src.ml.ForModel.C_model import GitHubModel
+from Assessment.C_GPT import GPT
+from Config.M_LoadConfig import load_config
+from ml.ForModel.C_model import GitHubModel
 
 class ProfileAssessment:
 
@@ -41,7 +42,6 @@ class ProfileAssessment:
         self.score_profile = sum(value for value in self.assessment_profile_dict.values() if isinstance(value, (int, float)))
         return self.score_profile
 
-
     def assessment_mainrepo(self):
         self.assessment_repo_main_dict["forks"] = self.get_predicted_value("forks_r")
         self.assessment_repo_main_dict["stargazers_count"] = self.get_predicted_value("stars_r")
@@ -56,10 +56,9 @@ class ProfileAssessment:
         self.score_main_repos = sum(value for value in self.assessment_repo_main_dict.values() if isinstance(value, (int, float)))
         return self.score_main_repos
 
-
     def assessment_kod(self, full_or_three):
         scale_mark = 5
-        list_of_path = self.user.main_repo.dounloud_mainRepo()
+        list_of_path = self.user.main_repo.download_mainRepo()
         chat_gpt = GPT(list_of_path)
         self.assessment_kod_list = chat_gpt.evaluate_codeS(full_or_three)
         for i in range (len(self.assessment_kod_list)):
@@ -67,17 +66,13 @@ class ProfileAssessment:
             self.score_kod+=marks
         self.score_kod = (self.score_kod/len(self.assessment_kod_list))*scale_mark
         return self.score_kod
-    
 
     def model_assessment(self):
         model = GitHubModel(input_size=28, output_size=28)
-        base_dir = Path(__file__).parents[3]
-        path_model = base_dir / "best_model.pth"
-        path_scaler = base_dir / "scaler.pth"
-        model.load_state_dict(torch.load(path_model))
+        model.load_state_dict(torch.load(os.getenv("MODEL_PATH")))
         model.eval()
 
-        scaler = torch.load(path_scaler, weights_only=False) 
+        scaler = torch.load(os.getenv("SCALER_PATH"), weights_only=False) 
         scale = 5
 
         new_data = pd.DataFrame({
@@ -149,7 +144,7 @@ class ProfileAssessment:
             "count_views": 26,
             "active_days_r": 27
             }
-    
+
     def get_value(self, value, default=0):
         if value is None:
             return default
@@ -164,7 +159,7 @@ class ProfileAssessment:
         elif value == "NULL":
             return default
         return value
-    
+
     def check_string(self, value):
         if not value:
             return 0
@@ -173,17 +168,12 @@ class ProfileAssessment:
         elif value == "None":
             return 0
         return 1
-    
+
     def check_plan(self, plan):
         if plan is None or plan.name == "free" or plan == "None" :
             return 0
         return 1
-    
+
     def get_predicted_value(self, field_name):
         index = self.field_index_map[field_name]
         return float(self.predicted_scores[0][index])
-    
-
-
-
-

@@ -1,3 +1,4 @@
+python-dotenv>=1.0.1
 PyGithub==2.6.1
 g4f==0.5.3.2
 numpy==2.3.0rc1

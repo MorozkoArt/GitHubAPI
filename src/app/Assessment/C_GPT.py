@@ -6,7 +6,7 @@ class GPT:
     def __init__(self, listOfPaths):
         self.listOfPaths = listOfPaths
         self.MinNumfiles = 5
-        self.max_iterations = 5
+        self.max_iterations = 10
 
     def evaluate_codeS(self, full_or_three):
         list_evaluate_codeS = []
@@ -49,8 +49,6 @@ class GPT:
                 iterations+=1
         else:
             return None
-        
-
 
     def get_range_gpt(self, full_or_three):
         if full_or_three == 1:

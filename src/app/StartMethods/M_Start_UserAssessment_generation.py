@@ -1,7 +1,8 @@
+import os
 import textwrap
-from src.app.User_and_Repo.C_User import User_GitHub
-from src.app.Assessment.C_ProfileAssessment import ProfileAssessment
-from src.app.Interface.M_SaveInformation import save_user_information
+from User_and_Repo.C_User import User_GitHub
+from Assessment.C_ProfileAssessment import ProfileAssessment
+from Interface.M_SaveInformation import save_user_information
 
 def start_assessment_generation_empty(user_git):
     assessment = ProfileAssessment(user_git)
@@ -23,7 +24,6 @@ def start_assessment_generation_empty(user_git):
 
     save_user_information(user_git, assessment)
 
-
 def start_assessment_generation(user_git, var_kod_2):
     assessment = ProfileAssessment(user_git)
     assessment_profile = assessment.assessment_profile()
@@ -43,7 +43,6 @@ def start_assessment_generation(user_git, var_kod_2):
 
     save_user_information(user_git, assessment)
 
-
 def start_user_assessment_generation(user, public_or_private):
     user_git = User_GitHub(user, public_or_private)
 
@@ -56,8 +55,7 @@ def start_user_assessment_generation(user, public_or_private):
             print("\nCode assessment may take a significant amount of time (from 1 to 15 minutes).")
             print(f"Code files in the repository {user_git.main_repo.name} for assessment:\n"
                     f"{textwrap.fill(content_kod, width=65)}\n")
-            print("If the repository contains many code files, assess all or the first five?")
-            var_kod_2 = int(input("Enter 1 to assess all, or 2 to assess the first five: "))
+            var_kod_2 = int(os.getenv("CODE_ASSESS_MODE"))
             start_assessment_generation(user_git, var_kod_2)
         else:
             start_assessment_generation_empty(user_git)

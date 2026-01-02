@@ -1,11 +1,10 @@
 from prettytable import PrettyTable, HRuleStyle
 import textwrap
 
-
 def _create_profile_table(user, assessment):
     table = PrettyTable(hrules=HRuleStyle.ALL)
     table.field_names = ["Field name", "Significance", "Assessment"]
-    
+
     profile_data = [
         ("Username", user.name, " "),
         ("Profile access", user.public_or_private, " "),
@@ -26,7 +25,7 @@ def _create_profile_table(user, assessment):
         ("Programming languages", textwrap.fill(', '.join(map(str, user.languages)), width=40), 
             round(assessment.assessment_profile_dict.get("language"), 2)),
     ]
-    
+
     if len(user.repos_user) != 0:
         repo_data = [
             ("Average number of commits per repository", round(user.count_commits, 2), 
@@ -45,24 +44,23 @@ def _create_profile_table(user, assessment):
             ("Number of forks", user.forks, round(assessment.assessment_profile_dict.get("forks"), 2)),
         ]
         profile_data[7:7] = repo_data
-    
+
     for row in profile_data:
         table.add_row(row)
-    
+
     table.align["Field name"] = "l"
     table.align["Significance"] = "l"
     table.align["Assessment"] = "r"
     table.border = True
     table.header = True
     table.padding_width = 1
-    
-    return table
 
+    return table
 
 def _create_main_repo_table(user, assessment):
     table = PrettyTable(hrules=HRuleStyle.ALL)
     table.field_names = ["Field name", "Significance", "Assessment"]
-    
+
     repo_data = [
         ("Repository name", user.main_repo.name, "-"),
         ("Programming language", user.main_repo.language, "-"),
@@ -90,36 +88,34 @@ def _create_main_repo_table(user, assessment):
         ("Number of repository views", user.main_repo.count_views, 
             round(assessment.assessment_repo_main_dict.get("count_views"), 2)),
     ]
-    
+
     for row in repo_data:
         table.add_row(row)
-    
+
     table.align["Field name"] = "l"
     table.align["Significance"] = "l"
     table.align["Assessment"] = "r"
     table.border = True
     table.header = True
     table.padding_width = 1
-    
-    return table
 
+    return table
 
 def _create_code_files_table(assessment):
     table = PrettyTable(hrules=HRuleStyle.ALL)
     table.field_names = ["Field name", "Assessment", "Explanation"]
-    
+
     for text, marks, file_name in assessment.assessment_kod_list:
         table.add_row([file_name, marks, textwrap.fill(text, width=80)])
-    
+
     table.align["Field name"] = "l"
     table.align["Assessment"] = "l"
     table.align["Explanation"] = "l"
     table.border = True
     table.header = True
     table.padding_width = 1
-    
-    return table
 
+    return table
 
 def print_assessment(user, assessment):
     tables = []
@@ -140,7 +136,7 @@ def print_assessment(user, assessment):
     if user.repos.totalCount != 0 and user.main_repo:
         tables.append(f"Main repository assessment: {round(assessment.score_main_repos, 2)}\n")
         tables.append(f"Average code files assessment: {round(assessment.score_kod, 2)}\n")
-    
+
     tables.append(f"Final assessment: {round((assessment.score_profile + assessment.score_main_repos + assessment.score_kod), 2)}\n\n\n")
-    
+
     return tables
