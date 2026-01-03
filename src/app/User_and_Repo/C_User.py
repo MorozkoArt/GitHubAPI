@@ -1,6 +1,7 @@
+import os
 import concurrent.futures
 import threading
-from Interface.C_ProgressBar import ProgressBar
+from common.Utils.C_ProgressBar import ProgressBar
 from User_and_Repo.C_UserRepo import User_repo
 from User_and_Repo.C_MainRepo import Main_repo
 
@@ -92,7 +93,7 @@ class User_GitHub:
             finally:
                 update_progress()
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=int(os.getenv("MAX_WORKERS_USER"))) as executor:
             futures = [executor.submit(process_repo_wrapper, repo) for repo in repos_list]
             return self._collect_results(futures)
 
@@ -126,8 +127,11 @@ class User_GitHub:
         for repo_user in repos_user:
             self._process_single_repo_result(
                 repo_user, commits_frequency, commits_in_day, commits_count,
-                languages, avg_a_days, avg_cont, avg_views, stars, forks
+                languages, avg_a_days, avg_cont, avg_views
             )
+            stars += repo_user.stargazers_count
+            forks += repo_user.forks
+
             max_judgement, main_repo = self.find_main_repo_helper(repo_user, max_judgement, main_repo)
 
         return (
@@ -138,15 +142,13 @@ class User_GitHub:
 
     def _process_single_repo_result(self, repo_user, commits_frequency, commits_in_day, 
                                     commits_count, languages, avg_a_days, avg_cont, 
-                                    avg_views, stars, forks):
+                                    avg_views):
         commits_frequency.append(repo_user.commits_frequency if repo_user.commits_frequency != "NULL" else 0)
         commits_in_day.append(repo_user.commits_in_day if repo_user.commits_in_day != "NULL" else 0)
         commits_count.append(repo_user.commits_count)
         avg_a_days.append(repo_user.days_work)
         avg_cont.append(repo_user.contributors_count)
         avg_views.append(repo_user.count_views if repo_user.count_views != '-' else 0)
-        stars += repo_user.stargazers_count
-        forks += repo_user.forks
 
         if repo_user.language and repo_user.language not in languages:
             languages.append(repo_user.language)

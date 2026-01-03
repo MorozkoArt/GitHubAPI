@@ -3,7 +3,7 @@ import torch
 import pandas as pd
 from pathlib import Path
 from Assessment.C_GPT import GPT
-from Config.M_LoadConfig import load_config
+from common.Config.M_LoadConfig import load_config
 from ml.ForModel.C_model import GitHubModel
 
 class ProfileAssessment:

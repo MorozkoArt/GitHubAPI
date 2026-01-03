@@ -3,8 +3,8 @@ import shutil
 import concurrent.futures
 import threading
 from User_and_Repo.C_UserRepo import User_repo
-from Interface.C_ProgressBar import ProgressBar
-from Config.file_extensions import is_code_file
+from common.Utils.C_ProgressBar import ProgressBar
+from common.Utils.file_extensions import is_code_file
 
 class Main_repo(User_repo):
 
@@ -39,7 +39,7 @@ class Main_repo(User_repo):
                 prbar.update_pd()
 
         try:
-            max_workers = min(10, self.commits.totalCount)
+            max_workers = min(int(os.getenv("MAX_WORKERS_REPO")), self.commits.totalCount)
 
             with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
                 list(executor.map(process_commit, list(self.commits)))

@@ -4,7 +4,7 @@ from Interface.M_GetInformation import print_assessment
 
 
 def save_user_information(user, assessment):
-    output_dir = Path(os.getenv("OUTPUT_DIR", "output"))
+    output_dir = Path(os.getenv("OUTPUT_DIR"))
     output_dir.mkdir(parents=True, exist_ok=True)
 
     file_path = output_dir / f"GitHub_{user.name}.txt"

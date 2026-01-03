@@ -14,18 +14,12 @@ def sanitize_response(response: str, remove_n: int = 1) -> str:
         return response
 
     text = remove_urls(response)
-
     text = text.strip()
-
     sentences = split_into_sentences(text)
-
     if len(sentences) <= remove_n:
         return " ".join(sentences[:-remove_n]) if sentences else ""
-
     kept = sentences[:-remove_n]
-
     cleaned = " ".join(kept).strip()
-
     cleaned = re.sub(r'\s+\n\s+', '\n', cleaned)
     cleaned = re.sub(r'\s{2,}', ' ', cleaned)
 

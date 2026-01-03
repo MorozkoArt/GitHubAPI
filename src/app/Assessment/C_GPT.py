@@ -1,5 +1,5 @@
 from g4f.client import Client
-from utils.M_Clear_text import sanitize_response
+from Utils.M_Clear_text import sanitize_response
 import os
 import re
 
@@ -7,7 +7,6 @@ class GPT:
     def __init__(self, listOfPaths):
         self.listOfPaths = listOfPaths
         self.MinNumfiles = 5
-        self.max_iterations = 10
 
     def evaluate_codeS(self, full_or_three):
         list_evaluate_codeS = []
@@ -36,7 +35,7 @@ class GPT:
 
         text = self.generate_prompt(code)
 
-        while iterations < self.max_iterations:
+        while True:
             try:
                 raw_response = self.get_gpt_response(text)
                 response = sanitize_response(raw_response)
@@ -47,10 +46,6 @@ class GPT:
                         return response, marks, file_name
             except Exception as e:
                 continue
-            finally:
-                iterations+=1
-        else:
-            return None
 
     def get_range_gpt(self, full_or_three):
         if full_or_three == 1:
