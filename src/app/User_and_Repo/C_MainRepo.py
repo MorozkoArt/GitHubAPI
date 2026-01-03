@@ -2,9 +2,9 @@ import os
 import shutil
 import concurrent.futures
 import threading
-from src.app.User_and_Repo.C_UserRepo import User_repo
-from src.app.Interface.C_ProgressBar import ProgressBar
-from src.app.Config.file_extensions import is_code_file
+from User_and_Repo.C_UserRepo import User_repo
+from common.Utils.C_ProgressBar import ProgressBar
+from common.Utils.file_extensions import is_code_file
 
 class Main_repo(User_repo):
 
@@ -25,7 +25,7 @@ class Main_repo(User_repo):
         commits_add_lines_list = []
         commits_del_lines_list = []
         lock = threading.Lock()
-        
+
         def process_commit(commit):
             try:
                 line_changes = self.get_commit_lines_changed(commit)
@@ -37,19 +37,19 @@ class Main_repo(User_repo):
                             commits_del_lines_list.append(removed)
             finally:
                 prbar.update_pd()
-        
+
         try:
-            max_workers = min(10, self.commits.totalCount)
-            
+            max_workers = min(int(os.getenv("MAX_WORKERS_REPO")), self.commits.totalCount)
+
             with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
                 list(executor.map(process_commit, list(self.commits)))
-                
+
         finally:
             prbar.close_pd()
 
         commits_add_lines_value = self._calculate_average(commits_add_lines_list)
         commits_del_lines_value = self._calculate_average(commits_del_lines_list)
-        
+
         return commits_add_lines_value, commits_del_lines_value
 
     def _calculate_average(self, data_list):
@@ -60,7 +60,7 @@ class Main_repo(User_repo):
     def get_content_kod_parallel(self):
         contents_kod = []
         lock = threading.Lock()
-        
+
         def process_directory(path):
             try:
                 contents = self.repo.get_contents(path)
@@ -93,7 +93,7 @@ class Main_repo(User_repo):
             print(f"An unexpected error occurred: {e}")
             return None
 
-    def dounloud_mainRepo(self):
+    def download_mainRepo(self):
         list_of_paths = []
         print(f"Downloading files from the repository: {self.repo.name}")
         
@@ -113,11 +113,11 @@ class Main_repo(User_repo):
             except Exception as e:
                 print(f"Error downloading {file_content.path}: {e}")
                 return None
-        
+
         with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
             futures = [executor.submit(download_file, file_content) 
                         for file_content in self.contents_kod]
-            
+
             for future in concurrent.futures.as_completed(futures):
                 try:
                     path = future.result()
@@ -125,5 +125,5 @@ class Main_repo(User_repo):
                         list_of_paths.append(path)
                 except Exception as e:
                     print(f"Error in file download: {e}")
-        
+
         return list_of_paths

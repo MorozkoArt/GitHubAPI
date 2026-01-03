@@ -1,8 +1,9 @@
+import os
 import concurrent.futures
 import threading
-from src.app.Interface.C_ProgressBar import ProgressBar
-from src.app.User_and_Repo.C_UserRepo import User_repo
-from src.app.User_and_Repo.C_MainRepo import Main_repo
+from common.Utils.C_ProgressBar import ProgressBar
+from User_and_Repo.C_UserRepo import User_repo
+from User_and_Repo.C_MainRepo import Main_repo
 
 class User_GitHub:
     def __init__(self, user, public_or_private):
@@ -29,7 +30,7 @@ class User_GitHub:
         if not repo_data:
             self._set_default_values()
             return
-        
+
         self._process_repo_data(repo_data)
 
     def _set_default_values(self):
@@ -65,9 +66,9 @@ class User_GitHub:
     def process_repositories(self):
         repos_list = list(self.repos)
         total_repos = len(repos_list)
-        
+
         pbar = ProgressBar(total_repos, "Loading repositories: ")
-        
+
         try:
             results = self._process_repos_parallel(repos_list, pbar)
             return self._process_parallel_results(results)
@@ -77,13 +78,13 @@ class User_GitHub:
     def _process_repos_parallel(self, repos_list, pbar):
         completed = 0
         lock = threading.Lock()
-        
+
         def update_progress():
             nonlocal completed
             with lock:
                 completed += 1
                 pbar.update_pd()
-        
+
         def process_repo_wrapper(repo):
             try:
                 return User_repo(repo, self.public_or_private)
@@ -91,8 +92,8 @@ class User_GitHub:
                 return None
             finally:
                 update_progress()
-        
-        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=int(os.getenv("MAX_WORKERS_USER"))) as executor:
             futures = [executor.submit(process_repo_wrapper, repo) for repo in repos_list]
             return self._collect_results(futures)
 
@@ -110,7 +111,7 @@ class User_GitHub:
     def _process_parallel_results(self, repos_user):
         if not repos_user:
             return None
-        
+
         commits_frequency = []
         commits_in_day = []
         commits_count = []
@@ -122,14 +123,17 @@ class User_GitHub:
         avg_a_days = []
         avg_cont = []
         avg_views = []
-        
+
         for repo_user in repos_user:
             self._process_single_repo_result(
                 repo_user, commits_frequency, commits_in_day, commits_count,
-                languages, avg_a_days, avg_cont, avg_views, stars, forks
+                languages, avg_a_days, avg_cont, avg_views
             )
+            stars += repo_user.stargazers_count
+            forks += repo_user.forks
+
             max_judgement, main_repo = self.find_main_repo_helper(repo_user, max_judgement, main_repo)
-        
+
         return (
             commits_frequency, commits_in_day, commits_count, languages, 
             repos_user, main_repo, stars, forks, 
@@ -138,16 +142,14 @@ class User_GitHub:
 
     def _process_single_repo_result(self, repo_user, commits_frequency, commits_in_day, 
                                     commits_count, languages, avg_a_days, avg_cont, 
-                                    avg_views, stars, forks):
+                                    avg_views):
         commits_frequency.append(repo_user.commits_frequency if repo_user.commits_frequency != "NULL" else 0)
         commits_in_day.append(repo_user.commits_in_day if repo_user.commits_in_day != "NULL" else 0)
         commits_count.append(repo_user.commits_count)
         avg_a_days.append(repo_user.days_work)
         avg_cont.append(repo_user.contributors_count)
         avg_views.append(repo_user.count_views if repo_user.count_views != '-' else 0)
-        stars += repo_user.stargazers_count
-        forks += repo_user.forks
-        
+
         if repo_user.language and repo_user.language not in languages:
             languages.append(repo_user.language)
 
@@ -164,14 +166,14 @@ class User_GitHub:
     def month_usege(self):
         if self.updated_at is None or self.created_at is None:
             return 0
-            
+
         years_diff = self.updated_at.year - self.created_at.year
         months_diff = self.updated_at.month - self.created_at.month
         total_months = years_diff * 12 + months_diff
-        
+
         if self.updated_at.day < self.created_at.day:
             total_months -= 1
-            
+
         return total_months
 
     def get_last_activity(self, user):

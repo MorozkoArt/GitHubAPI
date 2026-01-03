@@ -1,4 +1,4 @@
-from src.ml.GenerationUsers.C_Assessment import Assessment
+from GenerationUsers.C_Assessment import Assessment
 from typing import Dict, Any
 import pandas as pd
 import random

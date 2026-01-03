@@ -3,18 +3,22 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
+import os
 from pathlib import Path
 
-from src.ml.GenerationUsers.M_separation_data import separation
-from src.ml.GenerationUsers.C_generation_fake_users import GitHubUserGenerator
-from src.ml.ForModel.C_dataset import GitHubDataset
-from src.ml.ForModel.C_model import GitHubModel
-from src.ml.ForModel.M_education import evaluate, train_epoch
+from GenerationUsers.M_separation_data import separation
+from GenerationUsers.C_generation_fake_users import GitHubUserGenerator
+from ForModel.C_dataset import GitHubDataset
+from ForModel.C_model import GitHubModel
+from ForModel.M_education import evaluate, train_epoch
 
 def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    base_dir = Path(__file__).parents[2]
-    path = base_dir / "data" / "training.csv"
+
+    data_dir = Path(os.getenv("DATA_DIR"))
+    data_dir.mkdir(parents=True, exist_ok=True)
+    path = data_dir / "training.csv"
+    scaler_path = data_dir / "scaler.pth"
 
     if not Path(path).exists():
         generator = GitHubUserGenerator()
@@ -52,15 +56,15 @@ def main():
 
         if val_loss < best_loss:
             best_loss = val_loss
-            torch.save(model.state_dict(), "best_model.pth")
+            torch.save(model.state_dict(), os.getenv("MODEL_PATH"))
             print("  Saved best model!")
 
     print("\nTesting best model...")
-    model.load_state_dict(torch.load("best_model.pth"))
+    model.load_state_dict(torch.load(os.getenv("MODEL_PATH")))
     test_loss, test_mae, test_r2 = evaluate(model, test_loader, criterion, device)
     print(f"Test Loss: {test_loss:.4f}, MAE: {test_mae:.4f}, R2: {test_r2:.4f}")
 
-    torch.save(train_dataset.get_scaler(), 'scaler.pth')
+    torch.save(train_dataset.get_scaler(), os.getenv("SCALER_PATH"))
 
 if __name__ == '__main__':
     main()

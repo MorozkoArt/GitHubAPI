@@ -1,13 +1,11 @@
+python-dotenv>=1.0.1
 PyGithub==2.6.1
-g4f==0.5.3.2
-numpy==2.3.0rc1
+g4f==6.8.2
+numpy==2.3.0
 pandas==2.2.3
 tqdm==4.67.1
 requests==2.32.3
 prettytable==3.16.0
 pytest==8.3.5
-scikit-learn==1.7.0rc1
---extra-index-url https://download.pytorch.org/whl/cu126
-torch
-torchvision
-torchaudio
+scikit-learn==1.7.0
+torch==2.9.1

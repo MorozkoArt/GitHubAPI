@@ -20,6 +20,7 @@ har_and_cookies/
 *.csv
 *.json
 dataset/
+output/
 
 # Jupyter Notebook
 .ipynb_checkpoints/

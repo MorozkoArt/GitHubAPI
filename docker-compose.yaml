@@ -1,0 +1,15 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - ./src:/app/src
+      - data:/app/data
+      - output:/app/output
+
+volumes:
+  data:
+  output:
