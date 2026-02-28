@@ -1,51 +1,111 @@
-from g4f.client import Client
-from Utils.M_Clear_text import sanitize_response
 import os
 import re
+import requests
+import time
+from common.Utils.M_Clear_text import sanitize_response
 
 class GPT:
     def __init__(self, listOfPaths):
         self.listOfPaths = listOfPaths
         self.MinNumfiles = 5
 
+        # Используем HF_TOKEN (убедитесь, что он задан в окружении)
+        self.api_token = os.getenv("HF_TOKEN")
+        if not self.api_token:
+            raise RuntimeError("HF_TOKEN is not set in environment")
+
+        # Новый актуальный URL роутера
+        self.api_url = "https://router.huggingface.co/v1/chat/completions"
+        
+        # Модель из вашего рабочего примера
+        # Примечание: Если эта модель будет недоступна, можно использовать "Qwen/Qwen2.5-Coder-32B-Instruct"
+        self.model_name = "Qwen/Qwen2.5-Coder-32B-Instruct" 
+
     def evaluate_codeS(self, full_or_three):
-        list_evaluate_codeS = []
+        results = []
         range_gpt = self.get_range_gpt(full_or_three)
 
-        i = 0
-        while i < len(self.listOfPaths) and i < range_gpt:
+        for i in range(min(len(self.listOfPaths), range_gpt)):
             result = self.evaluate_code(self.listOfPaths[i])
             if result:
-                list_evaluate_codeS.append(result)
-            else:
-                range_gpt += 1
-            i += 1
-        return list_evaluate_codeS
+                results.append(result)
+        return results
 
     def evaluate_code(self, file_path):
-
-        iterations = 0
-
         try:
             file_name = os.path.basename(file_path)
             code = self.read_file(file_path)
-        except FileNotFoundError:
-            print(f"file {file_path} not found")
+            
+            # Обрезаем код, если он слишком длинный для контекста
+            if len(code) > 15000:
+                code = code[:15000] + "\n... [Code truncated]"
+        except Exception as e:
+            print(f"[ERROR] Reading file {file_path}: {e}")
             return None
 
-        text = self.generate_prompt(code)
+        prompt = self.generate_prompt(code)
 
-        while True:
+        try:
+            raw_response = self.get_gpt_response(prompt)
+            if not raw_response:
+                return None
+                
+            response = sanitize_response(raw_response)
+            marks = self.extract_grade(response)
+
+            if 1 <= marks <= 10:
+                print(f"[OK] File: {file_name} | Rating: {marks}")
+                return response, marks, file_name
+            else:
+                print(f"[WARN] Could not parse rating for {file_name}. Response: {response[:50]}...")
+                return None
+
+        except Exception as e:
+            print(f"[ERROR] Request failed for {file_name}: {e}")
+            return None
+
+    def get_gpt_response(self, text):
+        headers = {
+            "Authorization": f"Bearer {self.api_token}",
+            "Content-Type": "application/json"
+        }
+
+        payload = {
+            "model": self.model_name,
+            "messages": [
+                {
+                    "role": "system", 
+                    "content": "You are a professional code auditor. Return rating from 1 to 10 and a brief explanation."
+                },
+                {"role": "user", "content": text}
+            ],
+            "temperature": 0.1,
+            "max_tokens": 200
+        }
+
+        # Обработка запроса с повторными попытками
+        for attempt in range(3):
             try:
-                raw_response = self.get_gpt_response(text)
-                response = sanitize_response(raw_response)
-                if self.is_valid_response(response):
-                    marks = self.extract_grade(response)
-                    if marks >= 0:
-                        print(f"File rating {file_name}: {marks}")
-                        return response, marks, file_name
+                response = requests.post(self.api_url, headers=headers, json=payload, timeout=60)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    return data["choices"][0]["message"]["content"]
+                
+                elif response.status_code == 429:
+                    print(f"[WAIT] Rate limit hit, retrying in 20s...")
+                    time.sleep(20)
+                elif response.status_code == 503:
+                    print(f"[WAIT] Model loading, retrying in 15s...")
+                    time.sleep(15)
+                else:
+                    print(f"[ERROR] API Status {response.status_code}: {response.text}")
+                    break
             except Exception as e:
-                continue
+                print(f"[ERROR] Connection error: {e}")
+                time.sleep(5)
+                
+        return None
 
     def get_range_gpt(self, full_or_three):
         if full_or_three == 1:
@@ -53,30 +113,20 @@ class GPT:
         return min(self.MinNumfiles, len(self.listOfPaths))
 
     def read_file(self, file_path):
-        with open(file_path, 'r', encoding='utf-8', errors='replace') as file:
+        with open(file_path, "r", encoding="utf-8", errors="replace") as file:
             return file.read()
 
     def generate_prompt(self, code):
-        return (f"{code} Rate this code from 1 to 10 (1 - lowest quality, 10 - highest quality)."
-                        f"Provide your rating and explanation without copying the code strictly in this format:\n "
-                        f"Rating: [number from 1 to 10]]\n"
-                        f"Explanation of rating: [brief explanation, max. 60 words in English]")
+        return (
+            f"Analyze the following code:\n\n```python\n{code}\n```\n\n"
+            "Format your response exactly as follows:\n"
+            "Rating: [number 1-10]\n"
+            "Explanation: [max 50 words]"
+        )
 
-    def get_gpt_response(self, text):
-        client = Client()
-        return client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": text}]
-        ).choices[0].message.content
-
-    def is_valid_response(self, response):
-        return not self.is_request_ended_with_status_code(response)
-
-    def is_request_ended_with_status_code(self, s):
-        pattern = r'^Request ended with status code \d+$'
-        return bool(re.match(pattern, s))
-
-    def extract_grade(self, input_string):
-        pattern = r"(?i)\s*Rating:\s*(\d+)"
-        match = re.search(pattern, input_string)
-        return int(match.group(1)) if match else -1
+    def extract_grade(self, text):
+        # Поиск числа после слова Rating:
+        match = re.search(r"Rating\s*:\s*(\d+)", text, re.IGNORECASE)
+        if match:
+            return int(match.group(1))
+        return -1

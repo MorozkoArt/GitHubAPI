@@ -4,23 +4,18 @@ WORKDIR /app
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PYTHONPATH=/app/src
+    PYTHONPATH=/app/src:/app/src/app:/app/src/common
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+COPY src/app/requirements.txt .
 
 RUN pip install --upgrade pip setuptools wheel && \
     pip install --prefer-binary -r requirements.txt && \
     rm -rf /root/.cache/pip
 
-COPY src/ ./src
+COPY src/ ./src/
 
-CMD sh -c '\
-    if [ "$RUN_MODE" = "train" ]; then \
-        python src/ml/train.py; \
-    else \
-        python src/app/main.py; \
-    fi'
+CMD ["python", "src/app/main.py"]

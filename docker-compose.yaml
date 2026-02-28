@@ -1,15 +1,25 @@
 services:
+  train:
+    build:
+      context: .
+      dockerfile: src/ml/Dockerfile
+    env_file: .env
+    volumes:
+      - ./data:/app/data
+    profiles:
+      - train
+    restart: "no"
+
   app:
     build:
       context: .
-      dockerfile: Dockerfile
-    env_file:
-      - .env
+      dockerfile: src/app/Dockerfile
+    env_file: .env
     volumes:
       - ./src:/app/src
-      - data:/app/data
-      - output:/app/output
-
-volumes:
-  data:
-  output:
+      - ./data:/app/data
+      - ./output:/app/output
+      - ./har_and_cookies:/root/.config/g4f
+    profiles:
+      - app
+    restart: "no"
