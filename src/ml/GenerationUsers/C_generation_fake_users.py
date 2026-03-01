@@ -56,20 +56,14 @@ class GitHubUserGenerator:
         }
 
     def _generate_user_data(self, user_type: str) -> Dict[str, Any] | None:
-        if user_type == "absolute_zero":
-            return self._absolute_zero()
-        if user_type == "field_zero":
-            return self._field_zero_random()
-        if user_type == "low_values":
-            return self._low_values()
-        if user_type == "beginner":
-            return self._beginner()
-        if user_type == "intermediate":
-            return self._intermediate()
-        if user_type == "advanced":
-            return self._advanced()
-        if user_type == "maximum_values":
-            return self._maximum_values()
+        if user_type == "absolute_zero":   return self._absolute_zero()
+        if user_type == "field_zero":      return self._field_zero_random()
+        if user_type == "sparse_zero":     return self._sparse_zero()
+        if user_type == "low_values":      return self._low_values()
+        if user_type == "beginner":        return self._beginner()
+        if user_type == "intermediate":    return self._intermediate()
+        if user_type == "advanced":        return self._advanced()
+        if user_type == "maximum_values":  return self._maximum_values()
         return None
 
     def _absolute_zero(self) -> Dict[str, Any]:
@@ -93,24 +87,20 @@ class GitHubUserGenerator:
             "inDay_repo", "addLine", "delLine", "count_views", "active_days_r",
         ]
         data = dict(self._intermediate_template)
-        field = random.choice(zeroable_fields)
-        data[field] = 0
+        data[random.choice(zeroable_fields)] = 0
+        return data
 
-        if data["repos"] == 0:
-            data.update({
-                "languages": 0, "forks": 0, "stars": 0, "avg_cont": 0,
-                "avg_a_days": 0, "frequencyCommits": 666, "inDayCommits": 0,
-                "countCommits": 0, "avg_views": 0, "forks_r": 0, "stars_r": 0,
-                "cont_count": 0, "commits_repo": 0, "frequency_repo": 666,
-                "inDay_repo": 0, "addLine": 0, "delLine": 0,
-                "count_views": 0, "active_days_r": 0,
-            })
-        if data["countCommits"] == 0:
-            data.update({
-                "inDayCommits": 0, "frequencyCommits": 666,
-                "commits_repo": 0, "frequency_repo": 666,
-                "inDay_repo": 0, "addLine": 0, "delLine": 0,
-            })
+    def _sparse_zero(self) -> Dict[str, Any]:
+        sparse_fields = [
+            "stars", "forks", "org", "avg_views",
+            "avg_cont", "count_views", "stars_r", "forks_r",
+        ]
+        data = dict(self._intermediate_template)
+
+        fields_to_zero = random.sample(sparse_fields, k=random.randint(1, 3))
+        for f in fields_to_zero:
+            data[f] = 0
+
         return data
 
     def _low_values(self) -> Dict[str, Any]:
@@ -296,7 +286,6 @@ class GitHubUserGenerator:
                 "inDay_repo": 0, "addLine": 0, "delLine": 0,
             })
 
-        # Привести в порядок соотношения commits vs inDay
         if d["countCommits"] > 0 and d["countCommits"] < d["inDayCommits"]:
             d["countCommits"], d["inDayCommits"] = d["inDayCommits"], d["countCommits"]
         elif d["countCommits"] == d["inDayCommits"] and d["countCommits"] > 0:
@@ -314,24 +303,23 @@ class GitHubUserGenerator:
         a = self.assessment
         scores = {}
 
-        scores["followers_s"] = a.followers_to_score_log(user_data["followers"])
-        scores["following_s"] = a.following_to_score_log(user_data["following"])
-        scores["hireable_s"] = a.hireable_to_score(user_data["hireable"])
-        scores["plan_s"] = a.plan_to_score(user_data["plan"])
-        scores["blog_s"] = a.blog_to_score(user_data["blog"])
-        scores["company_s"] = a.company_to_score(user_data["company"])
-        scores["org_s"] = a.org_to_score_log(user_data["org"])
-        scores["langs_s"] = a.language_to_score_log(user_data["languages"])
-        scores["forks_s"] = a.forks_to_score_log(user_data["forks"])
-        scores["stars_s"] = a.stars_to_score_log(user_data["stars"])
-        scores["avg_cont_s"] = a.avg_cont_to_score_log(user_data["avg_cont"])
-        scores["avg_a_days_s"] = a.avg_a_days_to_score_log(user_data["avg_a_days"])
-        scores["freq_commits_s"] = a.frequency_to_score_exp(
-            user_data["repos"], user_data["frequencyCommits"])
+        scores["followers_s"]      = a.followers_to_score_log(user_data["followers"])
+        scores["following_s"]      = a.following_to_score_log(user_data["following"])
+        scores["hireable_s"]       = a.hireable_to_score(user_data["hireable"])
+        scores["plan_s"]           = a.plan_to_score(user_data["plan"])
+        scores["blog_s"]           = a.blog_to_score(user_data["blog"])
+        scores["company_s"]        = a.company_to_score(user_data["company"])
+        scores["org_s"]            = a.org_to_score_log(user_data["org"])
+        scores["langs_s"]          = a.language_to_score_log(user_data["languages"])
+        scores["forks_s"]          = a.forks_to_score_log(user_data["forks"])
+        scores["stars_s"]          = a.stars_to_score_log(user_data["stars"])
+        scores["avg_cont_s"]       = a.avg_cont_to_score_log(user_data["avg_cont"])
+        scores["avg_a_days_s"]     = a.avg_a_days_to_score_log(user_data["avg_a_days"])
+        scores["freq_commits_s"]   = a.frequency_to_score_exp(user_data["repos"], user_data["frequencyCommits"])
         scores["in_day_commits_s"] = a.in_day_to_score_log(user_data["inDayCommits"])
-        scores["count_commits_s"] = a.commits_to_score_log(user_data["countCommits"])
-        scores["avg_views_s"] = a.avg_views_to_score_log(user_data["avg_views"])
-        scores["repos_s"] = a.evaluate_repositories(
+        scores["count_commits_s"]  = a.commits_to_score_log(user_data["countCommits"])
+        scores["avg_views_s"]      = a.avg_views_to_score_log(user_data["avg_views"])
+        scores["repos_s"]          = a.evaluate_repositories(
             scores["freq_commits_s"],
             scores["in_day_commits_s"],
             scores["count_commits_s"],
@@ -339,18 +327,18 @@ class GitHubUserGenerator:
         )
         scores["created_update_s"] = a.created_update_to_score_linear(
             scores["repos_s"], user_data["created_update"])
-        scores["forks_r_s"] = a.forks_r_to_score_log(user_data["forks_r"])
-        scores["stars_r_s"] = a.stars_r_to_score_log(user_data["stars_r"])
-        scores["contributors_s"] = a.contributors_count_to_score_log(user_data["cont_count"])
-        scores["commits_repo_s"] = a.commits_r_to_score_log(user_data["commits_repo"])
+        scores["forks_r_s"]        = a.forks_r_to_score_log(user_data["forks_r"])
+        scores["stars_r_s"]        = a.stars_r_to_score_log(user_data["stars_r"])
+        scores["contributors_s"]   = a.contributors_count_to_score_log(user_data["cont_count"])
+        scores["commits_repo_s"]   = a.commits_r_to_score_log(user_data["commits_repo"])
         scores["frequency_repo_s"] = a.frequency_r_to_score_exp(
             user_data["repos"], user_data["frequency_repo"], user_data["active_days_r"])
-        scores["in_day_repo_s"] = a.in_day_r_to_score_log(
+        scores["in_day_repo_s"]    = a.in_day_r_to_score_log(
             user_data["inDay_repo"], user_data["active_days_r"])
-        scores["add_line_s"] = a.add_line_log(user_data["addLine"])
-        scores["del_line_s"] = a.del_line_log(user_data["delLine"])
-        scores["count_views_s"] = a.count_views_count_to_score_log(user_data["count_views"])
-        scores["active_days_r_s"] = a.days_main_repo(
+        scores["add_line_s"]       = a.add_line_log(user_data["addLine"])
+        scores["del_line_s"]       = a.del_line_log(user_data["delLine"])
+        scores["count_views_s"]    = a.count_views_count_to_score_log(user_data["count_views"])
+        scores["active_days_r_s"]  = a.days_main_repo(
             scores["frequency_repo_s"],
             scores["in_day_repo_s"],
             scores["commits_repo_s"],
@@ -362,13 +350,14 @@ class GitHubUserGenerator:
 
     def generate_users(self, count: int = 150_000) -> pd.DataFrame:
         schedule: List[str] = (
-            ["absolute_zero"] * 5_000 +
-            ["field_zero"]    * 10_000 +
-            ["low_values"]    * 25_000 +
-            ["beginner"]      * 25_000 +
-            ["intermediate"]  * 30_000 +
-            ["advanced"]      * 35_000 +
-            ["maximum_values"]* 20_000
+            ["absolute_zero"]  *  5_000 +
+            ["field_zero"]     * 10_000 +
+            ["sparse_zero"]    * 10_000 +
+            ["low_values"]     * 20_000 +
+            ["beginner"]       * 25_000 +
+            ["intermediate"]   * 30_000 +
+            ["advanced"]       * 30_000 +
+            ["maximum_values"] * 20_000
         )
         random.shuffle(schedule)
 
@@ -378,9 +367,8 @@ class GitHubUserGenerator:
             if raw is None:
                 continue
             user_data = self._validate_and_fix_user_data(raw)
-            scores = self._calculate_scores(user_data)
-            row = {**user_data, **scores}
-            data.append(row)
+            scores    = self._calculate_scores(user_data)
+            data.append({**user_data, **scores})
 
         return pd.DataFrame(data, columns=self.columns)
 

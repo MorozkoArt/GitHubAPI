@@ -19,7 +19,6 @@ services:
       - ./src:/app/src
       - ./data:/app/data
       - ./output:/app/output
-      - ./har_and_cookies:/root/.config/g4f
     profiles:
       - app
     restart: "no"
