@@ -1,6 +1,6 @@
 import os
-import sys
 import torch
+import joblib
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from pathlib import Path
@@ -11,9 +11,6 @@ from ForModel.C_model import GitHubModel
 from ForModel.C_loss import ZeroConstrainedLoss
 from ForModel.M_education import evaluate, train_epoch
 
-import joblib
-
-
 def separator(char="-", width=60):
     print(char * width)
 
@@ -22,16 +19,18 @@ def export_onnx(model: GitHubModel, onnx_path: Path, input_size: int = 28) -> No
     model.eval()
     dummy = torch.zeros(1, input_size)
 
+    batch_dim = torch.export.Dim("batch_size", min=1, max=1024)
+    dynamic_shapes = {"x": {0: batch_dim}}
+
     torch.onnx.export(
         model,
         dummy,
         str(onnx_path),
         input_names=["input"],
         output_names=["output"],
-        dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}},
+        dynamic_shapes=dynamic_shapes,
         opset_version=18,
-        do_constant_folding=True,
-        dynamo=False,
+        dynamo=True,
     )
     size_mb = onnx_path.stat().st_size / 1024 / 1024
     print(f"  ONNX saved: {onnx_path}  ({size_mb:.2f} MB)")
@@ -40,11 +39,17 @@ def export_onnx(model: GitHubModel, onnx_path: Path, input_size: int = 28) -> No
 def verify_onnx(onnx_path: Path, scaler, X_test_raw) -> None:
     try:
         import onnxruntime as ort
+
         session    = ort.InferenceSession(str(onnx_path))
         input_name = session.get_inputs()[0].name
-        sample     = scaler.transform(X_test_raw.values[:1]).astype("float32")
-        out        = session.run(None, {input_name: sample})[0]
-        print(f"  ONNX check passed. Sample prediction (row 0):")
+
+        non_zero_mask = (X_test_raw != 0).any(axis=1)
+        first_non_zero = X_test_raw[non_zero_mask].iloc[:1]
+
+        sample = scaler.transform(first_non_zero.values).astype("float32")
+        out    = session.run(None, {input_name: sample})[0]
+
+        print(f"  ONNX check passed. Sample prediction (first non-zero row):")
         print(f"  {out[0].round(3)}")
     except ImportError:
         print("  onnxruntime not installed in train env, skipping check.")
@@ -56,10 +61,6 @@ def require_env(name: str) -> str:
         raise RuntimeError(f"Environment variable '{name}' is not set. Check your .env file.")
     return value
 
-
-# -----------------------------------------------------------------
-# Главная функция
-# -----------------------------------------------------------------
 
 def main() -> None:
     separator("=")

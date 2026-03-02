@@ -3,76 +3,131 @@
 </div>
 
 <div id="header" align="center">
-    <h1>🎨Compiling an information portrait based on a profile on GitHub </h1>
-    <h3>💻Practice project</h3>
+    <h1>🎨 Составление информационного портрета по профилю GitHub</h1>
+    <h3>💻 Проект по практике</h3>
 </div>
 
 ---
-### Brief information about the project🌐:
-- *💾 A Python program that receives user data via the GitHub API and gives a numerical score to the profile, and the score value shows the user's activity level and programming skills*
-- *📑 MyToken = os.environ.get("GITHUB_TOKEN") - a string with a token, for the program to work in a variable environment, you need to create such a variable and place your access token there. [Information on how to do this](https://remontka.pro/environment-variables-windows/?ysclid=m5cn3cte63157731913)*
-- *💿 Full information is published on my [Google Drive](https://drive.google.com/drive/folders/18Q0nS8e0jUeByKjYreqZ1MXWn0KfvMVV?usp=drive_link)*
+
+### Кратко о проекте 🌐
+
+- *💾 Инструмент для автоматической оценки GitHub-профилей. Анализирует активность пользователя, качество репозиториев и код основного репозитория, возвращая числовую оценку до 250 баллов*
+- *💿 Полная информация опубликована на [Google Drive](https://drive.google.com/drive/folders/18Q0nS8e0jUeByKjYreqZ1MXWn0KfvMVV?usp=drive_link)*
+
 ---
-### Language👅 and tool🔧:
+
+### Язык 👅 и инструменты 🔧
+
 <img src="https://raw.githubusercontent.com/MorozkoArt/MorozkoArt/446de453fb12c56c11adfb43cde081d484777abb/Resources/python-original.svg" title="python" width="40" height="40"/>&nbsp;
 <img src="https://raw.githubusercontent.com/MorozkoArt/MorozkoArt/446de453fb12c56c11adfb43cde081d484777abb/Resources/pycharm-original.svg" title="pycharm" width="40" height="40"/>&nbsp;
+
 ---
 
-## Main features
+## Как работает оценка
 
-1. **GitHub Profile Analysis**:
-   - Evaluating user activity
-   - Analyze repositories and code
-   - Generate a comprehensive report
+| Блок          | Максимум | Что оценивается                                     |
+|---------------|----------|-----------------------------------------------------|
+| Профиль       | 100      | followers, repos, commits, языки, организации и др. |
+| Репозиторий   | 100      | stars, forks, коммиты, активные дни, просмотры      |
+| Качество кода | 50       | анализ файлов через LLM (HuggingFace API)           |
 
-2. **Machine Learning**:
-   - Predicting profile quality
-   - Evaluating contributions to projects
+## Установка и запуск
 
-3. **Working with the GitHub API**:
-   - Multiple authentication methods
-   - Getting detailed information about users
+### Шаг 1 — Клонировать репозиторий
 
-## Installation and startup
-
-1. Establish dependencies:
 ```bash
-pip install -r requirements.txt
+git clone https://github.com/MorozkoArt/GitHubAPI
+cd GitHubAPI
 ```
 
-2. Set the environment variables:
+### Шаг 2 — Настроить переменные окружения
+
 ```bash
-export GITHUB_TOKEN="your_github_token"
+cp .env.example .env
 ```
 
-3. Start the project:
-```bash
-python main.py
+Открыть `.env` и заполнить обязательные поля:
+
+```env
+# GitHub токен: Settings → Developer settings → Personal access tokens → Classic
+# Необходимые права: repo, read:user, read:org
+GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+GITHUB_USERNAME=твой_логин
+
+# HuggingFace токен: https://huggingface.co/settings/tokens (бесплатно)
+HF_TOKEN=hf_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-## Project Architecture
+### Шаг 3 — Обучить модель (один раз, ~20–40 минут)
+
+```bash
+docker compose --profile train up --build
+```
+
+После завершения в консоли появится:
+
+```bash
+Training complete.
+```
+
+Артефакты (`model.onnx`, `scaler.pkl`) сохраняются в Docker volume `data` автоматически.
+
+### Шаг 4 — Запустить приложение
+
+```bash
+docker compose --profile app up --build
+```
+
+> **Повторные запуски** (модель уже обучена):
+
+> ```bash
+> docker compose --profile app up
+> ```
+---
+
+## Архитектура проекта
+
+<details>
+<summary><b>📂 Структура директорий</b></summary>
+<br>
 
 ```plaintext
 📂project/
 ├── 📂src/
-│   ├──📂api/
-│   │   ├──📂Assessment         # User evaluation techniques
-│   │   ├──📂Config/            # Configuration files
-│   │   ├──📂Interface/         # Visualization techniques
-│   │   ├──📂StartMethods/      # Startup methods
-│   │   ├──📂User_and_Repo/     # Classes for working with users
-│   └── ml/
-│       ├──📂GenerationUsers/   # Data generation
-│       ├──📂ForModel/          # Model ML
-│       └──📄train.py           # Model training
-├──📂data/                      # Training data
-├──📂tests/                     # Test directory
-└──📄main.py                    # Main script
+│   ├──📂app/
+│   │   ├──📄Dockerfile
+│   │   ├──📄requirements.txt
+│   │   ├──📂Assessment         # Методы оценки пользователя
+│   │   ├──📂Interface/         # Методы визуализации
+│   │   ├──📂StartMethods/      # Методы запуска
+│   │   ├──📂User_and_Repo/     # Классы для работы с пользователями
+│   │   └──📄main.py            # Главный скрипт
+│   ├──📂common/
+│   │   ├──📂Config
+│   │   └──📂Utils
+│   └──📂ml/
+│       ├──📄Dockerfile
+│       ├──📄requirements.txt
+│       ├──📂GenerationUsers/   # Генерация обучающих данных
+│       ├──📂ForModel/          # Архитектура модели
+│       └──📄train.py           # Обучение модели
+├──📂data/                      # Обучающие данные
+├──📂tests/                     # Тесты
+├──📄docker-compose.yaml
+└──📄.env.example
 ```
 
-## Example output
+</details>
 
-```
+---
+
+## Пример вывода
+
+<details>
+<summary><b>📊 Показать пример оценки профиля</b></summary>
+<br>
+
+```plaintext
 User profile assessment results - MorozkoArt 
 
 Profile data and their assessment:
@@ -119,38 +174,91 @@ Profile assessment: 41.8
 ...
 ```
 
-## Technologies used
+</details>
 
-| Technology   | Assignment                  | Version |
-|--------------|-----------------------------|---------|
-| PyTorch      | Machine Learning            | 2.0+    |
-| PyGithub     | Working with the GitHub API | 1.55+   |
-| PrettyTable  | Data Visualization          | 3.0+    |
-| tqdm         | Progress Bars               | 4.0+    |
-| pandas       | data processing             | 1.5+    |
-| scikit-learn | Evaluation Metrics          | 1.2+    |
-| GPT-4        | Code Analysis               | -       |
+---
 
-## Конфигурация
+## Переменные окружения
 
-Evaluation parameters are customized via JSON files:
-- `field_score.json` - weights for different metrics
-- `max_value.json` - maximum values for normalization
-- `tour_field.json` - tournament evaluation parameters
+<details>
+<summary><b>⚙️ Полный список переменных .env</b></summary>
+<br>
 
-## Additional features
+| Переменная          | Описание                                | Пример                                              |
+|---------------------|-----------------------------------------|-----------------------------------------------------|
+| `GITHUB_TOKEN`      | Токен GitHub API                        | `ghp_xxx`                                           |
+| `GITHUB_USERNAME`   | Логин для анализа                       | `MorozkoArt`                                        |
+| `GITHUB_USER_TOKEN` | Токен для полного доступа (опционально) |                                                     |
+| `HF_TOKEN`          | Токен HuggingFace                       | `hf_xxx`                                            |
+| `HF_API_URL`        | URL HuggingFace API                     | `https://router.huggingface.co/v1/chat/completions` |
+| `HF_MODEL_NAME`     | LLM для оценки кода                     | `Qwen/Qwen2.5-Coder-32B-Instruct`                   |
+| `DATA_DIR`          | Путь к ML-артефактам                    | `/app/data`                                         |
+| `OUTPUT_DIR`        | Папка для результатов                   | `/app/output`                                       |
+| `MODEL_PATH`        | Путь к ONNX-модели                      | `/app/data/model.onnx`                              |
+| `SCALER_PATH`       | Путь к scaler                           | `/app/data/scaler.pkl`                              |
+| `CHECKPOINT_PATH`   | Путь к PyTorch checkpoint               | `/app/data/best_model.pth`                          |
+| `DATASET_PATH`      | Путь к датасету                         | `/app/data/training.csv`                            |
+| `AUTH_METHOD`       | Метод аутентификации                    | `login` или `token`                                 |
+| `ACCESS_LEVEL`      | Уровень доступа                         | `public` или `private`                              |
+| `CODE_ASSESS_MODE`  | Режим оценки кода                       | `1` (все файлы) или `2` (5 файлов)                  |
+| `MAX_WORKERS_USER`  | Потоки для профиля                      | `5`                                                 |
+| `MAX_WORKERS_REPO`  | Потоки для репозитория                  | `10`                                                |
 
-1. **Synthetic Data Generation**:
-   - Creates profiles of different levels (beginner, intermediate, expert)
-   - Used for model training
+</details>
 
-2. **Detailed Repository Analysis**:
-   - Activity estimation
-   - Commits analysis
-   - Popularity estimation
+---
 
-3. **Saving results**:
-   - TXT format
-   - With a choice of saving location
+## Технологии
 
+<details>
+<summary><b>📦 Использованные библиотеки</b></summary>
+<br>
 
+| Технология    | Назначение                           | Версия   |
+|---------------|--------------------------------------|----------|
+| PyTorch (CPU) | Обучение нейронной сети              | 2.9.1    |
+| onnxruntime   | Инференс ONNX-модели в приложении    | ≥ 1.19.0 |
+| PyGithub      | Работа с GitHub API v3               | 2.6.1    |
+| requests      | HTTP-запросы к HuggingFace API       | 2.32.3   |
+| pandas        | Обработка и анализ данных            | 2.2.3    |
+| scikit-learn  | Нормализация данных (StandardScaler) | 1.7.0    |
+| joblib        | Сохранение и загрузка StandardScaler | ≥ 1.3.0  |
+| numpy         | Научные вычисления                   | ≥ 1.26.0 |
+| PrettyTable   | Форматированный вывод таблиц         | 3.16.0   |
+| tqdm          | Индикаторы прогресса                 | 4.67.1   |
+| python-dotenv | Загрузка конфигурации из .env        | ≥ 1.0.1  |
+| pytest        | Тестирование кода                    | 8.3.5    |
+
+</details>
+
+---
+
+## Технические детали
+
+<details>
+<summary><b>🔬 Устройство модели и Docker-образов</b></summary>
+<br>
+
+**Модель:** MLP с residual-блоками, LayerNorm, GELU, 28 входов → 28 выходов.
+Обучается на CPU за ~30 минут, экспортируется в ONNX (~1.5 MB).
+
+**Функция потерь:** `ZeroConstrainedLoss = SmoothL1 + штраф за ненулевые предсказания при нулевых целевых значениях (weight=1.5)`
+
+**Разделение образов:**
+
+| Образ                | Зависимости               | Размер  |
+|----------------------|---------------------------|---------|
+| `src/ml/Dockerfile`  | PyTorch CPU + ONNX        | ~1.1 GB |
+| `src/app/Dockerfile` | onnxruntime (без PyTorch) | ~350 MB |
+
+**Результаты обучения:**
+
+- Test MAE: `0.17`
+- Test R²: `0.96`
+
+**Зависимости разделены по сервисам:**
+
+- `src/ml/requirements.txt` — для обучения (PyTorch, ONNX, scikit-learn)
+- `src/app/requirements.txt` — для приложения (onnxruntime, PyGithub, requests)
+
+</details>
