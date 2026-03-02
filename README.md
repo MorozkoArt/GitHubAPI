@@ -7,21 +7,15 @@
     <h3>💻 Проект по практике</h3>
 </div>
 
----
-
-### Кратко о проекте 🌐
+## Кратко о проекте 🌐
 
 - *💾 Инструмент для автоматической оценки GitHub-профилей. Анализирует активность пользователя, качество репозиториев и код основного репозитория, возвращая числовую оценку до 250 баллов*
 - *💿 Полная информация опубликована на [Google Drive](https://drive.google.com/drive/folders/18Q0nS8e0jUeByKjYreqZ1MXWn0KfvMVV?usp=drive_link)*
 
----
-
-### Язык 👅 и инструменты 🔧
+## Язык и инструменты
 
 <img src="https://raw.githubusercontent.com/MorozkoArt/MorozkoArt/446de453fb12c56c11adfb43cde081d484777abb/Resources/python-original.svg" title="python" width="40" height="40"/>&nbsp;
 <img src="https://raw.githubusercontent.com/MorozkoArt/MorozkoArt/446de453fb12c56c11adfb43cde081d484777abb/Resources/pycharm-original.svg" title="pycharm" width="40" height="40"/>&nbsp;
-
----
 
 ## Как работает оценка
 
@@ -83,12 +77,11 @@ docker compose --profile app up --build
 > ```bash
 > docker compose --profile app up
 > ```
----
 
 ## Архитектура проекта
 
 <details>
-<summary><b>📂 Структура директорий</b></summary>
+<summary><b>Структура директорий</b></summary>
 <br>
 
 ```plaintext
@@ -119,12 +112,10 @@ docker compose --profile app up --build
 
 </details>
 
----
-
 ## Пример вывода
 
 <details>
-<summary><b>📊 Показать пример оценки профиля</b></summary>
+<summary><b>Показать пример оценки профиля</b></summary>
 <br>
 
 ```plaintext
@@ -176,12 +167,10 @@ Profile assessment: 41.8
 
 </details>
 
----
-
 ## Переменные окружения
 
 <details>
-<summary><b>⚙️ Полный список переменных .env</b></summary>
+<summary><b>Полный список переменных .env</b></summary>
 <br>
 
 | Переменная          | Описание                                | Пример                                              |
@@ -206,12 +195,10 @@ Profile assessment: 41.8
 
 </details>
 
----
-
 ## Технологии
 
 <details>
-<summary><b>📦 Использованные библиотеки</b></summary>
+<summary><b>Использованные библиотеки</b></summary>
 <br>
 
 | Технология    | Назначение                           | Версия   |
@@ -231,12 +218,10 @@ Profile assessment: 41.8
 
 </details>
 
----
-
 ## Технические детали
 
 <details>
-<summary><b>🔬 Устройство модели и Docker-образов</b></summary>
+<summary><b>Устройство модели и Docker-образов</b></summary>
 <br>
 
 **Модель:** MLP с residual-блоками, LayerNorm, GELU, 28 входов → 28 выходов.
