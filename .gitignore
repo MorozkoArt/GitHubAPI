@@ -21,6 +21,7 @@ har_and_cookies/
 *.json
 dataset/
 output/
+data/training.csv
 
 # Jupyter Notebook
 .ipynb_checkpoints/

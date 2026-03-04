@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 from Interface.M_GetInformation import print_assessment
 
-
 def save_user_information(user, assessment):
     output_dir = Path(os.getenv("OUTPUT_DIR"))
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -16,5 +15,4 @@ def save_to_file(file_path, user, assessment):
     with open(file_path, "w", encoding="utf-8") as f:
         for table in tables:
             f.write(str(table))
-
 
