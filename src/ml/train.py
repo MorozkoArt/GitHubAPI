@@ -90,7 +90,7 @@ def main() -> None:
     separator()
 
     if not csv_path.exists():
-        print("Generating 150 000 synthetic profiles...")
+        print("Generating 300 000 synthetic profiles...")
         gen = GitHubUserGenerator()
         df  = gen.generate_users()
         gen.save_to_csv(df, str(csv_path))

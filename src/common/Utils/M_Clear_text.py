@@ -16,6 +16,9 @@ def sanitize_response(response: str, remove_n: int = 1) -> str:
     text = remove_urls(response)
     text = text.strip()
     sentences = split_into_sentences(text)
+    if remove_n == 0:
+        return " ".join(sentences)
+
     if len(sentences) <= remove_n:
         return " ".join(sentences[:-remove_n]) if sentences else ""
     kept = sentences[:-remove_n]

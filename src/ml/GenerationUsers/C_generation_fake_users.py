@@ -348,16 +348,16 @@ class GitHubUserGenerator:
         )
         return scores
 
-    def generate_users(self, count: int = 150_000) -> pd.DataFrame:
+    def generate_users(self, count: int = 300_000) -> pd.DataFrame:
         schedule: List[str] = (
-            ["absolute_zero"]  *  5_000 +
-            ["field_zero"]     * 10_000 +
-            ["sparse_zero"]    * 10_000 +
-            ["low_values"]     * 20_000 +
-            ["beginner"]       * 25_000 +
-            ["intermediate"]   * 30_000 +
-            ["advanced"]       * 30_000 +
-            ["maximum_values"] * 20_000
+            ["absolute_zero"]  * 15_000 +
+            ["field_zero"]     * 15_000 +
+            ["sparse_zero"]    * 20_000 +
+            ["low_values"]     * 45_000 +
+            ["beginner"]       * 55_000 +
+            ["intermediate"]   * 65_000 +
+            ["advanced"]       * 50_000 +
+            ["maximum_values"] * 35_000 
         )
         random.shuffle(schedule)
 

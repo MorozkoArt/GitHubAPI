@@ -7,13 +7,13 @@ class ResidualBlock(nn.Module):
         super().__init__()
         self.block = nn.Sequential(
             nn.Linear(size, size),
-            nn.LayerNorm(size),
-            nn.GELU(),
+            nn.BatchNorm1d(size),
+            nn.ReLU(),
             nn.Dropout(dropout),
             nn.Linear(size, size),
-            nn.LayerNorm(size),
+            nn.BatchNorm1d(size),
         )
-        self.act = nn.GELU()
+        self.act = nn.ReLU()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.act(x + self.block(x))
@@ -25,13 +25,13 @@ class GitHubModel(nn.Module):
 
         self.encoder = nn.Sequential(
             nn.Linear(input_size, 256),
-            nn.LayerNorm(256),
-            nn.GELU(),
+            nn.BatchNorm1d(256),
+            nn.ReLU(),
             nn.Dropout(0.25),
 
             nn.Linear(256, 256),
-            nn.LayerNorm(256),
-            nn.GELU(),
+            nn.BatchNorm1d(256),
+            nn.ReLU(),
             nn.Dropout(0.2),
         )
 
@@ -42,13 +42,13 @@ class GitHubModel(nn.Module):
 
         self.decoder = nn.Sequential(
             nn.Linear(256, 128),
-            nn.LayerNorm(128),
-            nn.GELU(),
+            nn.BatchNorm1d(128),
+            nn.ReLU(),
             nn.Dropout(0.1),
 
             nn.Linear(128, 64),
-            nn.LayerNorm(64),
-            nn.GELU(),
+            nn.BatchNorm1d(64),
+            nn.ReLU(),
 
             nn.Linear(64, output_size),
         )

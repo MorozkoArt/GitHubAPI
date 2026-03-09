@@ -181,6 +181,13 @@ class User_GitHub:
             events = user.get_public_events()
             if events.totalCount > 0:
                 return list(events)[0].created_at
+        except AttributeError:
+            try:
+                events = user.get_events()
+                if events.totalCount > 0:
+                    return list(events)[0].created_at
+            except Exception as e:
+                print(f"Error getting user events: {e}")
         except Exception as e:
             print(f"Error getting user events: {e}")
         return None
