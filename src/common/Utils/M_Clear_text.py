@@ -9,7 +9,7 @@ def split_into_sentences(text: str):
     sentences = re.split(r'(?<=[.!?])\s+', text.strip(), flags=re.UNICODE)
     return [s.strip() for s in sentences if s.strip()]
 
-def sanitize_response(response: str, remove_n: int = 1) -> str:
+def sanitize_response(response: str, remove_n: int = 0) -> str:
     if not response:
         return response
 

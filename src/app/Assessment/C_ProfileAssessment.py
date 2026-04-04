@@ -116,7 +116,37 @@ class ProfileAssessment:
 
         scaled     = scaler.transform(raw_df.values).astype("float32")
         input_name = ort_session.get_inputs()[0].name
-        return ort_session.run(None, {input_name: scaled})[0]  # (1, 28)
+        predictions = ort_session.run(None, {input_name: scaled})[0]
+
+        return self._apply_zero_constraints(predictions, raw_df.iloc[0].to_dict())
+
+
+    def _apply_zero_constraints(self, predictions: np.ndarray, raw: dict) -> np.ndarray:
+        result = predictions.copy()
+
+        direct_zero_map = {
+            "followers":    0,  "following":   1,  "hireable":  2,  "plan":      3,
+            "blog":         4,  "company":     5,  "org":       6,  "languages": 7,
+            "forks":        8,  "stars":       9,  "avg_cont":  10, "avg_a_days": 11,
+            "inDayCommits": 13, "countCommits": 14, "avg_views": 15, "repos":    16,
+            "forks_r":      18, "stars_r":     19, "cont_count": 20,
+            "commits_repo": 21, "inDay_repo":  23, "addLine":   24,
+            "delLine":      25, "count_views": 26, "active_days_r": 27,
+        }
+        for field, idx in direct_zero_map.items():
+            if raw.get(field, 0) == 0:
+                result[0][idx] = 0.0
+
+        if raw.get("repos", 0) == 0 or raw.get("frequencyCommits", 666) >= 30:
+            result[0][12] = 0.0
+        if raw.get("repos", 0) == 0 or raw.get("frequency_repo", 666) >= 30:
+            result[0][22] = 0.0
+
+        if raw.get("repos", 0) == 0:
+            for idx in range(7, 28):
+                result[0][idx] = 0.0
+
+        return result
 
     def _create_field_index_map(self) -> dict:
         return {
@@ -134,14 +164,10 @@ class ProfileAssessment:
         idx = self.field_index_map[field_name]
         return float(self.predicted_scores[0][idx])
 
-    def _get_value(self, value, default: float = 0):
-        if value is None:
+    def _get_value(self, value, default=0):
+        if value is None or value is False:
             return default
-        if isinstance(value, str) and (not value.strip() or value in ("None", "NULL", "-")):
-            return default
-        if isinstance(value, bool) and not value:
-            return default
-        if value in ("-", "None", "NULL"):
+        if isinstance(value, str) and value.strip() in ("", "None", "NULL", "-"):
             return default
         return value
 

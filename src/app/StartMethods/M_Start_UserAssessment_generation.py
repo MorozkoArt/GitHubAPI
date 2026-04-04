@@ -11,7 +11,7 @@ def start_assessment_generation_empty(user_git):
     if user_git.repos.totalCount == 0:
         print("The user has no repositories.")
         print(f"Profile assessment: {round(assessment_profile, 2)}")
-    elif user_git.main_repo:
+    elif not user_git.main_repo:
         print("The user has no repositories containing code files.")
         if len(user_git.repos_user) != 0:
             print(f"Profile assessment: {round(assessment_profile, 2)}")

@@ -1,75 +1,73 @@
+import os
 import math
 from common.Config.M_LoadConfig import load_config
 
 class User_repo:
     def __init__(self, repo, publicOrPrivate, config_file="tour_field.json"):
-        self.commits = repo.get_commits()
+        all_commits = repo.get_commits()
 
-        if self.commits.totalCount == 0:
+        if all_commits.totalCount == 0:
             raise ValueError(f"Repo '{repo.name}' has no commits, skipping.")
 
+        limit = int(os.getenv("MAX_COMMITS", 1000))
+        self.commits_list: list = list(all_commits[:limit] if limit > 0 else all_commits)
+        self.commits_count: int = all_commits.totalCount
+
         commits_frequency_value, commits_in_day_value, commits_days = self.commits_frequency_in_day()
-        self.commits_count = self.commits.totalCount
         self.commits_frequency = commits_frequency_value
-        self.commits_in_day = commits_in_day_value
-        self.name = repo.name
-        self.language = repo.language
-        self.forks = repo.forks
-        self.stargazers_count = repo.stargazers_count
+        self.commits_in_day    = commits_in_day_value
+        self.name              = repo.name
+        self.language          = repo.language
+        self.forks             = repo.forks
+        self.stargazers_count  = repo.stargazers_count
 
         try:
             self.contributors_count = repo.get_contributors().totalCount
         except Exception:
             self.contributors_count = 0
 
-        self.created_at = repo.created_at.date()
-        self.last_date = self.commits[0].commit.author.date.date()
-        self.days_usege = (int((self.last_date - self.created_at).days) + 1)
-        self.days_work = commits_days
+        self.created_at    = repo.created_at.date()
+        self.last_date     = self.commits_list[0].commit.author.date.date()
+        self.days_usage    = (self.last_date - self.created_at).days + 1
+        self.days_work     = commits_days
         self.publicOrPrivate = publicOrPrivate
 
         if self.publicOrPrivate == "public":
             self.count_views = "-"
         else:
             try:
-                self.count_views = repo.get_views_traffic()['uniques']
+                self.count_views = repo.get_views_traffic()["uniques"]
             except Exception:
                 self.count_views = "-"
 
         self.tour_field = load_config(config_file)
 
     def commits_frequency_in_day(self):
-        commits_frequency_list = []
-        commits_in_day_list = []
-        day = self.commits[0].commit.author.date.date()
-        count_commits_in_day = 0
-        max_commits = 1000
-        range_commits = (self.commits.totalCount if self.commits.totalCount <= max_commits else max_commits)
+        frequency_list  = []
+        in_day_list     = []
+        current_day     = self.commits_list[0].commit.author.date.date()
+        count_in_day    = 0
 
-        for i in range(range_commits):
-            if i != (range_commits) - 1:
-                frequency = (self.commits[i].commit.author.date.date() - self.commits[i + 1].commit.author.date.date()).days
-                commits_frequency_list.append(frequency)
-            if day == self.commits[i].commit.author.date.date():
-                count_commits_in_day += 1
+        for i, commit in enumerate(self.commits_list):
+            commit_date = commit.commit.author.date.date()
+
+            if i < len(self.commits_list) - 1:
+                next_date = self.commits_list[i + 1].commit.author.date.date()
+                frequency_list.append((commit_date - next_date).days)
+
+            if commit_date == current_day:
+                count_in_day += 1
             else:
-                commits_in_day_list.append(count_commits_in_day)
-                count_commits_in_day = 1
-                day = self.commits[i].commit.author.date.date()
-            if i == (self.commits.totalCount) - 1:
-                commits_in_day_list.append(count_commits_in_day)
+                in_day_list.append(count_in_day)
+                count_in_day = 1
+                current_day  = commit_date
 
-        if len(commits_frequency_list) != 0:
-            commits_frequency_value = sum(commits_frequency_list) / len(commits_frequency_list)
-        else:
-            commits_frequency_value = "NULL"
+        in_day_list.append(count_in_day)
 
-        if len(commits_in_day_list) != 0:
-            commits_in_day_value = sum(commits_in_day_list) / len(commits_in_day_list)
-        else:
-            commits_in_day_value = "NULL"
+        frequency_value = sum(frequency_list) / len(frequency_list) if frequency_list else "NULL"
+        in_day_value    = sum(in_day_list)    / len(in_day_list)    if in_day_list    else "NULL"
 
-        return commits_frequency_value, commits_in_day_value, len(commits_in_day_list)
+        return frequency_value, in_day_value, len(in_day_list)
 
 
     def tournament(self):
@@ -91,7 +89,6 @@ class User_repo:
             judgement = 0
         return judgement
 
+    @staticmethod
     def search_repo(repos, name):
-        for repo in repos:
-            if repo.name == name:
-                return repo
+        return next((repo for repo in repos if repo.name == name), None)

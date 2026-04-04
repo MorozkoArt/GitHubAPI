@@ -18,10 +18,10 @@ class Main_repo(User_repo):
         self.name_files = ", ".join(f"{content_file.path}" for content_file in self.contents_kod)
 
     def commits_line_change_parallel(self):
-        if self.commits.totalCount == 0:
+        if self.commits_count == 0:  
             return "NULL", "NULL"
         
-        prbar = ProgressBar(self.commits.totalCount, "Loading repo data: ")
+        prbar = ProgressBar(len(self.commits_list), "Loading repo data: ")
         commits_add_lines_list = []
         commits_del_lines_list = []
         lock = threading.Lock()
@@ -39,10 +39,10 @@ class Main_repo(User_repo):
                 prbar.update_pd()
 
         try:
-            max_workers = min(int(os.getenv("MAX_WORKERS_REPO")), self.commits.totalCount)
+            max_workers = min(int(os.getenv("MAX_WORKERS_REPO")), len(self.commits_list))
 
             with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-                list(executor.map(process_commit, list(self.commits)))
+                list(executor.map(process_commit, self.commits_list))
 
         finally:
             prbar.close_pd()
@@ -94,30 +94,29 @@ class Main_repo(User_repo):
             return None
 
     def download_mainRepo(self):
-        list_of_paths = []
+        storage_dir = os.getenv("STORAGE_DIR")
+
+        if os.path.exists(storage_dir):
+            shutil.rmtree(storage_dir)
+        os.makedirs(storage_dir)
+
         print(f"Downloading files from the repository: {self.repo.name}")
-        
-        if not os.path.exists("storage"):
-            os.makedirs("storage")
-        elif os.listdir("storage"):
-            shutil.rmtree("storage")
-            os.makedirs("storage")
-        
+
         def download_file(file_content):
             try:
-                full_path = os.path.join("storage", file_content.path)
+                full_path = os.path.join(storage_dir, file_content.path)
                 os.makedirs(os.path.dirname(full_path), exist_ok=True)
-                with open(full_path, 'wb') as f:
+                with open(full_path, "wb") as f:
                     f.write(file_content.decoded_content)
                 return full_path
             except Exception as e:
                 print(f"Error downloading {file_content.path}: {e}")
                 return None
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-            futures = [executor.submit(download_file, file_content) 
-                        for file_content in self.contents_kod]
-
+        list_of_paths = []
+        max_workers = int(os.getenv("MAX_WORKERS_REPO"))
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = [executor.submit(download_file, fc) for fc in self.contents_kod]
             for future in concurrent.futures.as_completed(futures):
                 try:
                     path = future.result()

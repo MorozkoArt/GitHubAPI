@@ -70,7 +70,7 @@ def _create_main_repo_table(user, assessment):
         ("Number of contributors", user.main_repo.contributors_count, 
             round(assessment.assessment_repo_main_dict.get("contributors_count"), 2)),
         ("Repository creation date\nLast update date\nActive duration (from first to last commit)", 
-            f"{user.main_repo.created_at}\n{user.main_repo.last_date}\n{user.main_repo.days_usege} Day(s)", "-"),
+            f"{user.main_repo.created_at}\n{user.main_repo.last_date}\n{user.main_repo.days_usage} Day(s)", "-"),
         ("Number of active days (days with commits)", f"{user.main_repo.days_work} Day(s)", 
             round(assessment.assessment_repo_main_dict.get("days_work"), 2)),
         ("Number of commits", user.main_repo.commits_count, 
