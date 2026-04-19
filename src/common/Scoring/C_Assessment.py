@@ -137,6 +137,56 @@ class Assessment:
         k = max(self.max_value["languages"] * 0.25, 1.0)
         return self._hill_score(languages, k, self.field_score["languages"], n=1.5)
 
+    def _shannon_diversity_score(
+            self, language_counts: dict[str, int], field_score: float
+    ) -> float:
+        """
+        Нормализованная энтропия Шеннона для оценки разнообразия языков:
+
+            H      = -Σ pᵢ · ln(pᵢ)
+            H_norm = H / ln(L)         ∈ [0, 1]
+            Score  = field_score · H_norm
+
+        pᵢ — доля репозиториев на языке i,  L — количество уникальных языков.
+
+        Зачем нужна нормализация на ln(L):
+          Максимальная энтропия при L языках равна ln(L) (равномерное распределение).
+          Деление на ln(L) приводит результат к [0, 1] независимо от числа языков:
+          5 языков с равномерным распределением → H_norm = 1.0
+          5 языков, 90% на одном               → H_norm ≈ 0.2
+
+        Граничные случаи:
+          Один язык (L=1)  → H = 0, возвращаем 30% от field_score
+                             (знаем хотя бы один язык — это не ноль)
+          Нет языков        → 0.0
+        """
+        if not language_counts:
+            return 0.0
+
+        total = sum(language_counts.values())
+        if total == 0:
+            return 0.0
+
+        probs = [c / total for c in language_counts.values() if c > 0]
+        L = len(probs)
+
+        if L == 1:
+            # За владение одним языком — базовый балл (30%)
+            return round(field_score * 0.30, 3)
+
+        H = -sum(p * math.log(p) for p in probs)
+        H_max = math.log(L)
+        return round(field_score * (H / H_max), 3)
+
+    def language_shannon_score(self, language_counts: dict[str, int]) -> float:
+        """
+        Публичный метод: энтропия Шеннона по словарю {язык: кол-во репо}.
+        Используется в реальном ассессменте вместо language_to_score_log.
+        """
+        return self._shannon_diversity_score(
+            language_counts, self.field_score["languages"]
+        )
+
     def forks_to_score_log(self, forks: float, repos: float = 1) -> float:
         """
         Байесово сглаживание + Hill, n=2.0.
@@ -199,6 +249,70 @@ class Assessment:
         if repos == 0:
             return 0.0
         return self._exp_score(frequency_commits, self.field_score["frequencyCommits"])
+
+    def _consistency_score(
+            self, intervals: list[float], field_score: float, lam: float = 1.5
+    ) -> float:
+        """
+        Оценка регулярности коммитов через Коэффициент Вариации (CV):
+
+            CV    = σ / μ
+            Score = field_score · e^(−λ · CV)
+
+        Где μ — среднее, σ — стандартное отклонение интервалов между коммитами.
+
+        Почему CV лучше просто среднего интервала:
+          Разработчик А: 10 коммитов за 1 день, потом тишина 3 месяца
+            → mean ≈ 9 дней, σ огромная, CV >> 1 → низкий балл
+          Разработчик Б: коммит каждые 10 дней стабильно
+            → mean ≈ 10 дней, σ ≈ 0, CV ≈ 0 → высокий балл
+          При одинаковом среднем интервале побеждает тот, кто регулярнее.
+
+        λ (lam) — скорость затухания:
+          lam = 1.5 → при CV=1 (σ=μ) остаётся ~22% балла,
+                       при CV=0 (идеальная регулярность) — 100%.
+
+        Граничные случаи:
+          intervals < 2 элементов → нет данных → 0.0
+          mean == 0 (все коммиты в одну секунду) → CV=0 → field_score
+        """
+        if not intervals or len(intervals) < 2:
+            return 0.0
+
+        mean = sum(intervals) / len(intervals)
+        if mean == 0:
+            return round(field_score, 3)
+
+        variance = sum((x - mean) ** 2 for x in intervals) / len(intervals)
+        cv = variance ** 0.5 / mean
+        return round(min(field_score * math.exp(-lam * cv), field_score), 3)
+
+    def frequency_consistency_score(
+            self, intervals: list[float], repos: float
+    ) -> float:
+        """
+        Публичный метод: CV-оценка регулярности коммитов профиля.
+        Используется как бонус поверх frequency_to_score_exp.
+
+        Возвращает до 20% от field_score["frequencyCommits"] —
+        не заменяет базовую оценку частоты, а дополняет её.
+        """
+        if repos == 0 or not intervals:
+            return 0.0
+        bonus_cap = self.field_score["frequencyCommits"] * 0.20
+        return self._consistency_score(intervals, bonus_cap, lam=1.5)
+
+    def frequency_repo_consistency_score(
+            self, intervals: list[float], repos: float
+    ) -> float:
+        """
+        То же самое, но для основного репозитория (frequencyComm_MainRepo).
+        Бонус до 20% от field_score["frequencyComm_MainRepo"].
+        """
+        if repos == 0 or not intervals:
+            return 0.0
+        bonus_cap = self.field_score["frequencyComm_MainRepo"] * 0.20
+        return self._consistency_score(intervals, bonus_cap, lam=1.5)
 
     def evaluate_repositories(
         self, frequency: float, in_day_commits: float, count_commits: float, num_repos: float

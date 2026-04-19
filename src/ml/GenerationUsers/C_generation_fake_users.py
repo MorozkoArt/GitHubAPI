@@ -1,4 +1,4 @@
-from GenerationUsers.C_Assessment import Assessment
+from common.Scoring.C_Assessment import Assessment
 from typing import Dict, Any, List
 import pandas as pd
 import random

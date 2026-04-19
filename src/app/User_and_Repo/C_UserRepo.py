@@ -9,17 +9,20 @@ class User_repo:
         if all_commits.totalCount == 0:
             raise ValueError(f"Repo '{repo.name}' has no commits, skipping.")
 
-        limit = int(os.getenv("MAX_COMMITS", 1000))
+        limit = int(os.getenv("MAX_COMMITS"))
         self.commits_list: list = list(all_commits[:limit] if limit > 0 else all_commits)
         self.commits_count: int = all_commits.totalCount
 
-        commits_frequency_value, commits_in_day_value, commits_days = self.commits_frequency_in_day()
-        self.commits_frequency = commits_frequency_value
-        self.commits_in_day    = commits_in_day_value
-        self.name              = repo.name
-        self.language          = repo.language
-        self.forks             = repo.forks
-        self.stargazers_count  = repo.stargazers_count
+        commits_frequency_value, commits_in_day_value, commits_days, frequency_intervals = \
+            self.commits_frequency_in_day()
+        self.commits_frequency  = commits_frequency_value
+        self.commits_in_day     = commits_in_day_value
+        self.name               = repo.name
+        self.language           = repo.language
+        self.forks              = repo.forks
+        self.stargazers_count   = repo.stargazers_count
+        self.commits_frequency_intervals: list[float] = frequency_intervals
+        self.commits_frequency_cv: float              = self._compute_cv(frequency_intervals)
 
         try:
             self.contributors_count = repo.get_contributors().totalCount
@@ -43,32 +46,52 @@ class User_repo:
         self.tour_field = load_config(config_file)
 
     def commits_frequency_in_day(self):
-        frequency_list  = []
-        in_day_list     = []
-        current_day     = self.commits_list[0].commit.author.date.date()
-        count_in_day    = 0
+        frequency_list = []
+        in_day_list = []
+        current_day = self.commits_list[0].commit.author.date.date()
+        count_in_day = 0
 
         for i, commit in enumerate(self.commits_list):
             commit_date = commit.commit.author.date.date()
 
             if i < len(self.commits_list) - 1:
                 next_date = self.commits_list[i + 1].commit.author.date.date()
-                frequency_list.append((commit_date - next_date).days)
+                gap = (commit_date - next_date).days
+                frequency_list.append(gap)
 
             if commit_date == current_day:
                 count_in_day += 1
             else:
                 in_day_list.append(count_in_day)
                 count_in_day = 1
-                current_day  = commit_date
+                current_day = commit_date
 
         in_day_list.append(count_in_day)
 
         frequency_value = sum(frequency_list) / len(frequency_list) if frequency_list else "NULL"
-        in_day_value    = sum(in_day_list)    / len(in_day_list)    if in_day_list    else "NULL"
+        in_day_value = sum(in_day_list) / len(in_day_list) if in_day_list else "NULL"
 
-        return frequency_value, in_day_value, len(in_day_list)
+        # Возвращаем frequency_list дополнительно — для CV-оценки регулярности
+        return frequency_value, in_day_value, len(in_day_list), frequency_list
 
+    def _compute_cv(self, intervals: list[float]) -> float:
+        """
+        Коэффициент вариации (CV = σ / μ) для списка интервалов между коммитами.
+
+        CV ∈ [0, +∞):
+          0     — идеально регулярные коммиты (σ = 0)
+          0.5   — умеренная нерегулярность
+          ≥ 1.0 — высокая нерегулярность (σ ≥ μ)
+
+        Возвращает 0.0 при недостаточном числе данных.
+        """
+        if not intervals or len(intervals) < 2:
+            return 0.0
+        mean = sum(intervals) / len(intervals)
+        if mean == 0:
+            return 0.0
+        variance = sum((x - mean) ** 2 for x in intervals) / len(intervals)
+        return variance ** 0.5 / mean
 
     def tournament(self):
         normalize_commits_count = min(self.commits_count / self.tour_field["commits_count"], 1)
