@@ -4,8 +4,8 @@ import pandas as pd
 import joblib
 import onnxruntime as ort
 
-from Assessment.C_GPT import GPT
-from common.Config.M_LoadConfig import load_config
+from C_GPT import GPT
+from Config.M_LoadConfig import load_config
 
 
 class ProfileAssessment:

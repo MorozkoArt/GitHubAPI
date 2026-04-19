@@ -14,8 +14,9 @@
 
 ## Язык и инструменты
 
-<img src="https://raw.githubusercontent.com/MorozkoArt/MorozkoArt/446de453fb12c56c11adfb43cde081d484777abb/Resources/python-original.svg" title="python" width="40" height="40"/>&nbsp;
-<img src="https://raw.githubusercontent.com/MorozkoArt/MorozkoArt/446de453fb12c56c11adfb43cde081d484777abb/Resources/pycharm-original.svg" title="pycharm" width="40" height="40"/>&nbsp;
+<img src="./Resources/python-original.svg" height="40" alt="Python" />
+<img width="12" />
+<img src="./Resources/pycharm-original.svg" height="40" alt="Pycharm" />
 
 ## Как работает оценка
 
