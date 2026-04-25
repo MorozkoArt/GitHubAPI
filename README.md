@@ -37,8 +37,8 @@
 ### Шаг 1 — Клонировать репозиторий
 
 ```bash
-git clone https://github.com/MorozkoArt/GitHubAPI
-cd GitHubAPI
+git clone https://github.com/MorozkoArt/DevMirror
+cd DevMirror
 ```
 
 ### Шаг 2 — Настроить переменные окружения

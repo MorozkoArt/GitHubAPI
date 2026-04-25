@@ -1,5 +1,6 @@
 services:
   train:
+    container_name: devmirror-train
     build:
       context: .
       dockerfile: src/ml/Dockerfile
@@ -11,6 +12,7 @@ services:
     restart: "no"
 
   app:
+    container_name: devmirror-app
     build:
       context: .
       dockerfile: src/app/Dockerfile
