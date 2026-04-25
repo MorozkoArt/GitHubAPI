@@ -5,6 +5,7 @@ from common.Utils.C_ProgressBar import ProgressBar
 from User_and_Repo.C_UserRepo import User_repo
 from User_and_Repo.C_MainRepo import Main_repo
 
+
 class User_GitHub:
     def __init__(self, user, public_or_private):
         self.repos = user.get_repos()
@@ -21,7 +22,7 @@ class User_GitHub:
         self.company = user.company
         self.public_or_private = public_or_private
         self.org = [org_.login for org_ in user.get_orgs()]
-        self.month_usege = self.month_usege()
+        self.account_age_months = self._calculate_account_age_months()
         self.generate_data()
 
     def generate_data(self):
@@ -34,6 +35,8 @@ class User_GitHub:
         self._process_repo_data(repo_data)
 
     def _set_default_values(self):
+        self.language_counts: dict[str, int] = {}
+        self.frequency_intervals: list[float] = []
         self.frequency_commits = 0
         self.in_day_commits = 0
         self.count_commits = 0
@@ -48,8 +51,9 @@ class User_GitHub:
 
     def _process_repo_data(self, repo_data):
         (frequencies, daily_commits, counts, languages, repos,
-        main_repo, stars, forks, 
-        avg_a_days, avg_cont, avg_views) = repo_data
+         main_repo, stars, forks,
+         avg_a_days, avg_cont, avg_views,
+         frequency_intervals) = repo_data
 
         self.frequency_commits = self.calculate_average(frequencies)
         self.in_day_commits = self.calculate_average(daily_commits)
@@ -59,8 +63,10 @@ class User_GitHub:
         self.avg_views = self.calculate_average(avg_views)
         self.forks = forks
         self.stars = stars
-        self.languages = languages
+        self.language_counts: dict[str, int] = languages
+        self.languages = list(languages.keys())
         self.repos_user = repos
+        self.frequency_intervals: list[float] = frequency_intervals
         self.main_repo = Main_repo(main_repo, User_repo.search_repo(self.repos, main_repo.name))
 
     def process_repositories(self):
@@ -76,24 +82,23 @@ class User_GitHub:
             pbar.close_pd()
 
     def _process_repos_parallel(self, repos_list, pbar):
-        completed = 0
         lock = threading.Lock()
 
         def update_progress():
-            nonlocal completed
             with lock:
-                completed += 1
                 pbar.update_pd()
 
         def process_repo_wrapper(repo):
             try:
                 return User_repo(repo, self.public_or_private)
-            except Exception as e:
+            except Exception:
                 return None
             finally:
                 update_progress()
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=int(os.getenv("MAX_WORKERS_USER"))) as executor:
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=int(os.getenv("MAX_WORKERS_USER"))
+        ) as executor:
             futures = [executor.submit(process_repo_wrapper, repo) for repo in repos_list]
             return self._collect_results(futures)
 
@@ -112,49 +117,59 @@ class User_GitHub:
         if not repos_user:
             return None
 
-        commits_frequency = []
-        commits_in_day = []
-        commits_count = []
-        languages = []
+        commits_frequency: list[float] = []
+        commits_in_day: list[float] = []
+        commits_count: list[int] = []
+        languages: dict[str, int] = {}
+        all_frequency_intervals: list[float] = []
         main_repo = repos_user[0]
         max_judgement = 0
         stars = 0
         forks = 0
-        avg_a_days = []
-        avg_cont = []
-        avg_views = []
+        avg_a_days: list[float] = []
+        avg_cont: list[float] = []
+        avg_views: list[float] = []
 
         for repo_user in repos_user:
             self._process_single_repo_result(
                 repo_user, commits_frequency, commits_in_day, commits_count,
-                languages, avg_a_days, avg_cont, avg_views
+                languages, avg_a_days, avg_cont, avg_views,
             )
             stars += repo_user.stargazers_count
             forks += repo_user.forks
+            all_frequency_intervals.extend(repo_user.commits_frequency_intervals)
 
-            max_judgement, main_repo = self.find_main_repo_helper(repo_user, max_judgement, main_repo)
+            max_judgement, main_repo = self.find_main_repo_helper(
+                repo_user, max_judgement, main_repo
+            )
 
         return (
-            commits_frequency, commits_in_day, commits_count, languages, 
-            repos_user, main_repo, stars, forks, 
-            avg_a_days, avg_cont, avg_views
+            commits_frequency, commits_in_day, commits_count, languages,
+            repos_user, main_repo, stars, forks,
+            avg_a_days, avg_cont, avg_views,
+            all_frequency_intervals,
         )
 
-    def _process_single_repo_result(self, repo_user, commits_frequency, commits_in_day, 
-                                    commits_count, languages, avg_a_days, avg_cont, 
-                                    avg_views):
-        commits_frequency.append(repo_user.commits_frequency if repo_user.commits_frequency != "NULL" else 0)
-        commits_in_day.append(repo_user.commits_in_day if repo_user.commits_in_day != "NULL" else 0)
+    def _process_single_repo_result(
+        self, repo_user, commits_frequency, commits_in_day,
+        commits_count, languages, avg_a_days, avg_cont, avg_views,
+    ):
+        commits_frequency.append(
+            repo_user.commits_frequency if repo_user.commits_frequency != "NULL" else 0
+        )
+        commits_in_day.append(
+            repo_user.commits_in_day if repo_user.commits_in_day != "NULL" else 0
+        )
         commits_count.append(repo_user.commits_count)
         avg_a_days.append(repo_user.days_work)
         avg_cont.append(repo_user.contributors_count)
-        avg_views.append(repo_user.count_views if repo_user.count_views != '-' else 0)
+        avg_views.append(repo_user.count_views if repo_user.count_views != "-" else 0)
 
-        if repo_user.language and repo_user.language not in languages:
-            languages.append(repo_user.language)
+        if repo_user.language:
+            languages[repo_user.language] = languages.get(repo_user.language, 0) + 1
 
     def find_main_repo_helper(self, repo_user, max_judgement, main_repo):
-        if repo_user.language is not None and repo_user.name != self.name:  
+        if repo_user.language is not None and repo_user.name != self.name:
             judgement = repo_user.tournament()
             if judgement > max_judgement:
                 return judgement, repo_user
@@ -163,7 +178,7 @@ class User_GitHub:
     def calculate_average(self, data):
         return sum(data) / len(data) if data else 0
 
-    def month_usege(self):
+    def _calculate_account_age_months(self) -> int:
         if self.updated_at is None or self.created_at is None:
             return 0
 

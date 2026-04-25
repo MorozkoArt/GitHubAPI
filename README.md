@@ -14,8 +14,15 @@
 
 ## Язык и инструменты
 
-<img src="https://raw.githubusercontent.com/MorozkoArt/MorozkoArt/446de453fb12c56c11adfb43cde081d484777abb/Resources/python-original.svg" title="python" width="40" height="40"/>&nbsp;
-<img src="https://raw.githubusercontent.com/MorozkoArt/MorozkoArt/446de453fb12c56c11adfb43cde081d484777abb/Resources/pycharm-original.svg" title="pycharm" width="40" height="40"/>&nbsp;
+<div align="center">
+    <img src="./Resources/python-original.svg" height="40" alt="Python" />
+    <img width="12" />
+    <img src="./Resources/github-original.svg" height="40" alt="GitHub" />
+    <img width="12" />
+    <img src="./Resources/pytorch-original.svg" height="40" alt="PyTorch" />
+    <img width="12" />
+    <img src="./Resources/pycharm-original.svg" height="40" alt="Pycharm" />
+</div>
 
 ## Как работает оценка
 
@@ -30,8 +37,8 @@
 ### Шаг 1 — Клонировать репозиторий
 
 ```bash
-git clone https://github.com/MorozkoArt/GitHubAPI
-cd GitHubAPI
+git clone https://github.com/MorozkoArt/DevMirror
+cd DevMirror
 ```
 
 ### Шаг 2 — Настроить переменные окружения
@@ -97,6 +104,7 @@ docker compose --profile app up --build
 │   │   └──📄main.py            # Главный скрипт
 │   ├──📂common/
 │   │   ├──📂Config
+│   │   ├──📂Scoring
 │   │   └──📂Utils
 │   └──📂ml/
 │       ├──📄Dockerfile
@@ -173,25 +181,27 @@ Profile assessment: 41.8
 <summary><b>Полный список переменных .env</b></summary>
 <br>
 
-| Переменная          | Описание                                | Пример                                              |
-|---------------------|-----------------------------------------|-----------------------------------------------------|
-| `GITHUB_TOKEN`      | Токен GitHub API                        | `ghp_xxx`                                           |
-| `GITHUB_USERNAME`   | Логин для анализа                       | `MorozkoArt`                                        |
-| `GITHUB_USER_TOKEN` | Токен для полного доступа (опционально) |                                                     |
-| `HF_TOKEN`          | Токен HuggingFace                       | `hf_xxx`                                            |
-| `HF_API_URL`        | URL HuggingFace API                     | `https://router.huggingface.co/v1/chat/completions` |
-| `HF_MODEL_NAME`     | LLM для оценки кода                     | `Qwen/Qwen2.5-Coder-32B-Instruct`                   |
-| `DATA_DIR`          | Путь к ML-артефактам                    | `/app/data`                                         |
-| `OUTPUT_DIR`        | Папка для результатов                   | `/app/output`                                       |
-| `MODEL_PATH`        | Путь к ONNX-модели                      | `/app/data/model.onnx`                              |
-| `SCALER_PATH`       | Путь к scaler                           | `/app/data/scaler.pkl`                              |
-| `CHECKPOINT_PATH`   | Путь к PyTorch checkpoint               | `/app/data/best_model.pth`                          |
-| `DATASET_PATH`      | Путь к датасету                         | `/app/data/training.csv`                            |
-| `AUTH_METHOD`       | Метод аутентификации                    | `login` или `token`                                 |
-| `ACCESS_LEVEL`      | Уровень доступа                         | `public` или `private`                              |
-| `CODE_ASSESS_MODE`  | Режим оценки кода                       | `1` (все файлы) или `2` (5 файлов)                  |
-| `MAX_WORKERS_USER`  | Потоки для профиля                      | `5`                                                 |
-| `MAX_WORKERS_REPO`  | Потоки для репозитория                  | `10`                                                |
+| Переменная          | Описание                                         | Пример                                               |
+|---------------------|--------------------------------------------------|------------------------------------------------------|
+| `GITHUB_TOKEN`      | Токен GitHub API                                 | `ghp_xxx`                                            |
+| `GITHUB_USERNAME`   | Логин для анализа                                | `MorozkoArt`                                         |
+| `GITHUB_USER_TOKEN` | Токен для полного доступа (опционально)          |                                                      |
+| `HF_TOKEN`          | Токен HuggingFace                                | `hf_xxx`                                             |
+| `HF_API_URL`        | URL HuggingFace API                              | `https://router.huggingface.co/v1/chat/completions`  |
+| `HF_MODEL_NAME`     | LLM для оценки кода                              | `Qwen/Qwen2.5-Coder-32B-Instruct`                    |
+| `PROJECT_ROOT`      | Корневая директория приложения                   | `/app`                                               |
+| `DATA_DIR`          | Путь к ML-артефактам                             | `/app/data`                                          |
+| `OUTPUT_DIR`        | Папка для результатов                            | `/app/output`                                        |
+| `STORAGE_DIR`       | Временная папка для скачанных файлов репозитория | `/app/storage`                                       |
+| `MODEL_PATH`        | Путь к ONNX-модели                               | `/app/data/model.onnx`                               |
+| `SCALER_PATH`       | Путь к scaler                                    | `/app/data/scaler.pkl`                               |
+| `CHECKPOINT_PATH`   | Путь к PyTorch checkpoint                        | `/app/data/best_model.pth`                           |
+| `DATASET_PATH`      | Путь к датасету                                  | `/app/data/training.csv`                             |
+| `AUTH_METHOD`       | Метод аутентификации                             | `login` или `token`                                  |
+| `CODE_ASSESS_MODE`  | Режим оценки кода                                | `1` (все файлы) или `2` (5 файлов)                   |
+| `MAX_WORKERS_USER`  | Потоки для профиля                               | `5`                                                  |
+| `MAX_WORKERS_REPO`  | Потоки для репозитория                           | `10`                                                 |
+| `MAX_COMMITS`       | Лимит коммитов при анализе репозитория           | `1000`                                               |
 
 </details>
 

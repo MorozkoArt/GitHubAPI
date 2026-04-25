@@ -1,4 +1,5 @@
-from GenerationUsers.C_Assessment import Assessment
+from common.Scoring.C_Assessment import Assessment
+from common.Utils.constants import NO_FREQUENCY_SENTINEL
 from typing import Dict, Any, List
 import pandas as pd
 import random
@@ -71,10 +72,10 @@ class GitHubUserGenerator:
             "followers": 0, "following": 0, "hireable": 0, "plan": 0,
             "blog": 0, "company": 0, "org": 0, "languages": 0,
             "forks": 0, "stars": 0, "avg_cont": 0, "avg_a_days": 0,
-            "frequencyCommits": 666, "inDayCommits": 0, "countCommits": 0,
+            "frequencyCommits": NO_FREQUENCY_SENTINEL, "inDayCommits": 0, "countCommits": 0,
             "avg_views": 0, "repos": 0, "created_update": 0,
             "forks_r": 0, "stars_r": 0, "cont_count": 0, "commits_repo": 0,
-            "frequency_repo": 666, "inDay_repo": 0, "addLine": 0,
+            "frequency_repo": NO_FREQUENCY_SENTINEL, "inDay_repo": 0, "addLine": 0,
             "delLine": 0, "count_views": 0, "active_days_r": 0,
         }
 
@@ -272,17 +273,17 @@ class GitHubUserGenerator:
         if d["repos"] == 0:
             d.update({
                 "languages": 0, "forks": 0, "stars": 0, "avg_cont": 0,
-                "avg_a_days": 0, "frequencyCommits": 666, "inDayCommits": 0,
+                "avg_a_days": 0, "frequencyCommits": NO_FREQUENCY_SENTINEL, "inDayCommits": 0,
                 "countCommits": 0, "avg_views": 0, "forks_r": 0, "stars_r": 0,
-                "cont_count": 0, "commits_repo": 0, "frequency_repo": 666,
+                "cont_count": 0, "commits_repo": 0, "frequency_repo": NO_FREQUENCY_SENTINEL,
                 "inDay_repo": 0, "addLine": 0, "delLine": 0,
                 "count_views": 0, "active_days_r": 0,
             })
 
         if d["countCommits"] == 0:
             d.update({
-                "inDayCommits": 0, "frequencyCommits": 666,
-                "commits_repo": 0, "frequency_repo": 666,
+                "inDayCommits": 0, "frequencyCommits": NO_FREQUENCY_SENTINEL,
+                "commits_repo": 0, "frequency_repo": NO_FREQUENCY_SENTINEL,
                 "inDay_repo": 0, "addLine": 0, "delLine": 0,
             })
 
@@ -299,7 +300,7 @@ class GitHubUserGenerator:
         return d
 
 
-    def _calculate_scores(self, user_data: Dict[str, Any]) -> Dict[str, float]:
+    def _calculate_scores(self, user_data: dict) -> dict:
         a = self.assessment
         scores = {}
 
@@ -311,11 +312,15 @@ class GitHubUserGenerator:
         scores["company_s"]        = a.company_to_score(user_data["company"])
         scores["org_s"]            = a.org_to_score_log(user_data["org"])
         scores["langs_s"]          = a.language_to_score_log(user_data["languages"])
-        scores["forks_s"]          = a.forks_to_score_log(user_data["forks"])
-        scores["stars_s"]          = a.stars_to_score_log(user_data["stars"])
+
+        # Байесовское сглаживание: передаём кол-во репозиториев как размер выборки
+        repos = user_data["repos"]
+        scores["forks_s"]          = a.forks_to_score_log(user_data["forks"], repos)
+        scores["stars_s"]          = a.stars_to_score_log(user_data["stars"], repos)
+
         scores["avg_cont_s"]       = a.avg_cont_to_score_log(user_data["avg_cont"])
         scores["avg_a_days_s"]     = a.avg_a_days_to_score_log(user_data["avg_a_days"])
-        scores["freq_commits_s"]   = a.frequency_to_score_exp(user_data["repos"], user_data["frequencyCommits"])
+        scores["freq_commits_s"]   = a.frequency_to_score_exp(repos, user_data["frequencyCommits"])
         scores["in_day_commits_s"] = a.in_day_to_score_log(user_data["inDayCommits"])
         scores["count_commits_s"]  = a.commits_to_score_log(user_data["countCommits"])
         scores["avg_views_s"]      = a.avg_views_to_score_log(user_data["avg_views"])
@@ -323,18 +328,21 @@ class GitHubUserGenerator:
             scores["freq_commits_s"],
             scores["in_day_commits_s"],
             scores["count_commits_s"],
-            user_data["repos"],
+            repos,
         )
         scores["created_update_s"] = a.created_update_to_score_linear(
-            scores["repos_s"], user_data["created_update"])
+            scores["repos_s"], user_data["created_update"]
+        )
         scores["forks_r_s"]        = a.forks_r_to_score_log(user_data["forks_r"])
         scores["stars_r_s"]        = a.stars_r_to_score_log(user_data["stars_r"])
         scores["contributors_s"]   = a.contributors_count_to_score_log(user_data["cont_count"])
         scores["commits_repo_s"]   = a.commits_r_to_score_log(user_data["commits_repo"])
         scores["frequency_repo_s"] = a.frequency_r_to_score_exp(
-            user_data["repos"], user_data["frequency_repo"], user_data["active_days_r"])
+            repos, user_data["frequency_repo"], user_data["active_days_r"]
+        )
         scores["in_day_repo_s"]    = a.in_day_r_to_score_log(
-            user_data["inDay_repo"], user_data["active_days_r"])
+            user_data["inDay_repo"], user_data["active_days_r"]
+        )
         scores["add_line_s"]       = a.add_line_log(user_data["addLine"])
         scores["del_line_s"]       = a.del_line_log(user_data["delLine"])
         scores["count_views_s"]    = a.count_views_count_to_score_log(user_data["count_views"])

@@ -27,8 +27,6 @@ def start_assessment_generation_empty(user_git):
 def start_assessment_generation(user_git, var_kod_2):
     assessment = ProfileAssessment(user_git)
     assessment_profile = assessment.assessment_profile()
-    assessment_kod = 0
-    assessment_main_repo = 0
 
     assessment_main_repo = assessment.assessment_mainrepo()
     assessment_kod = assessment.assessment_kod(var_kod_2)
@@ -49,7 +47,6 @@ def start_user_assessment_generation(user, public_or_private):
     if user_git.repos.totalCount == 0:
         start_assessment_generation_empty(user_git)
     else:
-        var_kod_2 = 2
         if user_git.main_repo:
             content_kod = user_git.main_repo.name_files
             print("\nCode assessment may take a significant amount of time (from 1 to 15 minutes).")

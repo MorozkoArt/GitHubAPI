@@ -1,11 +1,7 @@
 import os
-import sys
+from common.Utils.M_ValidateEnv import validate_env
 from StartMethods.M_GetChoisAuth import option_start
 
 if __name__ == "__main__":
-    my_token = os.getenv("GITHUB_TOKEN")
-    if not my_token:
-        print("GITHUB_TOKEN is not set")
-        sys.exit(1)
-
-    option_start(my_token)
+    validate_env()
+    option_start(os.getenv("GITHUB_TOKEN"))
