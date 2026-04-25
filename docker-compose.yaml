@@ -19,6 +19,10 @@ services:
       - ./src:/app/src
       - ./data:/app/data
       - ./output:/app/output
+      - storage_tmp:/app/storage
     profiles:
       - app
     restart: "no"
+
+volumes:
+  storage_tmp:

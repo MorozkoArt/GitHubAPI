@@ -97,8 +97,13 @@ class Main_repo(User_repo):
         storage_dir = os.getenv("STORAGE_DIR")
 
         if os.path.exists(storage_dir):
-            shutil.rmtree(storage_dir)
-        os.makedirs(storage_dir)
+            for item in os.scandir(storage_dir):
+                if item.is_dir():
+                    shutil.rmtree(item.path)
+                else:
+                    os.remove(item.path)
+        else:
+            os.makedirs(storage_dir)
 
         print(f"Downloading files from the repository: {self.repo.name}")
 

@@ -22,7 +22,7 @@ class User_GitHub:
         self.company = user.company
         self.public_or_private = public_or_private
         self.org = [org_.login for org_ in user.get_orgs()]
-        self.month_usege = self.month_usege()
+        self.account_age_months = self._calculate_account_age_months()
         self.generate_data()
 
     def generate_data(self):
@@ -137,7 +137,6 @@ class User_GitHub:
             )
             stars += repo_user.stargazers_count
             forks += repo_user.forks
-            # Агрегируем интервалы здесь — all_frequency_intervals в области видимости
             all_frequency_intervals.extend(repo_user.commits_frequency_intervals)
 
             max_judgement, main_repo = self.find_main_repo_helper(
@@ -179,7 +178,7 @@ class User_GitHub:
     def calculate_average(self, data):
         return sum(data) / len(data) if data else 0
 
-    def month_usege(self):
+    def _calculate_account_age_months(self) -> int:
         if self.updated_at is None or self.created_at is None:
             return 0
 

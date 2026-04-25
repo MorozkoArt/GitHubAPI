@@ -15,7 +15,7 @@ def _create_profile_table(user, assessment):
             f"{user.private_repos}\n{user.public_repos}", 
             round(assessment.assessment_profile_dict.get("repositories"), 2)),
         ("Account creation date\nLast update date\nAccount age", 
-            f"{user.created_at}\n{user.updated_at}\n{user.month_usege} Month(s)", 
+            f"{user.created_at}\n{user.updated_at}\n{user.account_age_months} Month(s)",
             round(assessment.assessment_profile_dict.get("month_usege"), 2)),
         ("Subscription plan", user.plan, round(assessment.assessment_profile_dict.get("plan"), 2)),
         ("Blog", user.blog, round(assessment.assessment_profile_dict.get("blog"), 2)),

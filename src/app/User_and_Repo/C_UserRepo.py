@@ -93,24 +93,49 @@ class User_repo:
         variance = sum((x - mean) ** 2 for x in intervals) / len(intervals)
         return variance ** 0.5 / mean
 
-    def tournament(self):
-        normalize_commits_count = min(self.commits_count / self.tour_field["commits_count"], 1)
-        decay_rate = 0.5
-        normalize_commits_frequency = (math.exp(-decay_rate * self.commits_frequency) if self.commits_frequency != "NULL" else 0)
-        normalize_commits_in_day = (min(self.commits_in_day / self.tour_field["commits_inDay"], 1) if self.commits_in_day != "NULL" else 0)
-        normalize_days_work = min(self.days_work / self.tour_field["days_work"], 1)
-        normalize_stars = min(self.stargazers_count / self.tour_field["stars"], 1)
-        normalize_forks = min(self.forks / self.tour_field["forks"], 1)
-        repos_log = (normalize_commits_count * 4 + normalize_commits_frequency * 0.25
-                     + normalize_commits_in_day * 0.25 + normalize_days_work * 2
-                     + normalize_stars + normalize_forks)
-        if repos_log > 1:
-            judgement = min(100 * (math.log(repos_log) / math.log(8.5)), 100)
-        elif 0 < repos_log <= 1:
-            judgement = min(100 * (math.log(repos_log + 1) / math.log(8.5)), 100) / 20
-        else:
-            judgement = 0
-        return judgement
+    def tournament(self) -> float:
+        """
+        Выбор главного репозитория для детального анализа.
+        Взвешенное геометрическое среднее нормализованных метрик.
+
+        Веса (сумма = 1.0):
+          35% — кол-во коммитов     (основной вклад разработчика)
+          25% — активные дни        (продолжительность работы)
+          20% — частота коммитов    (регулярность, exp-decay)
+          10% — коммитов в день     (интенсивность)
+           5% — звёзды              (социальное доказательство)
+           5% — форки               (социальное доказательство)
+
+        WGM гарантирует: репо с нулевыми коммитами → score ≈ 0,
+        независимо от звёзд и форков.
+        """
+        tf = self.tour_field
+
+        # Нормализованные компоненты ∈ [0, 1]
+        n_commits = min(self.commits_count / tf["commits_count"], 1.0)
+        n_days = min(self.days_work / tf["days_work"], 1.0)
+        n_frequency = (
+            math.exp(-0.5 * self.commits_frequency)
+            if self.commits_frequency != "NULL" else 0.0
+        )
+        n_in_day = (
+            min(self.commits_in_day / tf["commits_inDay"], 1.0)
+            if self.commits_in_day != "NULL" else 0.0
+        )
+        n_stars = min(self.stargazers_count / tf["stars"], 1.0)
+        n_forks = min(self.forks / tf["forks"], 1.0)
+
+        components = [
+            (n_commits, 0.35),
+            (n_days, 0.25),
+            (n_frequency, 0.20),
+            (n_in_day, 0.10),
+            (n_stars, 0.05),
+            (n_forks, 0.05),
+        ]
+
+        log_sum = sum(w * math.log(max(v, 1e-9)) for v, w in components)
+        return min(100.0 * math.exp(log_sum), 100.0)
 
     @staticmethod
     def search_repo(repos, name):

@@ -7,6 +7,7 @@ import onnxruntime as ort
 from Assessment.C_GPT import GPT
 from common.Scoring.C_Assessment import Assessment
 from common.Config.M_LoadConfig import load_config
+from common.Utils.constants import NO_FREQUENCY_SENTINEL
 
 
 class ProfileAssessment:
@@ -40,17 +41,11 @@ class ProfileAssessment:
             self.assessment_profile_dict[k] = self._get_predicted_value(mapped)
 
         # ── Энтропия Шеннона (1.3) ───────────────────────────────────────────
-        # Заменяем предсказание модели для языков реальной Shannon-оценкой.
-        # Модель обучена на count-based значениях; Shannon даёт более точную
-        # картину распределения языков конкретного пользователя.
         self.assessment_profile_dict["language"] = self._assessment.language_shannon_score(
             self.user.language_counts
         )
 
         # ── CV-бонус регулярности коммитов (1.2) ────────────────────────────
-        # Добавляем поверх предсказанного frequency_to_score_exp.
-        # Бонус ограничен 20% от field_score["frequencyCommits"],
-        # поэтому итоговая сумма не выходит за пределы field_score.
         cv_bonus = self._assessment.frequency_consistency_score(
             self.user.frequency_intervals,
             len(self.user.repos_user),
@@ -107,17 +102,18 @@ class ProfileAssessment:
         self.score_kod = (total / n) * scale_mark if n > 0 else 0.0
         return self.score_kod
 
-    def _model_assessment(self) -> np.ndarray:
-        ort_session = ort.InferenceSession(
-            os.getenv("MODEL_PATH"),
-            providers=["CPUExecutionProvider"],
-        )
-        scaler = joblib.load(os.getenv("SCALER_PATH"))
-        scale  = 5
+    def _build_feature_row(self) -> dict:
+        """
+        Формирует словарь входных признаков для ONNX-модели.
+
+        Вынесено из _model_assessment для читаемости и тестируемости:
+        можно проверить значения признаков отдельно от инференса модели.
+        """
         u  = self.user
         mv = self.max_value
+        scale = 5
 
-        raw_df = pd.DataFrame([{
+        return {
             "followers":        min(self._get_value(int(u.followers)),               scale * mv["followers"]),
             "following":        min(self._get_value(int(u.following)),               scale * mv["following"]),
             "hireable":         self._check_string(u.hireable),
@@ -135,19 +131,27 @@ class ProfileAssessment:
             "countCommits":     min(self._get_value(u.count_commits),                scale * mv["countCommits"]),
             "avg_views":        min(self._get_value(u.avg_views),                    scale * mv["avg_views"]),
             "repos":            min(self._get_value(len(u.repos_user)),              scale * mv["repos"]),
-            "created_update":   min(self._get_value(u.month_usege),                  scale * mv["created_update"]),
+            "created_update":   min(self._get_value(u.account_age_months),           scale * mv["created_update"]),
             "forks_r":          min(self._get_value(u.main_repo.forks),              scale * mv["forks_r"])       if u.main_repo else 0,
             "stars_r":          min(self._get_value(u.main_repo.stargazers_count),   scale * mv["stars_r"])       if u.main_repo else 0,
             "cont_count":       min(self._get_value(u.main_repo.contributors_count), scale * mv["cont_count"])    if u.main_repo else 0,
             "commits_repo":     min(self._get_value(u.main_repo.commits_count),      scale * mv["commits_repo"])  if u.main_repo else 0,
-            "frequency_repo":   self._get_value(u.main_repo.commits_frequency)                                    if u.main_repo else 30,
+            "frequency_repo":   self._get_value(u.main_repo.commits_frequency)                                    if u.main_repo else NO_FREQUENCY_SENTINEL,
             "inDay_repo":       min(self._get_value(u.main_repo.commits_in_day),     scale * mv["inDay_repo"])    if u.main_repo else 0,
             "addLine":          min(self._get_value(u.main_repo.commits_add_lines),  scale * mv["addLine"])       if u.main_repo else 0,
             "delLine":          min(self._get_value(u.main_repo.commits_del_lines),  scale * mv["delLine"])       if u.main_repo else 0,
             "count_views":      min(self._get_value(u.main_repo.count_views),        scale * mv["count_views"])   if u.main_repo else 0,
             "active_days_r":    min(self._get_value(u.main_repo.days_work),          scale * mv["active_days_r"]) if u.main_repo else 0,
-        }])
+        }
 
+    def _model_assessment(self) -> np.ndarray:
+        ort_session = ort.InferenceSession(
+            os.getenv("MODEL_PATH"),
+            providers=["CPUExecutionProvider"],
+        )
+        scaler = joblib.load(os.getenv("SCALER_PATH"))
+
+        raw_df      = pd.DataFrame([self._build_feature_row()])
         scaled      = scaler.transform(raw_df.values).astype("float32")
         input_name  = ort_session.get_inputs()[0].name
         predictions = ort_session.run(None, {input_name: scaled})[0]
@@ -158,21 +162,21 @@ class ProfileAssessment:
         result = predictions.copy()
 
         direct_zero_map = {
-            "followers":    0,  "following":   1,  "hireable":   2,  "plan":          3,
-            "blog":         4,  "company":     5,  "org":        6,  "languages":     7,
-            "forks":        8,  "stars":       9,  "avg_cont":  10,  "avg_a_days":   11,
+            "followers":    0,  "following":    1,  "hireable":   2,  "plan":          3,
+            "blog":         4,  "company":      5,  "org":        6,  "languages":     7,
+            "forks":        8,  "stars":        9,  "avg_cont":  10,  "avg_a_days":   11,
             "inDayCommits": 13, "countCommits": 14, "avg_views": 15,  "repos":        16,
-            "forks_r":      18, "stars_r":     19, "cont_count": 20,
-            "commits_repo": 21, "inDay_repo":  23, "addLine":   24,
-            "delLine":      25, "count_views": 26, "active_days_r": 27,
+            "forks_r":      18, "stars_r":      19, "cont_count": 20,
+            "commits_repo": 21, "inDay_repo":   23, "addLine":   24,
+            "delLine":      25, "count_views":  26, "active_days_r": 27,
         }
         for field, idx in direct_zero_map.items():
             if raw.get(field, 0) == 0:
                 result[0][idx] = 0.0
 
-        if raw.get("repos", 0) == 0 or raw.get("frequencyCommits", 666) >= 30:
+        if raw.get("repos", 0) == 0 or raw.get("frequencyCommits", NO_FREQUENCY_SENTINEL) >= 30:
             result[0][12] = 0.0
-        if raw.get("repos", 0) == 0 or raw.get("frequency_repo", 666) >= 30:
+        if raw.get("repos", 0) == 0 or raw.get("frequency_repo", NO_FREQUENCY_SENTINEL) >= 30:
             result[0][22] = 0.0
 
         if raw.get("repos", 0) == 0:
@@ -183,14 +187,14 @@ class ProfileAssessment:
 
     def _create_field_index_map(self) -> dict:
         return {
-            "followers": 0,   "following": 1,      "hireable": 2,       "plan": 3,
-            "blog": 4,        "company": 5,         "org": 6,            "languages": 7,
-            "forks": 8,       "stars": 9,           "avg_cont": 10,      "avg_a_days": 11,
-            "frequencyCommits": 12, "inDayCommits": 13, "countCommits": 14, "avg_views": 15,
-            "repos": 16,      "created_update": 17,
-            "forks_r": 18,    "stars_r": 19,        "cont_count": 20,
-            "commits_repo": 21, "frequency_repo": 22, "inDay_repo": 23,
-            "addLine": 24,    "delLine": 25,        "count_views": 26,   "active_days_r": 27,
+            "followers": 0,       "following": 1,       "hireable": 2,        "plan": 3,
+            "blog": 4,            "company": 5,          "org": 6,             "languages": 7,
+            "forks": 8,           "stars": 9,            "avg_cont": 10,       "avg_a_days": 11,
+            "frequencyCommits": 12, "inDayCommits": 13,  "countCommits": 14,   "avg_views": 15,
+            "repos": 16,          "created_update": 17,
+            "forks_r": 18,        "stars_r": 19,         "cont_count": 20,
+            "commits_repo": 21,   "frequency_repo": 22,  "inDay_repo": 23,
+            "addLine": 24,        "delLine": 25,         "count_views": 26,    "active_days_r": 27,
         }
 
     def _get_predicted_value(self, field_name: str) -> float:

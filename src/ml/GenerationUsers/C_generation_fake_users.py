@@ -1,4 +1,5 @@
 from common.Scoring.C_Assessment import Assessment
+from common.Utils.constants import NO_FREQUENCY_SENTINEL
 from typing import Dict, Any, List
 import pandas as pd
 import random
@@ -71,10 +72,10 @@ class GitHubUserGenerator:
             "followers": 0, "following": 0, "hireable": 0, "plan": 0,
             "blog": 0, "company": 0, "org": 0, "languages": 0,
             "forks": 0, "stars": 0, "avg_cont": 0, "avg_a_days": 0,
-            "frequencyCommits": 666, "inDayCommits": 0, "countCommits": 0,
+            "frequencyCommits": NO_FREQUENCY_SENTINEL, "inDayCommits": 0, "countCommits": 0,
             "avg_views": 0, "repos": 0, "created_update": 0,
             "forks_r": 0, "stars_r": 0, "cont_count": 0, "commits_repo": 0,
-            "frequency_repo": 666, "inDay_repo": 0, "addLine": 0,
+            "frequency_repo": NO_FREQUENCY_SENTINEL, "inDay_repo": 0, "addLine": 0,
             "delLine": 0, "count_views": 0, "active_days_r": 0,
         }
 
@@ -272,17 +273,17 @@ class GitHubUserGenerator:
         if d["repos"] == 0:
             d.update({
                 "languages": 0, "forks": 0, "stars": 0, "avg_cont": 0,
-                "avg_a_days": 0, "frequencyCommits": 666, "inDayCommits": 0,
+                "avg_a_days": 0, "frequencyCommits": NO_FREQUENCY_SENTINEL, "inDayCommits": 0,
                 "countCommits": 0, "avg_views": 0, "forks_r": 0, "stars_r": 0,
-                "cont_count": 0, "commits_repo": 0, "frequency_repo": 666,
+                "cont_count": 0, "commits_repo": 0, "frequency_repo": NO_FREQUENCY_SENTINEL,
                 "inDay_repo": 0, "addLine": 0, "delLine": 0,
                 "count_views": 0, "active_days_r": 0,
             })
 
         if d["countCommits"] == 0:
             d.update({
-                "inDayCommits": 0, "frequencyCommits": 666,
-                "commits_repo": 0, "frequency_repo": 666,
+                "inDayCommits": 0, "frequencyCommits": NO_FREQUENCY_SENTINEL,
+                "commits_repo": 0, "frequency_repo": NO_FREQUENCY_SENTINEL,
                 "inDay_repo": 0, "addLine": 0, "delLine": 0,
             })
 
