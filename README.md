@@ -234,7 +234,7 @@ Profile assessment: 41.8
 <summary><b>Устройство модели и Docker-образов</b></summary>
 <br>
 
-**Модель:** MLP с residual-блоками, LayerNorm, GELU, 28 входов → 28 выходов.
+**Модель:** MLP с residual-блоками, BatchNorm1d, ReLU, 28 входов → 28 выходов.
 Обучается на CPU за ~30 минут, экспортируется в ONNX (~1.5 MB).
 
 **Функция потерь:** `ZeroConstrainedLoss = SmoothL1 + штраф за ненулевые предсказания при нулевых целевых значениях (weight=1.5)`
