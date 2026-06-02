@@ -2,14 +2,14 @@ import math
 from common.Config.M_LoadConfig import load_config
 
 
+# ══════════════════════════════════════════════════════════════
+#  МАТЕМАТИЧЕСКИЕ ПРИМИТИВЫ
+# ══════════════════════════════════════════════════════════════
+
 class Assessment:
     def __init__(self, config_file="field_score.json", config_file2="max_value.json"):
         self.field_score = load_config(config_file)
         self.max_value   = load_config(config_file2)
-
-    # ══════════════════════════════════════════════════════════════
-    #  МАТЕМАТИЧЕСКИЕ ПРИМИТИВЫ
-    # ══════════════════════════════════════════════════════════════
 
     def _hill_score(self, value: float, k: float, field_score: float, n: float = 2.0) -> float:
         """
@@ -20,11 +20,9 @@ class Assessment:
         Свойства:
           - Гладкая, монотонно возрастающая, без разрывов и особых точек
           - f(0) = 0, f(k) = field_score / 2, f(∞) → field_score
-          - k  — «полунасыщение»: значение x, дающее 50% максимума
-          - n  — «кооперативность»: n=1 гиперболическая кривая,
+          - k  - «полунасыщение»: значение x, дающее 50% максимума
+          - n  - «кооперативность»: n=1 гиперболическая кривая,
                  n≥2 сигмоидальная (более резкий порог)
-
-        Применяется вместо кусочного _log_score.
         """
         if value <= 0 or k <= 0:
             return 0.0
@@ -34,11 +32,8 @@ class Assessment:
 
     def _exp_score(self, value: float, coefficient: float, decay_rate: float = 0.5) -> float:
         """
-        Экспоненциальное затухание для метрик «меньше = лучше» (частота коммитов):
-
+        Экспоненциальное затухание:
             f(x) = coefficient · e^(−decay_rate · x)
-
-        При x=0 → coefficient (идеально), при x→∞ → 0.
         """
         return round(coefficient * math.exp(-decay_rate * value), 3)
 
@@ -53,14 +48,6 @@ class Assessment:
         Взвешенное геометрическое среднее (WGM) нормализованных компонентов:
 
             WGM = field_score · ∏ vᵢ^wᵢ,   где Σwᵢ = 1, vᵢ ∈ [0,1]
-
-        Почему WGM вместо арифметического среднего:
-          - Если хотя бы один компонент = 0, итог → 0 (нельзя компенсировать
-            нулевую активность высокими значениями других метрик)
-          - Штрафует за дисбаланс показателей сильнее, чем среднее арифметическое
-          - Веса задают «важность» компонента, а не просто линейный коэффициент
-
-        components: [(normalized_value, weight), ...]
         """
         if not components:
             return 0.0
@@ -76,17 +63,10 @@ class Assessment:
 
             x̄_B = (C · m + n · x) / (C + n)
 
-          - value          — наблюдаемое значение метрики
-          - count          — размер выборки (кол-во репозиториев)
-          - population_avg — prior: ожидаемое «среднее» значение метрики
-          - C              — вес prior'а (виртуальные «голоса» с базовым рейтингом)
-
-        Семантика:
-          При count → 0  результат стремится к population_avg (не доверяем малой выборке).
-          При count → ∞  результат стремится к value (большая выборка говорит сама за себя).
-
-        Используется для метрик stars / forks, чтобы репозиторий с 1 форком
-        при 2 репозиториях не получал столько же, сколько зрелый проект.
+          - value          - наблюдаемое значение метрики
+          - count          - размер выборки (кол-во репозиториев)
+          - population_avg - prior: ожидаемое «среднее» значение метрики
+          - C              - вес prior'а (виртуальные «голоса» с базовым рейтингом)
         """
         if count <= 0:
             return 0.0
@@ -98,21 +78,21 @@ class Assessment:
 
     def followers_to_score_log(self, followers: float) -> float:
         """
-        Hill, n=1.3 — мягкая кривая (даже малое число фолловеров оценивается).
-        k = 2% от max: 50% балла при небольшом, но ненулевом сообществе.
+        Hill, n=1.3 - мягкая кривая
+        k = 2% от max
         """
         k = max(self.max_value["followers"] * 0.02, 1.0)
         return self._hill_score(followers, k, self.field_score["followers"], n=1.3)
 
     def following_to_score_log(self, following: float) -> float:
-        """Hill, n=1.3. k = 10% от max."""
+        """Hill, n=1.3. k = 10% от max"""
         k = max(self.max_value["following"] * 0.10, 1.0)
         return self._hill_score(following, k, self.field_score["following"], n=1.3)
 
     def org_to_score_log(self, orgs: float) -> float:
         """
-        Hill, n=2.0 — чёткий порог.
-        k = 25% от max: участие в нескольких организациях уже хорошо.
+        Hill, n=2.0 - чёткий порог.
+        k = 25% от max
         """
         k = max(self.max_value["org"] * 0.25, 1.0)
         return self._hill_score(orgs, k, self.field_score["org"], n=2.0)
@@ -132,7 +112,7 @@ class Assessment:
     def language_to_score_log(self, languages: float) -> float:
         """
         Hill, n=1.5.
-        k = 25% от max: умеренное поощрение мультиязычности.
+        k = 25% от max
         """
         k = max(self.max_value["languages"] * 0.25, 1.0)
         return self._hill_score(languages, k, self.field_score["languages"], n=1.5)
@@ -147,18 +127,7 @@ class Assessment:
             H_norm = H / ln(L)         ∈ [0, 1]
             Score  = field_score · H_norm
 
-        pᵢ — доля репозиториев на языке i,  L — количество уникальных языков.
-
-        Зачем нужна нормализация на ln(L):
-          Максимальная энтропия при L языках равна ln(L) (равномерное распределение).
-          Деление на ln(L) приводит результат к [0, 1] независимо от числа языков:
-          5 языков с равномерным распределением → H_norm = 1.0
-          5 языков, 90% на одном               → H_norm ≈ 0.2
-
-        Граничные случаи:
-          Один язык (L=1)  → H = 0, возвращаем 30% от field_score
-                             (знаем хотя бы один язык — это не ноль)
-          Нет языков        → 0.0
+        pᵢ - доля репозиториев на языке i,  L - количество уникальных языков.
         """
         if not language_counts:
             return 0.0
@@ -171,7 +140,7 @@ class Assessment:
         L = len(probs)
 
         if L == 1:
-            # За владение одним языком — базовый балл (30%)
+            # За владение одним языком - базовый балл (30%)
             return round(field_score * 0.30, 3)
 
         H = -sum(p * math.log(p) for p in probs)
@@ -180,8 +149,7 @@ class Assessment:
 
     def language_shannon_score(self, language_counts: dict[str, int]) -> float:
         """
-        Публичный метод: энтропия Шеннона по словарю {язык: кол-во репо}.
-        Используется в реальном ассессменте вместо language_to_score_log.
+        Энтропия Шеннона по словарю {язык: кол-во репо}.
         """
         return self._shannon_diversity_score(
             language_counts, self.field_score["languages"]
@@ -191,9 +159,7 @@ class Assessment:
         """
         Байесово сглаживание + Hill, n=2.0.
 
-        Байесовский prior = 8% от max (ожидаемое среднее кол-во форков).
-        При малом числе репо (repos≤2) байесовское среднее «тянет» результат
-        к prior'у, не давая завысить оценку за единственный популярный репо.
+        Байесовский prior = 8% от max
         """
         if repos == 0:
             return 0.0
@@ -205,9 +171,6 @@ class Assessment:
     def stars_to_score_log(self, stars: float, repos: float = 1) -> float:
         """
         Байесово сглаживание + Hill, n=2.0.
-
-        Звёзды — социальное доказательство; один случайно завирусившийся репо
-        не должен давать максимум при пустом профиле.
         """
         if repos == 0:
             return 0.0
@@ -232,7 +195,7 @@ class Assessment:
         return self._hill_score(avg_a_days, k, self.field_score["avg_a_days"], n=1.8)
 
     def commits_to_score_log(self, count_commits: float) -> float:
-        """Hill, n=2.0. k = 10% от max: порог «среднего разработчика»."""
+        """Hill, n=2.0. k = 10% от max"""
         k = max(self.max_value["countCommits"] * 0.10, 1.0)
         return self._hill_score(count_commits, k, self.field_score["countCommits"], n=2.0)
 
@@ -244,7 +207,6 @@ class Assessment:
     def frequency_to_score_exp(self, repos: float, frequency_commits: float) -> float:
         """
         Экспоненциальное затухание по среднему интервалу между коммитами.
-        При repos=0 — ноль (нет репозиториев, нет смысла).
         """
         if repos == 0:
             return 0.0
@@ -259,22 +221,7 @@ class Assessment:
             CV    = σ / μ
             Score = field_score · e^(−λ · CV)
 
-        Где μ — среднее, σ — стандартное отклонение интервалов между коммитами.
-
-        Почему CV лучше просто среднего интервала:
-          Разработчик А: 10 коммитов за 1 день, потом тишина 3 месяца
-            → mean ≈ 9 дней, σ огромная, CV >> 1 → низкий балл
-          Разработчик Б: коммит каждые 10 дней стабильно
-            → mean ≈ 10 дней, σ ≈ 0, CV ≈ 0 → высокий балл
-          При одинаковом среднем интервале побеждает тот, кто регулярнее.
-
-        λ (lam) — скорость затухания:
-          lam = 1.5 → при CV=1 (σ=μ) остаётся ~22% балла,
-                       при CV=0 (идеальная регулярность) — 100%.
-
-        Граничные случаи:
-          intervals < 2 элементов → нет данных → 0.0
-          mean == 0 (все коммиты в одну секунду) → CV=0 → field_score
+        Где μ - среднее, σ - стандартное отклонение интервалов между коммитами, λ (lam) - скорость затухания
         """
         if not intervals or len(intervals) < 2:
             return 0.0
@@ -291,10 +238,10 @@ class Assessment:
             self, intervals: list[float], repos: float
     ) -> float:
         """
-        Публичный метод: CV-оценка регулярности коммитов профиля.
+        CV-оценка регулярности коммитов профиля.
         Используется как бонус поверх frequency_to_score_exp.
 
-        Возвращает до 20% от field_score["frequencyCommits"] —
+        Возвращает до 20% от field_score["frequencyCommits"] -
         не заменяет базовую оценку частоты, а дополняет её.
         """
         if repos == 0 or not intervals:
@@ -321,12 +268,10 @@ class Assessment:
         Взвешенное геометрическое среднее показателей репозиторной активности.
 
         Веса:
-          35% — среднее кол-во коммитов (core productivity)
-          25% — кол-во репозиториев     (breadth)
-          20% — коммитов в день         (intensity)
-          20% — частота коммитов        (regularity)
-
-        WGM: ни один показатель не «тянет» весь блок в одиночку.
+          35% - среднее кол-во коммитов (core productivity)
+          25% - кол-во репозиториев     (breadth)
+          20% - коммитов в день         (intensity)
+          20% - частота коммитов        (regularity)
         """
         if num_repos == 0:
             return 0.0
@@ -345,9 +290,6 @@ class Assessment:
     def created_update_to_score_linear(self, repos_log: float, created_update: float) -> float:
         """
         WGM: возраст аккаунта (45%) × репозиторная активность (55%).
-
-        Логика: долгий, но неактивный аккаунт ≠ молодой, но насыщенный —
-        оба фактора одинаково важны и не компенсируют друг друга.
         """
         fs = self.field_score
         mv = self.max_value
@@ -391,7 +333,6 @@ class Assessment:
     def in_day_r_to_score_log(self, in_day_commits: float, day_work: float) -> float:
         """
         Hill, n=1.8. k = 25% от max.
-        Коэффициент поощрения зависит от того, работал ли репозиторий >1 дня.
         """
         coefficient = (
             self.field_score["inDayComm_MainRepo"] if day_work != 1
@@ -403,7 +344,6 @@ class Assessment:
     def frequency_r_to_score_exp(
         self, repos: float, frequency_commits: float, day_work: float
     ) -> float:
-        """Экспоненциальное затухание по частоте коммитов репозитория."""
         coefficient = (
             self.field_score["frequencyComm_MainRepo"] if day_work != 1
             else self.field_score["oneDay_frequency"]
@@ -413,44 +353,15 @@ class Assessment:
     def add_line_log(self, add_line: float) -> float:
         """
         Hill, n=2.0.
-        k = 20 строк: 50% балла при «умеренных» коммитах (не пустые, не монстрообразные).
-        Абсолютный порог, не зависящий от конфига — имеет смысл как есть.
+        k = 20 строк: 50% балла
         """
         return self._hill_score(add_line, 20.0, self.field_score["addLine"], n=2.0)
 
     def del_line_log(self, del_line: float) -> float:
         """
         Hill, n=2.0. k = 10 строк.
-        Удаление кода — признак рефакторинга и «уборки» — ценится.
         """
         return self._hill_score(del_line, 10.0, self.field_score["delLine"], n=2.0)
-
-    def days_repo(
-        self, frequency: float, in_day_commits: float, count_commits: float, count_day: float
-    ) -> float:
-        """
-        Взвешенное геометрическое среднее показателей активности репозитория.
-
-        Веса (сумма = 1.0):
-          40% — активные дни   (основной временно́й след)
-          35% — коммиты        (объём работы)
-          15% — коммитов в день (интенсивность)
-          10% — частота        (регулярность)
-
-        Входы frequency, in_day_commits, count_commits — уже вычисленные
-        score-значения; нормализуются относительно своих field_score.
-        count_day — сырое значение; нормализуется по max_value.
-        """
-        fs = self.field_score
-        mv = self.max_value
-
-        components = [
-            (min(count_day      / mv["active_days_r"],    1.0), 0.40),
-            (min(count_commits  / fs["commits_repo"],     1.0), 0.35),
-            (min(in_day_commits / fs["inDay_repo"],       1.0), 0.15),
-            (min(frequency      / fs["frequency_repo"],   1.0), 0.10),
-        ]
-        return self._weighted_geometric_mean(components, fs["created_update_r"])
 
     def days_main_repo(
         self,
@@ -465,14 +376,12 @@ class Assessment:
         Расширенная WGM для основного репозитория с учётом качества изменений.
 
         Веса (сумма = 1.0):
-          30% — активные дни   (временно́й след)
-          30% — коммиты        (объём работы)
-          15% — коммитов в день (интенсивность)
-          10% — частота        (регулярность)
-          10% — добавленные строки (содержательность коммитов)
-           5% — удалённые строки   (признак рефакторинга)
-
-        Нулевые строки изменений или нулевые активные дни → итог → 0.
+          30% - активные дни   (временно́й след)
+          30% - коммиты        (объём работы)
+          15% - коммитов в день (интенсивность)
+          10% - частота        (регулярность)
+          10% - добавленные строки (содержательность коммитов)
+           5% - удалённые строки   (признак рефакторинга)
         """
         fs = self.field_score
         mv = self.max_value

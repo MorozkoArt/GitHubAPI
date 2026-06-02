@@ -70,7 +70,6 @@ def main() -> None:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Device : {device}")
 
-    # -- Пути из .env ------------------------------------------------
     csv_path    = Path(require_env("DATASET_PATH"))
     onnx_path   = Path(require_env("MODEL_PATH"))
     pth_path    = Path(require_env("CHECKPOINT_PATH"))
@@ -84,7 +83,6 @@ def main() -> None:
     print(f"ONNX model : {onnx_path}")
     print(f"Scaler     : {scaler_path}")
 
-    # -- 1. Dataset --------------------------------------------------
     separator()
     print("STEP 1 / 5  Dataset")
     separator()
@@ -101,7 +99,6 @@ def main() -> None:
     X_train, y_train, X_val, y_val, X_test, y_test = separation(str(csv_path))
     print(f"  Train: {len(X_train)}  Val: {len(X_val)}  Test: {len(X_test)}")
 
-    # -- 2. DataLoaders ----------------------------------------------
     separator()
     print("STEP 2 / 5  DataLoaders")
     separator()
@@ -117,7 +114,6 @@ def main() -> None:
 
     print("  DataLoaders ready.")
 
-    # -- 3. Model ----------------------------------------------------
     separator()
     print("STEP 3 / 5  Model")
     separator()
@@ -132,7 +128,6 @@ def main() -> None:
     print(f"  Input size : {X_train.shape[1]}")
     print(f"  Output size: {y_train.shape[1]}")
 
-    # -- 4. Training -------------------------------------------------
     separator()
     print("STEP 4 / 5  Training")
     separator()
@@ -179,7 +174,6 @@ def main() -> None:
         print(f"{epoch:>6}  {train_loss:>8.4f}  {val_loss:>8.4f}  "
               f"{val_mae:>7.4f}  {val_r2:>7.4f}  {lr_now:>9.2e}  {note}")
 
-    # -- 5. Test & Export --------------------------------------------
     separator()
     print("STEP 5 / 5  Test + Export")
     separator()

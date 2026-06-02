@@ -71,19 +71,11 @@ class User_repo:
         frequency_value = sum(frequency_list) / len(frequency_list) if frequency_list else "NULL"
         in_day_value = sum(in_day_list) / len(in_day_list) if in_day_list else "NULL"
 
-        # Возвращаем frequency_list дополнительно — для CV-оценки регулярности
         return frequency_value, in_day_value, len(in_day_list), frequency_list
 
     def _compute_cv(self, intervals: list[float]) -> float:
         """
-        Коэффициент вариации (CV = σ / μ) для списка интервалов между коммитами.
-
-        CV ∈ [0, +∞):
-          0     — идеально регулярные коммиты (σ = 0)
-          0.5   — умеренная нерегулярность
-          ≥ 1.0 — высокая нерегулярность (σ ≥ μ)
-
-        Возвращает 0.0 при недостаточном числе данных.
+        Коэффициент вариации (CV = σ / μ).
         """
         if not intervals or len(intervals) < 2:
             return 0.0
@@ -105,13 +97,9 @@ class User_repo:
           10% — коммитов в день     (интенсивность)
            5% — звёзды              (социальное доказательство)
            5% — форки               (социальное доказательство)
-
-        WGM гарантирует: репо с нулевыми коммитами → score ≈ 0,
-        независимо от звёзд и форков.
         """
         tf = self.tour_field
 
-        # Нормализованные компоненты ∈ [0, 1]
         n_commits = min(self.commits_count / tf["commits_count"], 1.0)
         n_days = min(self.days_work / tf["days_work"], 1.0)
         n_frequency = (

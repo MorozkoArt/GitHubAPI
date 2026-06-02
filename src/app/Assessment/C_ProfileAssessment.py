@@ -40,12 +40,10 @@ class ProfileAssessment:
             mapped = key_map.get(k, k)
             self.assessment_profile_dict[k] = self._get_predicted_value(mapped)
 
-        # ── Энтропия Шеннона (1.3) ───────────────────────────────────────────
         self.assessment_profile_dict["language"] = self._assessment.language_shannon_score(
             self.user.language_counts
         )
 
-        # ── CV-бонус регулярности коммитов (1.2) ────────────────────────────
         cv_bonus = self._assessment.frequency_consistency_score(
             self.user.frequency_intervals,
             len(self.user.repos_user),
@@ -76,7 +74,6 @@ class ProfileAssessment:
         for dict_key, model_key in repo_keys.items():
             self.assessment_repo_main_dict[dict_key] = self._get_predicted_value(model_key)
 
-        # ── CV-бонус для основного репозитория (1.2) ────────────────────────
         cv_bonus_repo = self._assessment.frequency_repo_consistency_score(
             self.user.main_repo.commits_frequency_intervals,
             len(self.user.repos_user),
@@ -103,12 +100,6 @@ class ProfileAssessment:
         return self.score_kod
 
     def _build_feature_row(self) -> dict:
-        """
-        Формирует словарь входных признаков для ONNX-модели.
-
-        Вынесено из _model_assessment для читаемости и тестируемости:
-        можно проверить значения признаков отдельно от инференса модели.
-        """
         u  = self.user
         mv = self.max_value
         scale = 5
